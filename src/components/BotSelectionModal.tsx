@@ -63,8 +63,8 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
     } catch {}
     return {
       ...DEFAULT_AUTO_COLLECTOR,
-      make: filters.make || 'BMW',
-      model: filters.model || 'X5'
+      make: filters.make || '',
+      model: filters.model || ''
     };
   });
 
@@ -113,40 +113,39 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
     await onRunBotScan(config);
   };
 
-  // Toggle AutoCollector
+  // Toggle AutoCollector. Каждое нажатие уходит боту, иначе память приложения
+  // и реальная подписка разъезжаются и кнопка ничего не запускает.
   const handleToggleAutoCollector = () => {
     const targetModel = autoCollector.model || filters.model || '';
-    const targetMake = autoCollector.make || filters.make || 'BMW';
+    const targetMake = autoCollector.make || filters.make || '';
+    const starting = !autoCollector.isActive;
 
-    if (!autoCollector.isActive) {
-      setAutoCollector((prev) => ({
-        ...prev,
-        isActive: true,
-        lastRun: Date.now()
-      }));
-      setToastText(`⚡ Автосборщик запущен! Ищем ${targetMake} ${targetModel}`);
+    if (starting && !targetMake) {
+      setToastText('Сначала выбери марку');
+      return;
+    }
 
-      // If inside Telegram WebApp, send data back to bot
-      if (typeof window !== 'undefined' && (window as any).Telegram?.WebApp) {
-        try {
-          const tg = (window as any).Telegram.WebApp;
-          if (typeof tg.sendData === 'function') {
-            tg.sendData(JSON.stringify({
-              action: 'autocollect',
-              make: targetMake,
-              model: targetModel
-            }));
-          }
-        } catch (e) {
-          console.error('Telegram sendData error', e);
-        }
+    setAutoCollector((prev) => ({
+      ...prev,
+      isActive: starting,
+      lastRun: starting ? Date.now() : prev.lastRun
+    }));
+    setToastText(starting
+      ? `⚡ Автосборщик запущен! Ищем ${targetMake} ${targetModel}`
+      : 'Автосборщик остановлен');
+
+    const tg = (window as any).Telegram?.WebApp;
+
+    if (typeof tg?.sendData === 'function') {
+      try {
+        tg.sendData(JSON.stringify({
+          action: starting ? 'autocollect' : 'autocollect_stop',
+          make: targetMake,
+          model: targetModel
+        }));
+      } catch (e) {
+        console.error('Telegram sendData error', e);
       }
-    } else {
-      setAutoCollector((prev) => ({
-        ...prev,
-        isActive: false
-      }));
-      setToastText('Автосборщик остановлен');
     }
   };
 

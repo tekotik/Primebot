@@ -761,6 +761,7 @@ async def web_app_data_handler(update: Update, context: ContextTypes.DEFAULT_TYP
         return
     user_id = update.effective_user.id
     raw_data = update.message.web_app_data.data
+    logger.info(f"web_app_data от {user_id}: {raw_data}")
     try:
         data = json.loads(raw_data)
         action = data.get("action")
@@ -780,6 +781,13 @@ async def web_app_data_handler(update: Update, context: ContextTypes.DEFAULT_TYP
                 parse_mode=ParseMode.HTML
             )
             await watch_now_command(update, context)
+        elif action in ("autocollect_stop", "unsubscribe"):
+            DAILY_SUBSCRIBERS.pop(user_id, None)
+            save_subscribers()
+            await update.message.reply_text(
+                "⏹ <b>Автосборщик остановлен</b> - подписка удалена.",
+                parse_mode=ParseMode.HTML
+            )
     except Exception as e:
         logger.error(f"Ошибка парсинга web_app_data: {e}")
 
@@ -831,6 +839,14 @@ async def watch_now_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
             pass
 
     if count == 0:
+        if scanned == 0 and (make or model):
+            await update.message.reply_text(
+                f"⚠️ <b>Источник не вернул ни одного лота по «{make} {model}»</b> (просканировано 0). "
+                "Либо таких лотов сейчас нет, либо название модели не совпадает с аукционным: "
+                "в источнике это GL-Class, GLE-Class, а не GL.",
+                parse_mode=ParseMode.HTML
+            )
+            return
         await update.message.reply_text(
             f"ℹ️ <b>Новых лотов нет</b> (всего на аукционах: {found}, просканировано: {scanned}, сервер помнит: {remembered}){time_formatted}.\n"
             "Серверная дедупликация активна — бот пришлёт лоты, как только появятся новые.",

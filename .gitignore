@@ -8,3 +8,10 @@ coverage/
 !.env.example
 bun.lock
 __pycache__/
+
+# локальный запуск воркера: токен и логи наружу не должны попадать в репозиторий
+start-bot.cmd
+bot/subscribers.json
+bot.log
+bot-run.log
+.venv/
