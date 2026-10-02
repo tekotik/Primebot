@@ -1,0 +1,330 @@
+import { CarLot } from '../types/car';
+import vehicleData from './vehicle-makes-models.json';
+
+const modelsMap = (vehicleData.modelsByMake || {}) as Record<string, string[]>;
+
+export const OFFICIAL_MAKES: string[] = vehicleData.makes || [];
+
+export const US_MAKES_MODELS: Record<string, string[]> = {
+  ...modelsMap,
+  // Ensure common aliases/variants are safely mapped
+  RAM: modelsMap['Ram'] || ['1500', '2500', '3500', 'ProMaster 2500', 'ProMaster 1500', 'ProMaster City'],
+  Ram: modelsMap['Ram'] || ['1500', '2500', '3500', 'ProMaster 2500', 'ProMaster 1500', 'ProMaster City'],
+  'Mercedes-Benz': modelsMap['Mercedes-Benz'] || ['GLE', 'GLC', 'GLS', 'E-Class', 'C-Class', 'S-Class', 'G-Class']
+};
+
+export const DAMAGE_TYPES = [
+  { value: 'Front End', label: 'Передняя часть' },
+  { value: 'Rear End', label: 'Задняя часть' },
+  { value: 'Side', label: 'Боковая часть' },
+  { value: 'Mechanical', label: 'Механические повреждения' },
+  { value: 'Water/Flood', label: 'Вода / наводнение' },
+  { value: 'Undercarriage', label: 'Низ кузова' },
+  { value: 'All Over', label: 'По всему кузову' },
+  { value: 'Rollover', label: 'Переворот' },
+  { value: 'Top/Roof', label: 'Крыша' },
+  { value: 'Suspension', label: 'Подвеска' },
+  { value: 'Theft', label: 'Кража' },
+  { value: 'Burn', label: 'Пожар' },
+  { value: 'Vandalized', label: 'Вандализм' }
+];
+
+export const US_STATES = [
+  { code: 'CA', name: 'California (CA)' },
+  { code: 'TX', name: 'Texas (TX)' },
+  { code: 'FL', name: 'Florida (FL)' },
+  { code: 'NY', name: 'New York (NY)' },
+  { code: 'PA', name: 'Pennsylvania (PA)' },
+  { code: 'IL', name: 'Illinois (IL)' },
+  { code: 'OH', name: 'Ohio (OH)' },
+  { code: 'GA', name: 'Georgia (GA)' },
+  { code: 'NC', name: 'North Carolina (NC)' },
+  { code: 'MI', name: 'Michigan (MI)' },
+  { code: 'NJ', name: 'New Jersey (NJ)' }
+];
+
+export const DOCUMENT_OPTIONS = [
+  { value: 'clean', label: 'Clean Title' },
+  { value: 'salvage', label: 'Salvage' },
+  { value: 'rebuilt', label: 'Rebuilt' },
+  { value: 'non repairable', label: 'Non-Repairable' },
+  { value: 'certificate of destruction', label: 'Certificate of Destruction' },
+  { value: 'parts only', label: 'Parts Only' },
+  { value: 'bill of sale', label: 'Bill of Sale' }
+];
+
+export const ENGINE_OPTIONS = [
+  '1.0', '1.2', '1.4', '1.5', '1.6', '1.8', '2.0', '2.2', '2.4', '2.5', '2.7', '3.0', '3.5', '4.0', '5.0', '6.0'
+];
+
+// Helper to generate dynamic future countdowns relative to current session time
+export function getRelativeFutureDate(hoursAhead: number, minutesAhead: number = 0, secondsAhead: number = 0): string {
+  const ms = (hoursAhead * 3600 + minutesAhead * 60 + secondsAhead) * 1000;
+  return new Date(Date.now() + ms).toISOString();
+}
+
+/**
+ * Builds multi-angle IAAI real auction images for sliding (I1 to I8)
+ */
+function makeIaaiAngles(key: string): string[] {
+  const list: string[] = [];
+  for (let i = 1; i <= 8; i++) {
+    const curKey = key.includes('~I1~') ? key.replace('~I1~', `~I${i}~`) : key;
+    list.push(`https://vis.iaai.com/resizer?imageKeys=${curKey}&width=845&height=633`);
+  }
+  return list;
+}
+
+export const AUCTION_LOTS: CarLot[] = [
+  {
+    id: 'lot-45650660',
+    lotId: '45650660',
+    siteId: 2,
+    vin: '5UXCR6C08N9K80351',
+    year: 2022,
+    make: 'BMW',
+    model: 'X5',
+    trim: 'xDrive40i M Sport',
+    series: 'xDrive40i',
+    auction: 'iaai',
+    isTimed: true,
+    timedCloseDate: getRelativeFutureDate(21, 34),
+    saleDate: '2026-10-08',
+    currentBidUsd: 14300,
+    buyNowUsd: 21600,
+    estTurnkeyRub: 3680000,
+    odometerMiles: 55259,
+    engineDisplacementL: 3.0,
+    fuel: 'Gasoline',
+    transmission: 'automatic',
+    drive: 'All Wheel Drive',
+    primaryDamage: 'Front End',
+    condition: 'run',
+    document: 'salvage',
+    state: 'WI',
+    location: 'Appleton, WI',
+    images: makeIaaiAngles('46149215~SID~B522~S1~I1~RW2576~H1932~TH0'),
+    keysAvailable: true,
+    externalLink: 'https://www.iaai.com/VehicleDetail/46149215~US',
+    calculatorUrl: 'https://primeavtoexport.com/staging/ru/calculator/?lot=45650660'
+  },
+  {
+    id: 'lot-46095109',
+    lotId: '46095109',
+    siteId: 2,
+    vin: '3FMCR9CN1SRF02089',
+    year: 2025,
+    make: 'Ford',
+    model: 'Bronco Sport',
+    trim: 'Outer Banks 4x4',
+    series: 'Outer Banks',
+    auction: 'iaai',
+    isTimed: true,
+    timedCloseDate: getRelativeFutureDate(21, 2),
+    saleDate: '2026-10-06',
+    currentBidUsd: 9000,
+    estTurnkeyRub: 2450000,
+    odometerMiles: 1888,
+    engineDisplacementL: 1.5,
+    fuel: 'Gasoline',
+    transmission: 'automatic',
+    drive: 'All Wheel Drive',
+    primaryDamage: 'Front End',
+    condition: 'run',
+    document: 'salvage',
+    state: 'AZ',
+    location: 'Phoenix, AZ',
+    images: makeIaaiAngles('46594716~SID~B151~S0~I1~RW2576~H1932~TH0'),
+    keysAvailable: true,
+    externalLink: 'https://www.iaai.com/VehicleDetail/46594716~US',
+    calculatorUrl: 'https://primeavtoexport.com/staging/ru/calculator/?lot=46095109'
+  },
+  {
+    id: 'lot-45280433',
+    lotId: '45280433',
+    siteId: 2,
+    vin: '3C6TRVDG2LE101776',
+    year: 2020,
+    make: 'Ram',
+    model: 'ProMaster 2500',
+    trim: 'High Roof 159 WB',
+    series: 'High Roof 159 Wb',
+    auction: 'iaai',
+    isTimed: true,
+    timedCloseDate: getRelativeFutureDate(22, 16),
+    saleDate: '2026-10-13',
+    currentBidUsd: 6800,
+    estTurnkeyRub: 2190000,
+    odometerMiles: 58174,
+    engineDisplacementL: 3.6,
+    fuel: 'Flexible Fuel',
+    transmission: 'automatic',
+    drive: 'Front Wheel Drive',
+    primaryDamage: 'Front End',
+    secondaryDamage: 'Side',
+    condition: 'stationary',
+    document: 'salvage',
+    state: 'CO',
+    location: 'Denver East, CO',
+    images: makeIaaiAngles('45778257~SID~B374~S1~I1~RW2576~H1932~TH0'),
+    keysAvailable: true,
+    externalLink: 'https://www.iaai.com/VehicleDetail/45778257~US',
+    calculatorUrl: 'https://primeavtoexport.com/staging/ru/calculator/?lot=45280433'
+  },
+  {
+    id: 'lot-46208217',
+    lotId: '46208217',
+    siteId: 2,
+    vin: '3C6TRVDG9HE507433',
+    year: 2017,
+    make: 'Ram',
+    model: 'ProMaster 2500',
+    trim: 'High Roof 159 WB Cargo',
+    series: 'High Roof 159 Wb',
+    auction: 'iaai',
+    isTimed: true,
+    timedCloseDate: getRelativeFutureDate(22, 16),
+    saleDate: '2026-10-07',
+    currentBidUsd: 6500,
+    estTurnkeyRub: 2150000,
+    odometerMiles: 78446,
+    engineDisplacementL: 3.6,
+    fuel: 'Flexible Fuel',
+    transmission: 'automatic',
+    drive: 'Front Wheel Drive',
+    primaryDamage: 'Front End',
+    condition: 'run',
+    document: 'salvage',
+    state: 'CA',
+    location: 'Sacramento, CA',
+    images: makeIaaiAngles('46708129~SID~B331~S0~I1~RW2576~H1932~TH0'),
+    keysAvailable: true,
+    externalLink: 'https://www.iaai.com/VehicleDetail/46708129~US',
+    calculatorUrl: 'https://primeavtoexport.com/staging/ru/calculator/?lot=46208217'
+  },
+  {
+    id: 'lot-46243495',
+    lotId: '46243495',
+    siteId: 2,
+    vin: '4T1B11HK5KU824091',
+    year: 2019,
+    make: 'Toyota',
+    model: 'Camry',
+    trim: 'LE 2.5L Auto',
+    series: 'Le',
+    auction: 'iaai',
+    isTimed: true,
+    timedCloseDate: getRelativeFutureDate(20, 50),
+    saleDate: '2026-10-06',
+    currentBidUsd: 3300,
+    estTurnkeyRub: 1850000,
+    odometerMiles: 82409,
+    engineDisplacementL: 2.5,
+    fuel: 'Gasoline',
+    transmission: 'automatic',
+    drive: 'Front Wheel Drive',
+    primaryDamage: 'Front End',
+    condition: 'run',
+    document: 'clean',
+    state: 'IL',
+    location: 'St. Louis, IL',
+    images: makeIaaiAngles('46243495~SID~B524~S0~I1~RW2576~H1932~TH0'),
+    keysAvailable: true,
+    externalLink: 'https://www.iaai.com/VehicleDetail/46243495~US',
+    calculatorUrl: 'https://primeavtoexport.com/staging/ru/calculator/?lot=46243495'
+  },
+  {
+    id: 'lot-45927151',
+    lotId: '45927151',
+    siteId: 2,
+    vin: 'WDDPK4HA2FF104188',
+    year: 2015,
+    make: 'Mercedes-Benz',
+    model: 'SLK-Class',
+    trim: 'SLK 250 Roadster',
+    series: 'Slk 250',
+    auction: 'iaai',
+    isTimed: true,
+    timedCloseDate: getRelativeFutureDate(21, 59),
+    saleDate: '2026-10-08',
+    currentBidUsd: 3050,
+    estTurnkeyRub: 1790000,
+    odometerMiles: 71639,
+    engineDisplacementL: 1.8,
+    fuel: 'Gasoline',
+    transmission: 'automatic',
+    drive: 'Rear Wheel Drive',
+    primaryDamage: 'Front End',
+    condition: 'run',
+    document: 'salvage',
+    state: 'CA',
+    location: 'East Bay, CA',
+    images: makeIaaiAngles('46426239~SID~B332~S0~I1~RW2576~H1932~TH0'),
+    keysAvailable: true,
+    externalLink: 'https://www.iaai.com/VehicleDetail/46426239~US',
+    calculatorUrl: 'https://primeavtoexport.com/staging/ru/calculator/?lot=45927151'
+  },
+  {
+    id: 'lot-45947637',
+    lotId: '45947637',
+    siteId: 2,
+    vin: '5NPD84LF6HH099259',
+    year: 2017,
+    make: 'Hyundai',
+    model: 'Elantra',
+    trim: 'SE 2.0L Sedan',
+    series: 'Se',
+    auction: 'iaai',
+    isTimed: true,
+    timedCloseDate: getRelativeFutureDate(22, 13),
+    saleDate: '2026-10-09',
+    currentBidUsd: 2000,
+    estTurnkeyRub: 1490000,
+    odometerMiles: 98044,
+    engineDisplacementL: 2.0,
+    fuel: 'Gasoline',
+    transmission: 'automatic',
+    drive: 'Front Wheel Drive',
+    primaryDamage: 'Theft',
+    secondaryDamage: 'Side',
+    condition: 'run',
+    document: 'salvage',
+    state: 'NV',
+    location: 'Las Vegas, NV',
+    images: makeIaaiAngles('46446809~SID~B152~S0~I1~RW2576~H1932~TH0'),
+    keysAvailable: true,
+    externalLink: 'https://www.iaai.com/VehicleDetail/46446809~US',
+    calculatorUrl: 'https://primeavtoexport.com/staging/ru/calculator/?lot=45947637'
+  },
+  {
+    id: 'lot-46239877',
+    lotId: '46239877',
+    siteId: 2,
+    vin: 'JM3KE2CE4D0100063',
+    year: 2013,
+    make: 'Mazda',
+    model: 'CX-5',
+    trim: 'Touring AWD',
+    series: 'Touring',
+    auction: 'iaai',
+    isTimed: true,
+    timedCloseDate: getRelativeFutureDate(23, 53),
+    saleDate: '2026-10-07',
+    currentBidUsd: 1050,
+    estTurnkeyRub: 1250000,
+    odometerMiles: 22661,
+    engineDisplacementL: 2.0,
+    fuel: 'Gasoline',
+    transmission: 'automatic',
+    drive: 'All Wheel Drive',
+    primaryDamage: 'Normal Wear',
+    condition: 'stationary',
+    document: 'clean',
+    state: 'CA',
+    location: 'Los Angeles South, CA',
+    images: makeIaaiAngles('46739871~SID~B130~S0~I1~RW2576~H1932~TH0'),
+    keysAvailable: true,
+    externalLink: 'https://www.iaai.com/VehicleDetail/46739871~US',
+    calculatorUrl: 'https://primeavtoexport.com/staging/ru/calculator/?lot=46239877'
+  }
+];

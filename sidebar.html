@@ -1,0 +1,345 @@
+<aside class="auctions-sidebar" id="auctionsSidebar">
+                        <button class="auctions-sidebar__close" type="button" id="closeSidebar">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="18" y1="6" x2="6" y2="18"/>
+                                <line x1="6" y1="6" x2="18" y2="18"/>
+                            </svg>
+                        </button>
+                        
+                        <div class="auctions-sidebar__content">
+                        
+                        <div class="auctions-filters">
+                            <div class="auctions-filters__header">
+                                <h2 class="auctions-filters__title">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <line x1="4" y1="21" x2="4" y2="14"/>
+                                        <line x1="4" y1="10" x2="4" y2="3"/>
+                                        <line x1="12" y1="21" x2="12" y2="12"/>
+                                        <line x1="12" y1="8" x2="12" y2="3"/>
+                                        <line x1="20" y1="21" x2="20" y2="16"/>
+                                        <line x1="20" y1="12" x2="20" y2="3"/>
+                                    </svg>
+                                    Фильтры
+                                </h2>
+                            </div>
+
+                            <!-- Quick Search -->
+                            <div class="auctions-quick-search">
+                                <input type="text" class="auctions-quick-search__input" id="quickSearch" placeholder="VIN, номер лота или марка...">
+                                <button class="auctions-quick-search__btn" id="quickSearchBtn">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="11" cy="11" r="8"/>
+                                        <path d="m21 21-4.35-4.35"/>
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <div class="auctions-filters__body" id="filtersBody">
+                        <div class="auctions-filters__grid">
+                            <!-- Auction -->
+                            <div class="auctions-filter-group">
+                                <label class="auctions-filter-group__label">Аукцион</label>
+                                <select class="auctions-filter-group__select" id="filterAuction">
+                                    <option value="">Все аукционы</option>
+                                    <option value="copart">Copart</option>
+                                    <option value="iaai">IAAI</option>
+                                </select>
+                            </div>
+
+                            <!-- Timed -->
+                            <div class="auctions-filter-group">
+                                <label class="auctions-filter-group__label">Timed-аукционы</label>
+                                <select class="auctions-filter-group__select" id="filterTimed">
+                                    <option value="" selected>Все торги</option>
+                                    <option value="only">Только Timed Auction</option>
+                                </select>
+                            </div>
+
+                            <!-- Make -->
+                            <div class="auctions-filter-group">
+                                <label class="auctions-filter-group__label">Марка</label>
+                                <select class="auctions-filter-group__select" id="filterMake">
+                                    <option value="">Загрузка...</option>
+                                </select>
+                            </div>
+
+                            <!-- Model -->
+                            <div class="auctions-filter-group">
+                                <label class="auctions-filter-group__label">Модель</label>
+                                <select class="auctions-filter-group__select" id="filterModel" disabled>
+                                    <option value="">Сначала выберите марку</option>
+                                </select>
+                            </div>
+
+                            <!-- Year Range -->
+                            <div class="auctions-filter-group">
+                                <label class="auctions-filter-group__label">Год выпуска</label>
+                                <div class="auctions-filter-range">
+                                    <input type="number" class="auctions-filter-range__input" id="filterYearFrom" placeholder="От" min="1990" max="2026">
+                                    <span class="auctions-filter-range__sep">—</span>
+                                    <input type="number" class="auctions-filter-range__input" id="filterYearTo" placeholder="До" min="1990" max="2026">
+                                </div>
+                            </div>
+
+                            <!-- Odometer -->
+                            <div class="auctions-filter-group">
+                                <label class="auctions-filter-group__label">Пробег (миль)</label>
+                                <div class="auctions-filter-range">
+                                    <input type="number" class="auctions-filter-range__input" id="filterOdometerFrom" placeholder="От" min="0">
+                                    <span class="auctions-filter-range__sep">—</span>
+                                    <input type="number" class="auctions-filter-range__input" id="filterOdometerTo" placeholder="До">
+                                </div>
+                            </div>
+
+                            <!-- Fuel Type -->
+                            <div class="auctions-filter-group">
+                                <label class="auctions-filter-group__label">Тип топлива</label>
+                                <select class="auctions-filter-group__select" id="filterFuel">
+                                    <option value="">Все типы</option>
+                                    <option value="Gasoline">Бензин</option>
+                                    <option value="Diesel">Дизель</option>
+                                    <option value="Electric">Электро</option>
+                                    <option value="Flexible Fuel">Flex Fuel</option>
+                                </select>
+                            </div>
+
+                            <!-- Engine Size -->
+                            <div class="auctions-filter-group" id="engineSizeGroup">
+                                <label class="auctions-filter-group__label">Объём двигателя (л)</label>
+                                <div class="auctions-filter-group__range">
+                                    <select class="auctions-filter-group__select" id="filterEngineFrom">
+                                        <option value="">От</option>
+                                        <option value="1.0">1.0</option>
+                                        <option value="1.2">1.2</option>
+                                        <option value="1.4">1.4</option>
+                                        <option value="1.5">1.5</option>
+                                        <option value="1.6">1.6</option>
+                                        <option value="1.8">1.8</option>
+                                        <option value="2.0">2.0</option>
+                                        <option value="2.2">2.2</option>
+                                        <option value="2.4">2.4</option>
+                                        <option value="2.5">2.5</option>
+                                        <option value="2.7">2.7</option>
+                                        <option value="3.0">3.0</option>
+                                        <option value="3.2">3.2</option>
+                                        <option value="3.5">3.5</option>
+                                        <option value="3.6">3.6</option>
+                                        <option value="4.0">4.0</option>
+                                        <option value="4.4">4.4</option>
+                                        <option value="5.0">5.0</option>
+                                        <option value="5.7">5.7</option>
+                                        <option value="6.2">6.2</option>
+                                    </select>
+                                    <span class="auctions-filter-group__separator">—</span>
+                                    <select class="auctions-filter-group__select" id="filterEngineTo">
+                                        <option value="">До</option>
+                                        <option value="1.0">1.0</option>
+                                        <option value="1.2">1.2</option>
+                                        <option value="1.4">1.4</option>
+                                        <option value="1.5">1.5</option>
+                                        <option value="1.6">1.6</option>
+                                        <option value="1.8">1.8</option>
+                                        <option value="2.0">2.0</option>
+                                        <option value="2.2">2.2</option>
+                                        <option value="2.4">2.4</option>
+                                        <option value="2.5">2.5</option>
+                                        <option value="2.7">2.7</option>
+                                        <option value="3.0">3.0</option>
+                                        <option value="3.2">3.2</option>
+                                        <option value="3.5">3.5</option>
+                                        <option value="3.6">3.6</option>
+                                        <option value="4.0">4.0</option>
+                                        <option value="4.4">4.4</option>
+                                        <option value="5.0">5.0</option>
+                                        <option value="5.7">5.7</option>
+                                        <option value="6.2">6.2</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Transmission -->
+                            <div class="auctions-filter-group">
+                                <label class="auctions-filter-group__label">КПП</label>
+                                <select class="auctions-filter-group__select" id="filterTransmission">
+                                    <option value="">Все типы</option>
+                                    <option value="automatic">Автомат</option>
+                                    <option value="manual">Механика</option>
+                                </select>
+                            </div>
+
+                            <!-- Drive Type -->
+                            <div class="auctions-filter-group">
+                                <label class="auctions-filter-group__label">Привод</label>
+                                <select class="auctions-filter-group__select" id="filterDrive">
+                                    <option value="">Все типы</option>
+                                    <option value="Front Wheel Drive">Передний (FWD)</option>
+                                    <option value="Rear Wheel Drive">Задний (RWD)</option>
+                                    <option value="All Wheel Drive">Полный (AWD/4WD)</option>
+                                </select>
+                            </div>
+
+                            <!-- Damage Type -->
+                            <div class="auctions-filter-group">
+                                <label class="auctions-filter-group__label">Тип повреждения</label>
+                                <select class="auctions-filter-group__select" id="filterDamage">
+                                    <option value="">Все типы</option>
+                                    <option value="Front End">Передняя часть</option>
+                                    <option value="Rear End">Задняя часть</option>
+                                    <option value="Side">Боковая часть</option>
+                                    <option value="Mechanical">Механические повреждения</option>
+                                    <option value="Burn">Пожар</option>
+                                    <option value="Vandalized">Вандализм</option>
+                                    <option value="All Over">По всему кузову</option>
+                                    <option value="Rollover">Переворот</option>
+                                    <option value="Top/Roof">Крыша</option>
+                                    <option value="Suspension">Подвеска</option>
+                                    <option value="Theft">Кража</option>
+                                    <option value="Unknown">Неизвестно</option>
+                                </select>
+                            </div>
+
+                            <!-- Exclude Damage Type -->
+                            <div class="auctions-filter-group">
+                                <label class="auctions-filter-group__label">Исключить повреждение</label>
+                                <select class="auctions-filter-group__select" id="filterDamageExclude">
+                                    <option value="">Не исключать</option>
+                                    <option value="Water/Flood">Вода/наводнение</option>
+                                    <option value="Front End">Передняя часть</option>
+                                    <option value="Rear End">Задняя часть</option>
+                                    <option value="Side">Боковая часть</option>
+                                    <option value="All Over">По всему кузову</option>
+                                    <option value="Rollover">Переворот</option>
+                                    <option value="Top/Roof">Крыша</option>
+                                    <option value="Undercarriage">Низ кузова</option>
+                                    <option value="Mechanical">Механические повреждения</option>
+                                    <option value="Suspension">Подвеска</option>
+                                    <option value="Burn">Пожар</option>
+                                    <option value="Hail">Град</option>
+                                    <option value="Storm Damage">Ущерб от шторма</option>
+                                    <option value="Vandalized">Вандализм</option>
+                                    <option value="Theft">Кража</option>
+                                    <option value="Minor Dent/Scratches">Незначительные вмятины/царапины</option>
+                                    <option value="Normal Wear">Нормальный износ</option>
+                                    <option value="Frame Damage">Повреждение рамы</option>
+                                    <option value="Unknown">Неизвестно</option>
+                                </select>
+                            </div>
+
+                            <!-- Vehicle Condition -->
+                            <div class="auctions-filter-group">
+                                <label class="auctions-filter-group__label">Состояние</label>
+                                <select class="auctions-filter-group__select" id="filterCondition">
+                                    <option value="">Все</option>
+                                    <option value="run">На ходу</option>
+                                    <option value="enhanced">Улучшенное состояние</option>
+                                    <option value="stationary">Не на ходу</option>
+                                </select>
+                            </div>
+
+                            <!-- Documents -->
+                            <div class="auctions-filter-group">
+                                <label class="auctions-filter-group__label">Документы</label>
+                                <div class="auctions-filter-checks" id="filterDocument">
+                                    <label class="auctions-filter-check"><input type="checkbox" value="clean"><span>Clean Title</span></label>
+                                    <label class="auctions-filter-check"><input type="checkbox" value="salvage"><span>Salvage</span></label>
+                                    <label class="auctions-filter-check"><input type="checkbox" value="rebuilt"><span>Rebuilt</span></label>
+                                    <label class="auctions-filter-check"><input type="checkbox" value="non repairable"><span>Non-Repairable</span></label>
+                                    <label class="auctions-filter-check"><input type="checkbox" value="certificate of destruction"><span>Certificate of Destruction</span></label>
+                                    <label class="auctions-filter-check"><input type="checkbox" value="parts only"><span>Parts Only</span></label>
+                                    <label class="auctions-filter-check"><input type="checkbox" value="bill of sale"><span>Bill of Sale</span></label>
+                                </div>
+                                <span class="auctions-filter-group__hint">Можно выбрать несколько</span>
+                            </div>
+
+                            <!-- Location -->
+                            <div class="auctions-filter-group">
+                                <label class="auctions-filter-group__label">Штат</label>
+                                <select class="auctions-filter-group__select" id="filterState">
+                                    <option value="">Все штаты</option>
+                                    <option value="CA">California (CA)</option>
+                                    <option value="TX">Texas (TX)</option>
+                                    <option value="FL">Florida (FL)</option>
+                                    <option value="NY">New York (NY)</option>
+                                    <option value="PA">Pennsylvania (PA)</option>
+                                    <option value="IL">Illinois (IL)</option>
+                                    <option value="OH">Ohio (OH)</option>
+                                    <option value="GA">Georgia (GA)</option>
+                                    <option value="NC">North Carolina (NC)</option>
+                                    <option value="MI">Michigan (MI)</option>
+                                    <option value="NJ">New Jersey (NJ)</option>
+                                    <option value="VA">Virginia (VA)</option>
+                                    <option value="WA">Washington (WA)</option>
+                                    <option value="AZ">Arizona (AZ)</option>
+                                    <option value="MA">Massachusetts (MA)</option>
+                                    <option value="TN">Tennessee (TN)</option>
+                                    <option value="IN">Indiana (IN)</option>
+                                    <option value="MO">Missouri (MO)</option>
+                                    <option value="MD">Maryland (MD)</option>
+                                    <option value="WI">Wisconsin (WI)</option>
+                                    <option value="CO">Colorado (CO)</option>
+                                    <option value="MN">Minnesota (MN)</option>
+                                    <option value="SC">South Carolina (SC)</option>
+                                    <option value="AL">Alabama (AL)</option>
+                                    <option value="LA">Louisiana (LA)</option>
+                                    <option value="KY">Kentucky (KY)</option>
+                                    <option value="OR">Oregon (OR)</option>
+                                    <option value="OK">Oklahoma (OK)</option>
+                                    <option value="CT">Connecticut (CT)</option>
+                                    <option value="UT">Utah (UT)</option>
+                                    <option value="NV">Nevada (NV)</option>
+                                    <option value="AR">Arkansas (AR)</option>
+                                    <option value="MS">Mississippi (MS)</option>
+                                    <option value="KS">Kansas (KS)</option>
+                                    <option value="NM">New Mexico (NM)</option>
+                                    <option value="NE">Nebraska (NE)</option>
+                                    <option value="ID">Idaho (ID)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Bot Scan -->
+                        <div class="auctions-bot">
+                            <div class="auctions-bot__head">
+                                <span class="auctions-bot__title">Бот-подбор</span>
+                                <span class="auctions-bot__hint">Соберу все лоты на нужный день торгов по марке, модели и остальным фильтрам</span>
+                            </div>
+                            <div class="auctions-filter-group">
+                                <label class="auctions-filter-group__label">День торгов</label>
+                                <select class="auctions-filter-group__select" id="botDatePreset">
+                                    <option value="today">Сегодня</option>
+                                    <option value="tomorrow" selected>Завтра</option>
+                                    <option value="exact">Конкретная дата</option>
+                                    <option value="any">Все ближайшие торги</option>
+                                </select>
+                            </div>
+                            <div class="auctions-filter-group" id="botExactWrap" style="display: none;">
+                                <label class="auctions-filter-group__label">Дата</label>
+                                <div class="auctions-filter-range">
+                                    <input type="date" class="auctions-filter-range__input" id="botDateExact">
+                                </div>
+                            </div>
+                            <div class="auctions-filter-group">
+                                <label class="auctions-filter-group__label">Timed-аукционы</label>
+                                <select class="auctions-filter-group__select" id="botTimedMode">
+                                    <option value="all" selected>В общем списке</option>
+                                    <option value="only">Только Timed Auction</option>
+                                </select>
+                            </div>
+                            <button class="auctions-filters__btn auctions-filters__btn--apply auctions-bot__btn" type="button" id="botScanBtn">
+                                Подобрать лоты
+                            </button>
+                            <div class="auctions-bot__status" id="botStatus"></div>
+                        </div>
+
+                        <div class="auctions-filters__actions">
+                            <button class="auctions-filters__btn auctions-filters__btn--reset" type="button" id="resetFilters">
+                                Сбросить
+                            </button>
+                            <button class="auctions-filters__btn auctions-filters__btn--apply" type="button" id="applyFilters">
+                                Применить
+                            </button>
+                        </div>
+                            </div>
+                        </div>
+                        </div>
+                    

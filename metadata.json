@@ -1,0 +1,6 @@
+{
+  "name": "PRIME AUTO EXPORT — Поиск и каталог автомобилей с аукционов",
+  "description": "Интеллектуальный фильтр и каталог автомобилей с аукционов Южной Кореи, США, Японии и Европы с расчетом растаможки под ключ и удобным избранным.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
