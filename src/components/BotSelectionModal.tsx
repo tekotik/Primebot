@@ -27,6 +27,8 @@ interface BotSelectionModalProps {
   config: BotConfig;
   onChangeConfig: (cfg: BotConfig) => void;
   filters: PrimeFilterState;
+  onChangeFilters: (f: PrimeFilterState) => void;
+  onOpenFilter: () => void;
   onRunBotScan: (cfg: BotConfig) => Promise<void>;
   isScanning: boolean;
   botStatusText: string;
@@ -47,17 +49,43 @@ const collectorDateParam = (cfg: BotConfig): string => {
 
 const DEFAULT_AUTO_COLLECTOR: AutoCollectorConfig = {
   isActive: false,
-  make: '',
-  model: '',
-  yearFrom: '2020',
-  yearTo: '2024',
   intervalHours: 24, // 1 раз в день
   notifyChannel: 'telegram'
 };
 
-// Фильтры ленты: день торгов и режим аукциона. Одни и те же контроли
-// показываются и в «Поиск бот», и в «Автосборщик», чтобы не переключать
-// вкладку ради смены фильтра.
+// Короткая строка о том, что сейчас стоит в главном фильтре.
+const filterSummary = (f: PrimeFilterState): string => {
+  const parts: string[] = [];
+  if (f.make) parts.push([f.make, f.model].filter(Boolean).join(' '));
+  if (f.timed === 'only') parts.push('IAAI Timed');
+  else if (f.auction) parts.push(f.auction === 'copart' ? 'Copart' : 'IAAI');
+  if (f.yearFrom || f.yearTo) parts.push(`${f.yearFrom || 'любой'}–${f.yearTo || 'любой'} гг.`);
+  if (f.damageExclude) parts.push(`без ${f.damageExclude}`);
+  if (f.documents && f.documents.length) parts.push(f.documents.join('/'));
+  if (f.state) parts.push(f.state);
+  return parts.length ? parts.join(' · ') : 'Без фильтра - все торги США';
+};
+
+// Подписка автосборщика = главный фильтр ленты целиком. Поля, которых сервер
+// не понимает (двигатель, КПП, привод, состояние), не отправляем.
+const collectorSubscription = (cfg: BotConfig, f: PrimeFilterState) => ({
+  make: f.make || '',
+  model: f.model || '',
+  timed: f.timed === 'only' ? '1' : 'all',
+  site: f.auction === 'copart' ? '1' : f.auction === 'iaai' ? '2' : '',
+  date: collectorDateParam(cfg),
+  year_from: f.yearFrom || '',
+  year_to: f.yearTo || '',
+  odometer_from: f.odometerFrom || '',
+  odometer_to: f.odometerTo || '',
+  fuel: f.fuel || '',
+  state: f.state || '',
+  damage_pr: f.damage || '',
+  damage_exclude: f.damageExclude || '',
+  document: (f.documents || []).join(',')
+});
+
+// Фильтры вкладки «Поиск бот»: день торгов и режим аукциона.
 const BotSearchFilters: React.FC<{
   config: BotConfig;
   onChangeConfig: (cfg: BotConfig) => void;
@@ -117,6 +145,8 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
   config,
   onChangeConfig,
   filters,
+  onChangeFilters,
+  onOpenFilter,
   onRunBotScan,
   isScanning,
   botStatusText
@@ -128,44 +158,29 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
   const [autoCollector, setAutoCollector] = useState<AutoCollectorConfig>(() => {
     try {
       const saved = localStorage.getItem('prime_autocollector_config');
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return { ...DEFAULT_AUTO_COLLECTOR, ...parsed };
+      }
     } catch {}
-    return {
-      ...DEFAULT_AUTO_COLLECTOR,
-      make: filters.make || '',
-      model: filters.model || ''
-    };
+    return { ...DEFAULT_AUTO_COLLECTOR };
   });
 
   const [toastText, setToastText] = useState<string | null>(null);
-
-  // Sync initial make/model from active filters if empty
-  useEffect(() => {
-    if (!autoCollector.make && filters.make) {
-      setAutoCollector((prev) => ({ ...prev, make: filters.make }));
-    }
-    if (!autoCollector.model && filters.model) {
-      setAutoCollector((prev) => ({ ...prev, model: filters.model }));
-    }
-  }, [filters.make, filters.model]);
 
   // Persist autoCollector
   useEffect(() => {
     localStorage.setItem('prime_autocollector_config', JSON.stringify(autoCollector));
   }, [autoCollector]);
 
-  // Dropdown options for AutoCollector
+  // Dropdown options for AutoCollector: марка и модель живут в главном фильтре
   const availableMakes = Object.keys(US_MAKES_MODELS).sort();
-  const availableModels = autoCollector.make && US_MAKES_MODELS[autoCollector.make]
-    ? US_MAKES_MODELS[autoCollector.make]
+  const availableModels = filters.make && US_MAKES_MODELS[filters.make]
+    ? US_MAKES_MODELS[filters.make]
     : [];
 
   const handleCollectorMakeChange = (make: string) => {
-    setAutoCollector((prev) => ({
-      ...prev,
-      make,
-      model: '' // Reset model when make changes
-    }));
+    onChangeFilters({ ...filters, make, model: '' });
   };
 
   // Toast timer
@@ -184,40 +199,63 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
 
   // Toggle AutoCollector. Каждое нажатие уходит боту, иначе память приложения
   // и реальная подписка разъезжаются и кнопка ничего не запускает.
+  const sendBotPayload = (payload: Record<string, string>) => {
+    const tg = (window as any).Telegram?.WebApp;
+    if (typeof tg?.sendData !== 'function') return false;
+    try {
+      tg.sendData(JSON.stringify(payload));
+      return true;
+    } catch (e) {
+      console.error('Telegram sendData error', e);
+      return false;
+    }
+  };
+
+  const currentSignature = JSON.stringify(collectorSubscription(config, filters));
+
   const handleToggleAutoCollector = () => {
-    const targetModel = autoCollector.model || filters.model || '';
-    const targetMake = autoCollector.make || filters.make || '';
+    const subscription = collectorSubscription(config, filters);
     const starting = !autoCollector.isActive;
 
-    if (starting && !targetMake) {
-      setToastText('Сначала выбери марку');
+    if (starting && !subscription.make) {
+      setToastText('Сначала выбери марку в фильтре');
       return;
     }
+
+    const sent = sendBotPayload({
+      action: starting ? 'autocollect' : 'autocollect_stop',
+      ...subscription
+    });
 
     setAutoCollector((prev) => ({
       ...prev,
       isActive: starting,
-      lastRun: starting ? Date.now() : prev.lastRun
+      lastRun: starting ? Date.now() : prev.lastRun,
+      sentFilter: starting ? currentSignature : ''
     }));
-    setToastText(starting
-      ? `⚡ Автосборщик запущен! Ищем ${targetMake} ${targetModel}`
-      : 'Автосборщик остановлен');
 
-    const tg = (window as any).Telegram?.WebApp;
-
-    if (typeof tg?.sendData === 'function') {
-      try {
-        tg.sendData(JSON.stringify({
-          action: starting ? 'autocollect' : 'autocollect_stop',
-          make: targetMake,
-          model: targetModel,
-          timed: config.timedMode === 'only' ? '1' : 'all',
-          date: collectorDateParam(config)
-        }));
-      } catch (e) {
-        console.error('Telegram sendData error', e);
-      }
+    if (!sent) {
+      setToastText('Открой раздел через Telegram-бота - иначе подписка не уйдёт');
+      return;
     }
+
+    setToastText(starting
+      ? `⚡ Автосборщик запущен! Ищем ${subscription.make} ${subscription.model}`
+      : 'Автосборщик остановлен');
+  };
+
+  // Фильтр поменяли при активной подписке: применяем отдельно, чтобы смена
+  // настройки не запускала новый скан каждый раз.
+  const filterNeedsApply =
+    autoCollector.isActive && !!autoCollector.sentFilter && autoCollector.sentFilter !== currentSignature;
+
+  const handleApplyFilter = () => {
+    if (!sendBotPayload({ action: 'autocollect_update', ...collectorSubscription(config, filters) })) {
+      setToastText('Открой раздел через Telegram-бота');
+      return;
+    }
+    setAutoCollector((prev) => ({ ...prev, sentFilter: currentSignature }));
+    setToastText('🔄 Новый фильтр применён к автосборщику');
   };
 
   return (
@@ -376,7 +414,40 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
         {/* ===================== TAB 2: АВТОСБОРЩИК (ПОДБОРКА МАШИН 1 РАЗ В ДЕНЬ) ===================== */}
         {activeTab === 'autoCollector' && (
           <div className="space-y-4">
-            {/* Active status banner if running */}
+            {/* Кнопка главного фильтра: открывается поверх этого окна */}
+            <button
+              type="button"
+              onClick={onOpenFilter}
+              className="w-full p-3 bg-[#131724] border border-slate-800 hover:border-[#068eff]/60 rounded-2xl flex items-center gap-2.5 transition-colors text-left"
+            >
+              <div className="w-9 h-9 rounded-xl bg-[#068eff]/15 border border-[#068eff]/30 text-[#068eff] flex items-center justify-center shrink-0">
+                <Sliders className="w-4.5 h-4.5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <span className="block text-xs font-bold text-white uppercase tracking-wider font-['Exo_2',sans-serif]">
+                  Фильтр
+                </span>
+                <span className="block text-[11px] text-slate-400 truncate">
+                  {filterSummary(filters)}
+                </span>
+              </div>
+              <span className="text-[11px] font-semibold text-[#068eff] shrink-0">Изменить</span>
+            </button>
+
+            {filterNeedsApply && (
+              <div className="p-2.5 bg-amber-950/40 border border-amber-600/50 rounded-xl flex items-center justify-between gap-2">
+                <span className="text-[11px] text-amber-200">Фильтр изменён, подписка ещё со старым</span>
+                <button
+                  type="button"
+                  onClick={handleApplyFilter}
+                  className="px-2.5 py-1.5 rounded-lg bg-amber-500 text-black text-[11px] font-bold uppercase tracking-wide hover:bg-amber-400 transition-colors shrink-0"
+                >
+                  Применить
+                </button>
+              </div>
+            )}
+
+            {/* Активная статус-плашка, если уже запущен */}
             {autoCollector.isActive ? (
               <div className="p-3.5 bg-emerald-950/40 border border-emerald-500/50 rounded-2xl flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
@@ -391,7 +462,7 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
                       <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
                     </div>
                     <p className="text-[11px] text-slate-300 mt-0.5">
-                      Ищет {autoCollector.make || 'авто'} {autoCollector.model || ''} и отправляет подборку 1 раз в день
+                      Ищет {filters.make || 'авто'} {filters.model || ''} и отправляет подборку
                     </p>
                   </div>
                 </div>
@@ -421,7 +492,7 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
               </div>
             )}
 
-            {/* Model Target Configuration Form */}
+            {/* Марка и модель: эти же поля меняются в главном фильтре */}
             <div className="space-y-3 bg-[#131724] border border-slate-800 rounded-2xl p-3.5">
               <h4 className="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-1.5 font-['Exo_2',sans-serif]">
                 <Car className="w-3.5 h-3.5 text-emerald-400" />
@@ -433,7 +504,7 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
                 <div>
                   <label className="text-[10px] text-slate-400 block mb-1 font-medium">Марка</label>
                   <select
-                    value={autoCollector.make}
+                    value={filters.make}
                     onChange={(e) => handleCollectorMakeChange(e.target.value)}
                     className="w-full px-3 py-2 bg-[#0d1017] border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-emerald-500 cursor-pointer"
                   >
@@ -448,15 +519,13 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
                 <div>
                   <label className="text-[10px] text-slate-400 block mb-1 font-medium">Модель</label>
                   <select
-                    value={autoCollector.model}
-                    onChange={(e) =>
-                      setAutoCollector((prev) => ({ ...prev, model: e.target.value }))
-                    }
-                    disabled={!autoCollector.make}
+                    value={filters.model}
+                    onChange={(e) => onChangeFilters({ ...filters, model: e.target.value })}
+                    disabled={!filters.make}
                     className="w-full px-3 py-2 bg-[#0d1017] border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-emerald-500 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     <option value="" className="bg-[#0d1017] text-slate-400">
-                      {autoCollector.make ? 'Все модели марки' : 'Сначала выберите марку'}
+                      {filters.make ? 'Все модели марки' : 'Сначала выберите марку'}
                     </option>
                     {availableModels.map((mod) => (
                       <option key={mod} value={mod} className="bg-[#0d1017] text-white">
@@ -473,10 +542,8 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
                   <label className="text-[10px] text-slate-400 block mb-1">Год от</label>
                   <input
                     type="number"
-                    value={autoCollector.yearFrom}
-                    onChange={(e) =>
-                      setAutoCollector((prev) => ({ ...prev, yearFrom: e.target.value }))
-                    }
+                    value={filters.yearFrom}
+                    onChange={(e) => onChangeFilters({ ...filters, yearFrom: e.target.value })}
                     placeholder="2020"
                     className="w-full px-3 py-2 bg-[#0d1017] border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-emerald-500"
                   />
@@ -485,10 +552,8 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
                   <label className="text-[10px] text-slate-400 block mb-1">Год до</label>
                   <input
                     type="number"
-                    value={autoCollector.yearTo}
-                    onChange={(e) =>
-                      setAutoCollector((prev) => ({ ...prev, yearTo: e.target.value }))
-                    }
+                    value={filters.yearTo}
+                    onChange={(e) => onChangeFilters({ ...filters, yearTo: e.target.value })}
                     placeholder="2024"
                     className="w-full px-3 py-2 bg-[#0d1017] border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-emerald-500"
                   />
@@ -549,17 +614,29 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
               </div>
             </div>
 
-            {/* Фильтр ленты: эти же значения уходят в подписку автосборщика */}
-            <div className="space-y-3 bg-[#131724] border border-slate-800 rounded-2xl p-3.5">
-              <h4 className="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-1.5 font-['Exo_2',sans-serif]">
-                <Sliders className="w-3.5 h-3.5 text-[#068eff]" />
-                <span>Фильтр</span>
-              </h4>
-              <BotSearchFilters
-                config={config}
-                onChangeConfig={onChangeConfig}
-                className="space-y-3"
-              />
+            {/* День торгов: чего нет в главном фильтре */}
+            <div className="space-y-1.5">
+              <label className="text-[10px] text-slate-400 block font-medium">
+                День торгов
+              </label>
+              <select
+                value={config.datePreset}
+                onChange={(e) => onChangeConfig({ ...config, datePreset: e.target.value as any })}
+                className="w-full px-3 py-2 bg-[#0d1017] border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-emerald-500 cursor-pointer"
+              >
+                <option value="any">Все ближайшие торги</option>
+                <option value="today">Сегодня</option>
+                <option value="tomorrow">Завтра</option>
+                <option value="exact">Конкретная дата</option>
+              </select>
+              {config.datePreset === 'exact' && (
+                <input
+                  type="date"
+                  value={config.dateExact}
+                  onChange={(e) => onChangeConfig({ ...config, dateExact: e.target.value })}
+                  className="w-full px-3 py-2 bg-[#0d1017] border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-emerald-500"
+                />
+              )}
             </div>
 
             {/* Launch / Stop Action Button */}

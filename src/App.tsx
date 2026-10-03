@@ -519,6 +519,8 @@ export default function App() {
         config={botConfig}
         onChangeConfig={setBotConfig}
         filters={filters}
+        onChangeFilters={handleFilterUpdate}
+        onOpenFilter={() => setIsFilterOpen(true)}
         onRunBotScan={handleRunBotScan}
         isScanning={isScanning}
         botStatusText={botStatusText}

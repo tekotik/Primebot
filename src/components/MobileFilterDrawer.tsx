@@ -96,7 +96,8 @@ export const MobileFilterDrawer: React.FC<MobileFilterDrawerProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden flex flex-col justify-end">
+    // z-[60]: главный фильтр открывается и поверх окна автоподбора (z-50)
+    <div className="fixed inset-0 z-[60] overflow-hidden flex flex-col justify-end">
       {/* Backdrop */}
       <div
         onClick={onClose}

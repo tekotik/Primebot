@@ -64,15 +64,15 @@ export interface BotConfig {
   timedMode: 'all' | 'only';
 }
 
+// Марка, модель и годы автосборщик берёт из главного фильтра ленты
+// (PrimeFilterState) - здесь только само расписание и подпись фильтра,
+// отправленного боту в последний раз.
 export interface AutoCollectorConfig {
   isActive: boolean;
-  make: string;
-  model: string;
-  yearFrom: string;
-  yearTo: string;
   intervalHours: number; // e.g. 1 for "каждый час"
   notifyChannel: 'telegram' | 'browser';
   lastRun?: number;
+  sentFilter?: string;
 }
 
 export interface ClientFolder {

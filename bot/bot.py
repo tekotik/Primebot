@@ -770,20 +770,28 @@ async def web_app_data_handler(update: Update, context: ContextTypes.DEFAULT_TYP
     try:
         data = json.loads(raw_data)
         action = data.get("action")
-        if action in ("autocollect", "subscribe"):
+        if action in ("autocollect", "subscribe", "autocollect_update"):
             make = normalize_make(data.get("make", ""))
             model = data.get("model", "")
-            DAILY_SUBSCRIBERS[user_id] = {
-                "make": make,
-                "model": model,
-                "timed": str(data.get("timed", "") or ""),
-                "date": str(data.get("date", "") or ""),
-                "subscribed_at": str(datetime.now())
-            }
+            DAILY_SUBSCRIBERS[user_id] = dict(
+                subscriber_filter(data),
+                make=make,
+                model=model,
+                subscribed_at=str(datetime.now())
+            )
             save_subscribers()
+            if action == "autocollect_update":
+                # Смена фильтра при активной подписке: параметры обновили,
+                # новый проход не запускаем, иначе каждое изменение = скан.
+                await update.message.reply_text(
+                    f"🔄 <b>Фильтр подписки обновлён</b>\n\n"
+                    f"🎯 Теперь ищем: <b>{describe_subscription(DAILY_SUBSCRIBERS[user_id])}</b>",
+                    parse_mode=ParseMode.HTML
+                )
+                return
             await update.message.reply_text(
                 f"⚡ <b>Автосборщик запущен из приложения!</b>\n\n"
-                f"🎯 Ищем: <b>{make} {model}</b>\n\n"
+                f"🎯 Ищем: <b>{describe_subscription(DAILY_SUBSCRIBERS[user_id])}</b>\n\n"
                 "Запрашиваю актуальные автомобили с аукциона...",
                 parse_mode=ParseMode.HTML
             )
@@ -801,22 +809,49 @@ async def web_app_data_handler(update: Update, context: ContextTypes.DEFAULT_TYP
 
 # ==================== СЕРВЕРНЫЙ АВТОСБОРЩИК (BOT-WATCH) ====================
 
+# Поля главного фильтра из приложения, которые понимает bot-watch. Двигатель,
+# КПП, привод и состояние сервер не фильтрует - не передаём их вовсе.
+WATCH_FILTER_KEYS = (
+    "make", "model", "timed", "site", "date",
+    "year_from", "year_to", "odometer_from", "odometer_to",
+    "fuel", "state", "damage_pr", "damage_exclude", "document"
+)
+
+
+def subscriber_filter(source: Dict[str, Any]) -> Dict[str, str]:
+    """Из payload приложения берём только известные bot-watch поля, пустые отбрасываем."""
+    clean = {}
+    for key in WATCH_FILTER_KEYS:
+        value = str(source.get(key, "") or "").strip()
+        if value:
+            clean[key] = value
+    return clean
+
+
+def describe_subscription(config: Dict[str, Any]) -> str:
+    """Подписка одним словом для ответа пользователю."""
+    parts = [(config.get("make") or "").strip(), (config.get("model") or "").strip()]
+    label = " ".join(p for p in parts if p) or "все лоты"
+    if config.get("timed") == "1":
+        label += ", только Timed"
+    if config.get("site"):
+        label += ", площадка " + ("Copart" if config["site"] == "1" else "IAAI")
+    if config.get("date"):
+        label += f", торги {config['date']}"
+    years = [config.get("year_from", ""), config.get("year_to", "")]
+    if any(years):
+        label += ", годы {}-{}".format(years[0] or "любой", years[1] or "любой")
+    return label
+
+
 def subscriber_watch_params(user_id: int, config: Dict[str, Any]) -> Dict[str, Any]:
-    """Параметры bot-watch для подписки. Аукцион и дату берём из фильтра,
-    который приложен прислал вместе с маркой и моделью."""
-    timed = str(config.get("timed", "") or "").strip()
-    params = {
-        "timed": timed if timed in ("0", "1", "all") else "all",
-        "make": config.get("make", ""),
-        "model": config.get("model", ""),
-        "limit": WATCH_DEFAULT_LIMIT,
-        "watch_key": str(user_id)
-    }
-
-    date = str(config.get("date", "") or "").strip()
-    if date:
-        params["date"] = date
-
+    """Параметры bot-watch для подписки: весь главный фильтр, который приложен
+    прислал вместе с маркой и моделью. Без timed - смешанная выдача."""
+    params = subscriber_filter(config)
+    if params.get("timed") not in ("0", "1", "all"):
+        params["timed"] = "all"
+    params["limit"] = WATCH_DEFAULT_LIMIT
+    params["watch_key"] = str(user_id)
     return params
 
 
@@ -841,7 +876,8 @@ async def watch_now_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     params = subscriber_watch_params(user_id, config)
     data = await fetch_bot_watch(params)
     if not data or data.get("status") != "ok":
-        await update.message.reply_text("❌ Ошибка при обращении к bot-watch.php")
+        reason = (data or {}).get("message", "сервер не ответил")
+        await update.message.reply_text(f"❌ <b>bot-watch не ответил</b>: {reason}", parse_mode=ParseMode.HTML)
         return
 
     count = data.get("count", 0)
