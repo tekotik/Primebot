@@ -96,6 +96,9 @@ export default function App() {
   // Modals & Drawers
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isBotOpen, setIsBotOpen] = useState(false);
+  // При каждом открытии Mini App спрашиваем, куда идти: смотреть лоты или
+  // настраивать автосборщик. Без этого человек попадает в ленту молча.
+  const [entryChoice, setEntryChoice] = useState<'ask' | 'browse' | 'bot'>('ask');
   const [isBookmarksOpen, setIsBookmarksOpen] = useState(false);
   const [selectedLot, setSelectedLot] = useState<CarLot | null>(null);
   const [consultationLot, setConsultationLot] = useState<CarLot | null>(null);
@@ -107,8 +110,6 @@ export default function App() {
     dateExact: '',
     timedMode: 'only'
   });
-  const [isScanning, setIsScanning] = useState(false);
-  const [botStatusText, setBotStatusText] = useState('');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Initial load via cars-proxy.php / apicar API
@@ -223,43 +224,6 @@ export default function App() {
     } finally {
       setTimeout(() => setIsSearchingAnimation(false), 450);
     }
-  };
-
-  // Bot Scanning Execution with Precision Clock Dial Animation
-  const handleRunBotScan = async (cfg: BotConfig) => {
-    setIsScanning(true);
-    setBotStatusText('Ищу timed-аукционы на площадке IAAI (site=2)...');
-
-    await new Promise((r) => setTimeout(r, 600));
-    setBotStatusText('Запрос к cars-proxy.php / apicar API (IAAI)...');
-
-    await new Promise((r) => setTimeout(r, 600));
-    setBotStatusText('Получение timed_auction_close_date из API...');
-
-    const targetTimed = cfg.timedMode === 'only';
-    const updatedFilters: PrimeFilterState = {
-      ...filters,
-      auction: targetTimed ? 'iaai' : filters.auction,
-      timed: targetTimed ? 'only' : ''
-    };
-    setFilters(updatedFilters);
-
-    try {
-      const lots = await carsApiService.performTimedSearch(updatedFilters);
-      if (lots && lots.length > 0) {
-        setLiveLots(lots);
-      }
-      setFeedMeta(carsApiService.getFeedStatus());
-    } catch (e) {
-      // Keep lots
-    }
-
-    setIsScanning(false);
-    setBotStatusText(`Готово: ${liveLots.filter(l => l.auction === 'iaai' && l.isTimed).length} timed-аукционов на IAAI.`);
-
-    setTimeout(() => {
-      setIsBotOpen(false);
-    }, 850);
   };
 
   // Trigger search when filter changes
@@ -493,6 +457,66 @@ export default function App() {
         )}
       </main>
 
+      {/* 1.5. Выбор раздела при входе: просмотр авто или автоподбор */}
+      {entryChoice === 'ask' && (
+        <div className="fixed inset-0 z-[60] flex flex-col justify-end">
+          <div
+            onClick={() => setEntryChoice('browse')}
+            className="absolute inset-0 bg-black/85 backdrop-blur-sm animate-fade-in-fast"
+          />
+          <div className="relative w-full max-w-md mx-auto bg-[#0f131c] border-t border-slate-800 rounded-t-3xl shadow-2xl p-5 z-10 animate-slide-up-fast">
+            <div className="w-12 h-1.5 bg-slate-700/80 rounded-full mx-auto mb-4 shrink-0" />
+            <h2 className="text-base font-bold text-white uppercase tracking-wide font-['Exo_2',sans-serif] text-center">
+              Выбери действие
+            </h2>
+            <p className="text-[11px] text-slate-400 text-center mt-1.5 mb-4">
+              Переключаться можно и позже: кнопки внизу экрана
+            </p>
+
+            <div className="space-y-2.5">
+              <button
+                type="button"
+                onClick={() => setEntryChoice('browse')}
+                className="w-full p-3.5 bg-[#131724] border border-slate-800 hover:border-[#068eff]/60 rounded-2xl flex items-center gap-3 transition-colors text-left"
+              >
+                <div className="w-10 h-10 rounded-xl bg-[#068eff]/15 border border-[#068eff]/30 text-[#068eff] flex items-center justify-center shrink-0">
+                  <CarFront className="w-5 h-5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <span className="block text-sm font-bold text-white uppercase tracking-wider font-['Exo_2',sans-serif]">
+                    Просмотр авто
+                  </span>
+                  <span className="block text-[11px] text-slate-400">
+                    Живая лента лотов Copart и IAAI
+                  </span>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setEntryChoice('bot');
+                  setIsBotOpen(true);
+                }}
+                className="w-full p-3.5 bg-[#131724] border border-slate-800 hover:border-emerald-500/60 rounded-2xl flex items-center gap-3 transition-colors text-left"
+              >
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center justify-center shrink-0">
+                  <Gauge className="w-5 h-5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <span className="block text-sm font-bold text-white uppercase tracking-wider font-['Exo_2',sans-serif]">
+                    Автоподбор
+                  </span>
+                  <span className="block text-[11px] text-slate-400">
+                    Автосборщик: подборка машин 1 раз в день
+                  </span>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* 2. Mobile Bottom Navigation: [Фильтры], [Автоподбор], [Закладки] */}
       <MobileBottomNav
         onOpenFilter={() => setIsFilterOpen(true)}
@@ -512,7 +536,7 @@ export default function App() {
         matchedCount={displayLots.length}
       />
 
-      {/* 4. Bot Auto-Podbor Modal (with Clock Dial Animation & Automotive Scanner) */}
+      {/* 4. Bot Auto-Podbor Modal (Автосборщик) */}
       <BotSelectionModal
         isOpen={isBotOpen}
         onClose={() => setIsBotOpen(false)}
@@ -521,9 +545,6 @@ export default function App() {
         filters={filters}
         onChangeFilters={handleFilterUpdate}
         onOpenFilter={() => setIsFilterOpen(true)}
-        onRunBotScan={handleRunBotScan}
-        isScanning={isScanning}
-        botStatusText={botStatusText}
       />
 
       {/* 5. Mobile Bookmarks Drawer */}
