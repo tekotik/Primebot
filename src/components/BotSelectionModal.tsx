@@ -168,6 +168,23 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
 
   const [toastText, setToastText] = useState<string | null>(null);
 
+  // Что о нас знает Telegram: без права писать боту sendData не сработает,
+  // а видно это только изнутри самого WebView.
+  const [tgInfo, setTgInfo] = useState('Telegram не определён - открывай раздел из чата бота');
+  useEffect(() => {
+    const tg = (window as any).Telegram?.WebApp;
+    if (!tg) return;
+    try { tg.ready(); tg.expand?.(); } catch {}
+    setTgInfo([
+      tg.platform || 'платформа неизвестна',
+      tg.version ? `v${tg.version}` : '',
+      tg.botPermissions
+        ? (tg.botPermissions.can_write_to_pm ? 'писать боту можно' : 'писать боту нельзя')
+        : 'право писать не подтверждено',
+      tg.initData ? `вход есть` : 'входа нет'
+    ].filter(Boolean).join(' · '));
+  }, []);
+
   // Persist autoCollector
   useEffect(() => {
     localStorage.setItem('prime_autocollector_config', JSON.stringify(autoCollector));
@@ -199,10 +216,17 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
 
   // Toggle AutoCollector. Каждое нажатие уходит боту, иначе память приложения
   // и реальная подписка разъезжаются и кнопка ничего не запускает.
-  const sendBotPayload = (payload: Record<string, string>) => {
+  const sendBotPayload = async (payload: Record<string, string>) => {
     const tg = (window as any).Telegram?.WebApp;
     if (typeof tg?.sendData !== 'function') return false;
     try {
+      // Telegram даёт sendData только после согласия человека писать боту.
+      const canWrite = tg.botPermissions?.can_write_to_pm;
+      if (!canWrite && typeof tg.requestWriteAccess === 'function') {
+        const res = await tg.requestWriteAccess();
+        const granted = res === true || res?.granted === true || res?.status === 'granted';
+        if (!granted) return false;
+      }
       tg.sendData(JSON.stringify(payload));
       return true;
     } catch (e) {
@@ -213,7 +237,7 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
 
   const currentSignature = JSON.stringify(collectorSubscription(config, filters));
 
-  const handleToggleAutoCollector = () => {
+  const handleToggleAutoCollector = async () => {
     const subscription = collectorSubscription(config, filters);
     const starting = !autoCollector.isActive;
 
@@ -222,7 +246,7 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
       return;
     }
 
-    const sent = sendBotPayload({
+    const sent = await sendBotPayload({
       action: starting ? 'autocollect' : 'autocollect_stop',
       ...subscription
     });
@@ -235,7 +259,8 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
     }));
 
     if (!sent) {
-      setToastText('Открой раздел через Telegram-бота - иначе подписка не уйдёт');
+      setAutoCollector((prev) => ({ ...prev, isActive: !starting }));
+      setToastText('Telegram не дал разрешить запись боту - подписка не ушла');
       return;
     }
 
@@ -249,9 +274,9 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
   const filterNeedsApply =
     autoCollector.isActive && !!autoCollector.sentFilter && autoCollector.sentFilter !== currentSignature;
 
-  const handleApplyFilter = () => {
-    if (!sendBotPayload({ action: 'autocollect_update', ...collectorSubscription(config, filters) })) {
-      setToastText('Открой раздел через Telegram-бота');
+  const handleApplyFilter = async () => {
+    if (!(await sendBotPayload({ action: 'autocollect_update', ...collectorSubscription(config, filters) }))) {
+      setToastText('Telegram не дал разрешить запись боту - фильтр не ушёл');
       return;
     }
     setAutoCollector((prev) => ({ ...prev, sentFilter: currentSignature }));
@@ -433,6 +458,8 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
               </div>
               <span className="text-[11px] font-semibold text-[#068eff] shrink-0">Изменить</span>
             </button>
+
+            <p className="text-[10px] text-slate-500 px-1">{tgInfo}</p>
 
             {filterNeedsApply && (
               <div className="p-2.5 bg-amber-950/40 border border-amber-600/50 rounded-xl flex items-center justify-between gap-2">
