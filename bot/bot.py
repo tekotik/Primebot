@@ -776,6 +776,8 @@ async def web_app_data_handler(update: Update, context: ContextTypes.DEFAULT_TYP
             DAILY_SUBSCRIBERS[user_id] = {
                 "make": make,
                 "model": model,
+                "timed": str(data.get("timed", "") or ""),
+                "date": str(data.get("date", "") or ""),
                 "subscribed_at": str(datetime.now())
             }
             save_subscribers()
@@ -799,6 +801,25 @@ async def web_app_data_handler(update: Update, context: ContextTypes.DEFAULT_TYP
 
 # ==================== СЕРВЕРНЫЙ АВТОСБОРЩИК (BOT-WATCH) ====================
 
+def subscriber_watch_params(user_id: int, config: Dict[str, Any]) -> Dict[str, Any]:
+    """Параметры bot-watch для подписки. Аукцион и дату берём из фильтра,
+    который приложен прислал вместе с маркой и моделью."""
+    timed = str(config.get("timed", "") or "").strip()
+    params = {
+        "timed": timed if timed in ("0", "1", "all") else "all",
+        "make": config.get("make", ""),
+        "model": config.get("model", ""),
+        "limit": WATCH_DEFAULT_LIMIT,
+        "watch_key": str(user_id)
+    }
+
+    date = str(config.get("date", "") or "").strip()
+    if date:
+        params["date"] = date
+
+    return params
+
+
 async def watch_now_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Ручной запуск проверки автосборщика bot-watch для текущего пользователя"""
     user_id = update.effective_user.id
@@ -817,13 +838,7 @@ async def watch_now_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         parse_mode=ParseMode.HTML
     )
 
-    params = {
-        "timed": "all",
-        "make": make,
-        "model": model,
-        "limit": WATCH_DEFAULT_LIMIT,
-        "watch_key": str(user_id)
-    }
+    params = subscriber_watch_params(user_id, config)
     data = await fetch_bot_watch(params)
     if not data or data.get("status") != "ok":
         await update.message.reply_text("❌ Ошибка при обращении к bot-watch.php")
@@ -926,13 +941,7 @@ async def daily_auto_collect_job(context: ContextTypes.DEFAULT_TYPE):
         try:
             make = config.get("make", "")
             model = config.get("model", "")
-            params = {
-                "timed": "all",
-                "make": make,
-                "model": model,
-                "limit": WATCH_DEFAULT_LIMIT,
-                "watch_key": str(user_id)
-            }
+            params = subscriber_watch_params(user_id, config)
             watch_data = await fetch_bot_watch(params)
             if not watch_data or watch_data.get("status") != "ok":
                 continue

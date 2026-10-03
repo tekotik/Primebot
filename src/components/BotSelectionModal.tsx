@@ -32,6 +32,19 @@ interface BotSelectionModalProps {
   botStatusText: string;
 }
 
+// Дата в формате ГГГГ-ММ-ДД для подписки: пустая строка - все ближайшие торги.
+const collectorDateParam = (cfg: BotConfig): string => {
+  if (cfg.datePreset === 'exact') return cfg.dateExact || '';
+
+  const offset = cfg.datePreset === 'today' ? 0 : cfg.datePreset === 'tomorrow' ? 1 : null;
+  if (offset === null) return '';
+
+  const d = new Date();
+  d.setDate(d.getDate() + offset);
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+};
+
 const DEFAULT_AUTO_COLLECTOR: AutoCollectorConfig = {
   isActive: false,
   make: '',
@@ -197,7 +210,9 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
         tg.sendData(JSON.stringify({
           action: starting ? 'autocollect' : 'autocollect_stop',
           make: targetMake,
-          model: targetModel
+          model: targetModel,
+          timed: config.timedMode === 'only' ? '1' : 'all',
+          date: collectorDateParam(config)
         }));
       } catch (e) {
         console.error('Telegram sendData error', e);
@@ -534,12 +549,11 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
               </div>
             </div>
 
-            {/* Фильтры ленты: те же контроли, что во вкладке «Поиск бот»,
-                чтобы менять их, не выходя из автосборщика */}
+            {/* Фильтр ленты: эти же значения уходят в подписку автосборщика */}
             <div className="space-y-3 bg-[#131724] border border-slate-800 rounded-2xl p-3.5">
               <h4 className="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-1.5 font-['Exo_2',sans-serif]">
                 <Sliders className="w-3.5 h-3.5 text-[#068eff]" />
-                <span>Фильтр поиска</span>
+                <span>Фильтр</span>
               </h4>
               <BotSearchFilters
                 config={config}
