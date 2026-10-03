@@ -42,6 +42,62 @@ const DEFAULT_AUTO_COLLECTOR: AutoCollectorConfig = {
   notifyChannel: 'telegram'
 };
 
+// Фильтры ленты: день торгов и режим аукциона. Одни и те же контроли
+// показываются и в «Поиск бот», и в «Автосборщик», чтобы не переключать
+// вкладку ради смены фильтра.
+const BotSearchFilters: React.FC<{
+  config: BotConfig;
+  onChangeConfig: (cfg: BotConfig) => void;
+  className?: string;
+}> = ({ config, onChangeConfig, className = 'space-y-3.5 mb-5' }) => (
+  <div className={className}>
+    <div className="space-y-1.5">
+      <label className="text-xs font-semibold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+        <Calendar className="w-3.5 h-3.5 text-[#068eff]" />
+        День торгов
+      </label>
+      <select
+        value={config.datePreset}
+        onChange={(e) => onChangeConfig({ ...config, datePreset: e.target.value as any })}
+        className="w-full px-3 py-2.5 bg-[#141824] border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-[#068eff]"
+      >
+        <option value="today">Сегодня</option>
+        <option value="tomorrow">Завтра</option>
+        <option value="exact">Конкретная дата</option>
+        <option value="any">Все ближайшие торги</option>
+      </select>
+    </div>
+
+    {config.datePreset === 'exact' && (
+      <div className="space-y-1.5">
+        <label className="text-xs font-semibold uppercase tracking-wider text-slate-300">
+          Дата торгов
+        </label>
+        <input
+          type="date"
+          value={config.dateExact}
+          onChange={(e) => onChangeConfig({ ...config, dateExact: e.target.value })}
+          className="w-full px-3 py-2 bg-[#141824] border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-[#068eff]"
+        />
+      </div>
+    )}
+
+    <div className="space-y-1.5">
+      <label className="text-xs font-semibold uppercase tracking-wider text-slate-300">
+        Аукцион
+      </label>
+      <select
+        value={config.timedMode}
+        onChange={(e) => onChangeConfig({ ...config, timedMode: e.target.value as any })}
+        className="w-full px-3 py-2.5 bg-[#141824] border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-[#068eff]"
+      >
+        <option value="only">IAAI Timed</option>
+        <option value="all">Все аукционы</option>
+      </select>
+    </div>
+  </div>
+);
+
 export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
   isOpen,
   onClose,
@@ -273,70 +329,7 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
               </div>
             ) : (
               /* Bot Controls */
-              <div className="space-y-3.5 mb-5">
-                {/* День торгов */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
-                    <Calendar className="w-3.5 h-3.5 text-[#068eff]" />
-                    День торгов
-                  </label>
-                  <select
-                    value={config.datePreset}
-                    onChange={(e) =>
-                      onChangeConfig({
-                        ...config,
-                        datePreset: e.target.value as any
-                      })
-                    }
-                    className="w-full px-3 py-2.5 bg-[#141824] border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-[#068eff]"
-                  >
-                    <option value="today">Сегодня</option>
-                    <option value="tomorrow">Завтра</option>
-                    <option value="exact">Конкретная дата</option>
-                    <option value="any">Все ближайшие торги</option>
-                  </select>
-                </div>
-
-                {/* Конкретная дата (if selected) */}
-                {config.datePreset === 'exact' && (
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold uppercase tracking-wider text-slate-300">
-                      Дата торгов
-                    </label>
-                    <input
-                      type="date"
-                      value={config.dateExact}
-                      onChange={(e) =>
-                        onChangeConfig({
-                          ...config,
-                          dateExact: e.target.value
-                        })
-                      }
-                      className="w-full px-3 py-2 bg-[#141824] border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-[#068eff]"
-                    />
-                  </div>
-                )}
-
-                {/* Timed-аукционы режим */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-slate-300">
-                    Аукцион
-                  </label>
-                  <select
-                    value={config.timedMode}
-                    onChange={(e) =>
-                      onChangeConfig({
-                        ...config,
-                        timedMode: e.target.value as any
-                      })
-                    }
-                    className="w-full px-3 py-2.5 bg-[#141824] border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-[#068eff]"
-                  >
-                    <option value="only">IAAI Timed</option>
-                    <option value="all">Все аукционы</option>
-                  </select>
-                </div>
-              </div>
+              <BotSearchFilters config={config} onChangeConfig={onChangeConfig} />
             )}
 
             {/* Status text when done */}
@@ -539,6 +532,20 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
                   Telegram бот
                 </span>
               </div>
+            </div>
+
+            {/* Фильтры ленты: те же контроли, что во вкладке «Поиск бот»,
+                чтобы менять их, не выходя из автосборщика */}
+            <div className="space-y-3 bg-[#131724] border border-slate-800 rounded-2xl p-3.5">
+              <h4 className="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-1.5 font-['Exo_2',sans-serif]">
+                <Sliders className="w-3.5 h-3.5 text-[#068eff]" />
+                <span>Фильтр поиска</span>
+              </h4>
+              <BotSearchFilters
+                config={config}
+                onChangeConfig={onChangeConfig}
+                className="space-y-3"
+              />
             </div>
 
             {/* Launch / Stop Action Button */}
