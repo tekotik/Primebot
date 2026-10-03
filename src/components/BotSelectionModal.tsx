@@ -171,6 +171,7 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
   // Что о нас знает Telegram: без права писать боту sendData не сработает,
   // а видно это только изнутри самого WebView.
   const [tgInfo, setTgInfo] = useState('Telegram не определён - открывай раздел из чата бота');
+  const [sendNote, setSendNote] = useState('');
   useEffect(() => {
     const tg = (window as any).Telegram?.WebApp;
     if (!tg) return;
@@ -216,7 +217,7 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
 
   // Toggle AutoCollector. Каждое нажатие уходит боту, иначе память приложения
   // и реальная подписка разъезжаются и кнопка ничего не запускает.
-  const sendBotPayload = async (payload: Record<string, string>) => {
+  const sendViaTelegram = async (payload: Record<string, string>) => {
     const tg = (window as any).Telegram?.WebApp;
     if (typeof tg?.sendData !== 'function') return false;
     try {
@@ -233,6 +234,36 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
       console.error('Telegram sendData error', e);
       return false;
     }
+  };
+
+  // Основной канал - наш сервер: приложение POSTит подписку, сервер сверяет
+  // подпись initData. sendData остаётся запасным, если сервер не ответил.
+  const sendBotPayload = async (payload: Record<string, string>) => {
+    const { action, ...filter } = payload;
+    const tgApp = (window as any).Telegram?.WebApp;
+    // Сервер сверяет подпись по сырой строке initData: в свежем SDK
+    // initData - уже объект, поэтому берём initDataRaw.
+    const initData = typeof tgApp?.initDataRaw === 'string' && tgApp.initDataRaw
+      ? tgApp.initDataRaw
+      : (typeof tgApp?.initData === 'string' ? tgApp.initData : '');
+    try {
+      const res = await fetch('/api/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ init_data: initData, action, filter })
+      });
+      const data = await res.json().catch(() => null);
+      if (res.ok && data?.status === 'ok') {
+        setSendNote(`сервер принял, подписчиков: ${data.total}`);
+        return true;
+      }
+      setSendNote(`сервер: ${data?.message || ('код ' + res.status)}`);
+    } catch (e: any) {
+      setSendNote(`сервер недоступен: ${e?.message || e}`);
+    }
+    const sent = await sendViaTelegram(payload);
+    if (!sent) setSendNote('ни сервер, ни Telegram не приняли подписку');
+    return sent;
   };
 
   const currentSignature = JSON.stringify(collectorSubscription(config, filters));
@@ -260,7 +291,7 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
 
     if (!sent) {
       setAutoCollector((prev) => ({ ...prev, isActive: !starting }));
-      setToastText('Telegram не дал разрешить запись боту - подписка не ушла');
+      setToastText('Подписка не ушла: сервер не ответил, Telegram записи не дал');
       return;
     }
 
@@ -276,7 +307,7 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
 
   const handleApplyFilter = async () => {
     if (!(await sendBotPayload({ action: 'autocollect_update', ...collectorSubscription(config, filters) }))) {
-      setToastText('Telegram не дал разрешить запись боту - фильтр не ушёл');
+      setToastText('Ни сервер, ни Telegram не приняли фильтр');
       return;
     }
     setAutoCollector((prev) => ({ ...prev, sentFilter: currentSignature }));
@@ -459,7 +490,7 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
               <span className="text-[11px] font-semibold text-[#068eff] shrink-0">Изменить</span>
             </button>
 
-            <p className="text-[10px] text-slate-500 px-1">{tgInfo}</p>
+            <p className="text-[10px] text-slate-500 px-1">{[tgInfo, sendNote].filter(Boolean).join(' · ')}</p>
 
             {filterNeedsApply && (
               <div className="p-2.5 bg-amber-950/40 border border-amber-600/50 rounded-xl flex items-center justify-between gap-2">

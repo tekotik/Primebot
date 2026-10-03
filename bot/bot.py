@@ -61,6 +61,7 @@ SITE_BASE_URL = os.getenv("PRIME_SITE_BASE", DEFAULT_SITE_BASE).rstrip("/")
 API_STATIC_KEY = os.getenv("BOT_FEED_KEY") or os.getenv("PRIME_FEED_KEY", "5f17153da0663379d06efa746e2fe65a")
 API_BASE_URL = f"{SITE_BASE_URL}/api/bot-feed.php"
 WATCH_API_BASE_URL = os.getenv("PRIME_WATCH_URL", f"{SITE_BASE_URL}/api/bot-watch.php")
+SUBSCRIBE_API_URL = os.getenv("PRIME_SUBSCRIBE_URL", f"{SITE_BASE_URL}/api/bot-subscribe.php")
 
 # Mini App лежит на Vercel. Открывать его нужно из чата бота - только тогда
 # Telegram даёт приложению право sendData, и подписка доходит до воркера.
@@ -131,6 +132,76 @@ def save_subscribers():
             json.dump(DAILY_SUBSCRIBERS, f, ensure_ascii=False, indent=2)
     except Exception as e:
         logger.error(f"Ошибка сохранения {SUBSCRIBERS_FILE}: {e}")
+
+
+async def server_subscribers() -> Optional[Dict[int, Dict[str, Any]]]:
+    """
+    Подписки с сервера. Mini App пишет их прямо в bot-subscribe.php, не через
+    Telegram, поэтому правда лежит там, а subscribers.json - просто кэш.
+    None означает "сервер не ответил" - тогда держимся за локальный список.
+    """
+    try:
+        timeout = aiohttp.ClientTimeout(total=15)
+        async with aiohttp.ClientSession(timeout=timeout) as session:
+            async with session.get(SUBSCRIBE_API_URL, params={"key": API_STATIC_KEY}) as resp:
+                if resp.status != 200:
+                    logger.warning(f"bot-subscribe.php вернул HTTP {resp.status}")
+                    return None
+                data = await resp.json()
+    except Exception as e:
+        logger.error(f"Ошибка чтения подписок с сервера: {e}")
+        return None
+
+    if not isinstance(data, dict) or data.get("status") != "ok":
+        logger.warning(f"bot-subscribe.php не отдал список: {(data or {}).get('message', 'нет ответа')}")
+        return None
+
+    result: Dict[int, Dict[str, Any]] = {}
+    for raw_id, cfg in (data.get("subscribers") or {}).items():
+        try:
+            result[int(raw_id)] = dict(cfg)
+        except (TypeError, ValueError):
+            continue
+    return result
+
+
+async def push_subscription(user_id: int, action: str, subscription: Optional[Dict[str, Any]] = None) -> bool:
+    """Записать подписку из чата на тот же сервер, где живёт подписка из Mini App."""
+    payload: Dict[str, Any] = {"key": API_STATIC_KEY, "user_id": user_id, "action": action}
+    if subscription is not None:
+        payload["filter"] = subscription
+
+    try:
+        timeout = aiohttp.ClientTimeout(total=15)
+        async with aiohttp.ClientSession(timeout=timeout) as session:
+            async with session.post(SUBSCRIBE_API_URL, json=payload) as resp:
+                if resp.status == 200:
+                    return True
+                logger.warning(f"Сервер не принял подписку из чата ({action}): HTTP {resp.status}")
+    except Exception as e:
+        logger.error(f"Ошибка отправки подписки на сервер ({action}): {e}")
+    return False
+
+
+async def sync_subscribers():
+    """Слить локальный список с серверным. Сервер главнее: он видит и нажатия
+    кнопки в приложении, и остановки оттуда же."""
+    global DAILY_SUBSCRIBERS
+    remote = await server_subscribers()
+    if remote is None:
+        return
+
+    merged = dict(remote)
+    for user_id, cfg in DAILY_SUBSCRIBERS.items():
+        # Подписка из чата, которая так и не дошла до сервера. updated_at ставит
+        # только сервер, поэтому запись без него сервер не удалял - она наша.
+        if user_id not in merged and not cfg.get("updated_at"):
+            merged[user_id] = cfg
+
+    if merged != DAILY_SUBSCRIBERS:
+        DAILY_SUBSCRIBERS = merged
+        save_subscribers()
+        logger.info(f"Список автосборщика обновлён с сервера: подписчиков {len(merged)}")
 
 
 def calculate_live_countdown(lot: Dict[str, Any]) -> str:
@@ -719,6 +790,8 @@ async def autocollect_command(update: Update, context: ContextTypes.DEFAULT_TYPE
         subscription["year_to"] = year_to
     DAILY_SUBSCRIBERS[user_id] = dict(subscription, subscribed_at=str(datetime.now()))
     save_subscribers()
+    # Тот же сервер, куда смотрит кнопка в Mini App - иначе два списка разойдутся.
+    await push_subscription(user_id, "autocollect_update", subscription)
 
     text = (
         f"⚡ <b>Автосборщик запущен!</b>\n\n"
@@ -738,6 +811,7 @@ async def autocollect_stop_command(update: Update, context: ContextTypes.DEFAULT
         await update.message.reply_text("Активной подписки автосборщика нет.")
         return
     save_subscribers()
+    await push_subscription(user_id, "autocollect_stop")
     await update.message.reply_text(
         "⏹ <b>Автосборщик остановлен</b> - подписка удалена.",
         parse_mode=ParseMode.HTML
@@ -803,6 +877,7 @@ async def button_callback_handler(update: Update, context: ContextTypes.DEFAULT_
             "subscribed_at": str(datetime.now())
         }
         save_subscribers()
+        await push_subscription(user_id, "autocollect_update", {"make": make, "model": model})
         text = (
             f"⚡ <b>Автосборщик запущен!</b>\n\n"
             f"🎯 Ищем: <b>{make} {model}</b>\n"
@@ -833,6 +908,7 @@ async def web_app_data_handler(update: Update, context: ContextTypes.DEFAULT_TYP
                 subscribed_at=str(datetime.now())
             )
             save_subscribers()
+            await push_subscription(user_id, "autocollect_update", DAILY_SUBSCRIBERS[user_id])
             if action == "autocollect_update":
                 # Смена фильтра при активной подписке: параметры обновили,
                 # новый проход не запускаем, иначе каждое изменение = скан.
@@ -852,6 +928,7 @@ async def web_app_data_handler(update: Update, context: ContextTypes.DEFAULT_TYP
         elif action in ("autocollect_stop", "unsubscribe"):
             DAILY_SUBSCRIBERS.pop(user_id, None)
             save_subscribers()
+            await push_subscription(user_id, "autocollect_stop")
             await update.message.reply_text(
                 "⏹ <b>Автосборщик остановлен</b> - подписка удалена.",
                 parse_mode=ParseMode.HTML
@@ -960,6 +1037,7 @@ def subscriber_watch_params(user_id: int, config: Dict[str, Any]) -> Dict[str, A
 async def watch_now_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Ручной запуск проверки автосборщика bot-watch для текущего пользователя"""
     user_id = update.effective_user.id
+    await sync_subscribers()
     config = DAILY_SUBSCRIBERS.get(user_id)
     if not config:
         await update.message.reply_text(
@@ -1071,6 +1149,7 @@ async def daily_auto_collect_job(context: ContextTypes.DEFAULT_TYPE):
     Фоновая задача автосборщика по расписанию (1 раз в 10 минут для тестов / 1 раз в сутки в бою).
     Использует серверный эндпоинт bot-watch.php с серверной дедупликацией.
     """
+    await sync_subscribers()
     if not DAILY_SUBSCRIBERS:
         return
 

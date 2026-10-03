@@ -6,6 +6,10 @@
       "destination": "/api/feed.ts"
     },
     {
+      "source": "/api/subscribe",
+      "destination": "/api/subscribe.ts"
+    },
+    {
       "source": "/((?!api/).*)",
       "destination": "/index.html"
     }
