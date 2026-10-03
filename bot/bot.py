@@ -35,7 +35,9 @@ from telegram import (
     Update,
     InlineKeyboardButton,
     InlineKeyboardMarkup,
-    InputMediaPhoto
+    InputMediaPhoto,
+    WebAppInfo,
+    MenuButtonWebApp
 )
 from telegram.constants import ParseMode
 from telegram.ext import (
@@ -59,6 +61,10 @@ SITE_BASE_URL = os.getenv("PRIME_SITE_BASE", DEFAULT_SITE_BASE).rstrip("/")
 API_STATIC_KEY = os.getenv("BOT_FEED_KEY") or os.getenv("PRIME_FEED_KEY", "5f17153da0663379d06efa746e2fe65a")
 API_BASE_URL = f"{SITE_BASE_URL}/api/bot-feed.php"
 WATCH_API_BASE_URL = os.getenv("PRIME_WATCH_URL", f"{SITE_BASE_URL}/api/bot-watch.php")
+
+# Mini App лежит на Vercel. Открывать его нужно из чата бота - только тогда
+# Telegram даёт приложению право sendData, и подписка доходит до воркера.
+BOT_APP_URL = os.getenv("PRIME_APP_URL", "https://primebot-yw54.vercel.app").rstrip("/")
 
 # Токен берется из переменной окружения TELEGRAM_BOT_TOKEN
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
@@ -393,6 +399,9 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "• <code>/help</code> — полная справка по боту"
     )
     keyboard = [
+        [
+            InlineKeyboardButton("🤖 Открыть автоподбор", web_app=WebAppInfo(url=BOT_APP_URL))
+        ],
         [
             InlineKeyboardButton("⚡ Быстрый поиск Timed", callback_data="cmd_quick_timed"),
             InlineKeyboardButton("⚙️ Фильтры", callback_data="cmd_open_filters")
@@ -1153,7 +1162,7 @@ def main():
         )
         token = "DUMMY_TOKEN_PLEASE_SET_TELEGRAM_BOT_TOKEN"
 
-    app = Application.builder().token(token).build()
+    app = Application.builder().token(token).post_init(open_mini_app_entry).build()
 
     # Регистрация команд
     app.add_handler(CommandHandler("start", start_command))
@@ -1189,6 +1198,19 @@ def main():
     logger.info(f"Primebot успешно инициализирован. Интервал автосборщика: {WATCH_SCHEDULE_INTERVAL_SEC}с.")
     if token != "DUMMY_TOKEN_PLEASE_SET_TELEGRAM_BOT_TOKEN":
         app.run_polling()
+
+
+async def open_mini_app_entry(app: Application):
+    """Кнопка меню чата бота (рядом с полем ввода) должна вести в Mini App.
+    Без неё приложение открывается вне Telegram и sendData не имеет права
+    отправлять сообщения боту."""
+    try:
+        await app.bot.set_chat_menu_button(menu_button=MenuButtonWebApp(
+            text="Автоподбор", web_app=WebAppInfo(url=BOT_APP_URL)
+        ))
+        logger.info(f"Кнопка меню бота ведёт в Mini App: {BOT_APP_URL}")
+    except Exception as e:
+        logger.warning(f"Не удалось задать кнопку меню бота: {e}")
 
 
 if __name__ == "__main__":
