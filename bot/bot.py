@@ -639,15 +639,38 @@ async def filter_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(text, parse_mode=ParseMode.HTML, reply_markup=InlineKeyboardMarkup(keyboard))
 
 
+def split_years(args: List[str]):
+    """Год из команды: 2019 или 2018-2020 (и 2018..2020). Остальное - марка/модель.
+    Диапазон лет узкий специально: 'ProMaster 2500' не должен читаться как год."""
+    def is_year(t):
+        return len(t) == 4 and t.isdigit() and 1980 <= int(t) <= 2030
+
+    years, words = [], []
+    for token in args:
+        t = token.strip().replace("..", "-")
+        if is_year(t):
+            years.append(int(t))
+            continue
+        parts = t.split("-")
+        if len(parts) == 2 and all(is_year(p) for p in parts):
+            years += [int(parts[0]), int(parts[1])]
+            continue
+        words.append(token.strip())
+    if not years:
+        return words, "", ""
+    return words, str(min(years)), str(max(years))
+
+
 async def autocollect_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Команда /autocollect [марка] [модель] - ежедневная рассылка 1 раз в день"""
+    """Команда /autocollect [марка] [модель] [годы] - подписка автосборщика"""
     user_id = update.effective_user.id
     args = context.args or []
     if not args:
         text = (
             "🤖 <b>Настройка Автосборщика (1 раз в день):</b>\n\n"
             "Выберите марку и модель из списка или отправьте сообщением:\n"
-            "<code>/autocollect BMW X5</code> или <code>/autocollect RAM ProMaster 2500</code>"
+            "<code>/autocollect BMW X5 2018-2020</code> или <code>/autocollect RAM ProMaster 2500</code>\n\n"
+            "Остановить: <code>/stop</code>"
         )
         keyboard = [
             [
@@ -670,25 +693,46 @@ async def autocollect_command(update: Update, context: ContextTypes.DEFAULT_TYPE
         )
         return
 
-    make = normalize_make(args[0])
-    model = " ".join(args[1:]) if len(args) > 1 else ""
+    words, year_from, year_to = split_years(args)
+    if not words:
+        await update.message.reply_text(
+            "Нужна марка. Пример: <code>/autocollect BMW X5 2018-2020</code>",
+            parse_mode=ParseMode.HTML
+        )
+        return
 
-    DAILY_SUBSCRIBERS[user_id] = {
-        "make": make,
-        "model": model,
-        "subscribed_at": str(datetime.now())
-    }
+    make = normalize_make(words[0])
+    model = " ".join(words[1:])
+
+    subscription = {"make": make, "model": model}
+    if year_from:
+        subscription["year_from"] = year_from
+        subscription["year_to"] = year_to
+    DAILY_SUBSCRIBERS[user_id] = dict(subscription, subscribed_at=str(datetime.now()))
     save_subscribers()
 
     text = (
         f"⚡ <b>Автосборщик запущен!</b>\n\n"
-        f"🎯 Ищем: <b>{make} {model}</b>\n"
+        f"🎯 Ищем: <b>{describe_subscription(DAILY_SUBSCRIBERS[user_id])}</b>\n"
         f"📅 Периодичность: <b>автоматически при появлении новых лотов</b>\n\n"
         "Запрашиваю текущие актуальные автомобили с аукциона прямо сейчас..."
     )
     await update.message.reply_text(text, parse_mode=ParseMode.HTML)
     # Сразу запускаем первый проход для мгновенной выдачи
     await watch_now_command(update, context)
+
+
+async def autocollect_stop_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """/stop - снять подписку автосборщика, ничего не удаляя из ленты."""
+    user_id = update.effective_user.id
+    if DAILY_SUBSCRIBERS.pop(user_id, None) is None:
+        await update.message.reply_text("Активной подписки автосборщика нет.")
+        return
+    save_subscribers()
+    await update.message.reply_text(
+        "⏹ <b>Автосборщик остановлен</b> - подписка удалена.",
+        parse_mode=ParseMode.HTML
+    )
 
 
 # ==================== CALLBACKS ДЛЯ INLINE КНОПОК ====================
@@ -834,6 +878,8 @@ PLAIN_TEXT_COMMANDS = {
     "day": "day_command",
     "filter": "filter_command",
     "autocollect": "autocollect_command",
+    "autocollect_stop": "autocollect_stop_command",
+    "stop": "autocollect_stop_command",
     "autocollect_now": "watch_now_command",
     "watch": "watch_now_command",
     "watch_reset": "watch_reset_command",
@@ -1116,6 +1162,8 @@ def main():
     app.add_handler(CommandHandler("day", day_command))
     app.add_handler(CommandHandler("filter", filter_command))
     app.add_handler(CommandHandler("autocollect", autocollect_command))
+    app.add_handler(CommandHandler("autocollect_stop", autocollect_stop_command))
+    app.add_handler(CommandHandler("stop", autocollect_stop_command))
     app.add_handler(CommandHandler("autocollect_now", watch_now_command))
     app.add_handler(CommandHandler("watch", watch_now_command))
     app.add_handler(CommandHandler("watch_reset", watch_reset_command))
