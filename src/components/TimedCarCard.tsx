@@ -234,6 +234,19 @@ export const TimedCarCard: React.FC<TimedCarCardProps> = ({
             </span>
           </div>
         </div>
+
+        {lot.vin && lot.vin !== 'VIN не указан' && (
+          <a
+            href={`https://carcheckbot.com/ru/car/${lot.vin}?lot=${lot.lotId}`}
+            target="_blank"
+            rel="noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="mt-3 flex items-center justify-center gap-1.5 rounded-xl border border-[#068eff]/40 bg-[#068eff]/10 hover:bg-[#068eff]/20 text-[#068eff] text-[11px] font-bold uppercase tracking-wider py-2 transition-colors"
+          >
+            <ShieldCheck className="w-3.5 h-3.5" />
+            Проверка по VIN
+          </a>
+        )}
       </div>
     </article>
   );
