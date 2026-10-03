@@ -319,9 +319,10 @@ def format_lot_message(lot: Dict[str, Any]) -> tuple[str, InlineKeyboardMarkup]:
 
     caption = "\n".join(text_parts)
 
-    # Две ссылки:
+    # Три ссылки:
     # 1. link - прямая ссылка на страницу лота
     # 2. {site_base}/ru/calculator/?lot={lot_id} - ссылка на официальный расчет
+    # 3. carcheckbot - проверка по VIN, лот подставляется в ?lot=
     raw_lot_link = lot.get("link") or f"https://www.iaai.com/VehicleDetail/{lot_id}"
     lot_link = normalize_lot_url(raw_lot_link)
     calc_link = f"{SITE_BASE_URL}/ru/calculator/?lot={lot_id}"
@@ -332,6 +333,10 @@ def format_lot_message(lot: Dict[str, Any]) -> tuple[str, InlineKeyboardMarkup]:
             InlineKeyboardButton("💰 Расчёт под ключ", url=calc_link)
         ]
     ]
+
+    if vin and lot_id:
+        check_link = f"https://carcheckbot.com/ru/car/{vin}?lot={lot_id}"
+        keyboard.append([InlineKeyboardButton("🔎 Проверка по VIN", url=check_link)])
 
     return caption, InlineKeyboardMarkup(keyboard)
 
