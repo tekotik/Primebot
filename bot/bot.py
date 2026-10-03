@@ -807,6 +807,23 @@ async def web_app_data_handler(update: Update, context: ContextTypes.DEFAULT_TYP
         logger.error(f"Ошибка парсинга web_app_data: {e}")
 
 
+async def log_any_update(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Журнал входящих апдейтов во второй группе обработчиков: пишет, что бот
+    получил сообщение, даже если его никто не обслужил. Без него нельзя
+    отличить «не дошло» от «дошло, но проигнорировано»."""
+    user = update.effective_user
+    who = f"{user.id}" if user else "без автора"
+    if update.message:
+        kind = "web_app_data" if update.message.web_app_data else "сообщение"
+        body = (update.message.web_app_data.data if update.message.web_app_data
+                else update.message.text or "<без текста>")
+    elif update.callback_query:
+        kind, body = "кнопка", update.callback_query.data
+    else:
+        kind, body = "другое", str(update.to_dict())[:120]
+    logger.info(f"Входящее [{kind}] от {who}: {body[:300]}")
+
+
 # ==================== СЕРВЕРНЫЙ АВТОСБОРЩИК (BOT-WATCH) ====================
 
 # Поля главного фильтра из приложения, которые понимает bot-watch. Двигатель,
@@ -1074,6 +1091,11 @@ def main():
     app.add_handler(CommandHandler("watch_reset", watch_reset_command))
     app.add_handler(CallbackQueryHandler(button_callback_handler))
     app.add_handler(MessageHandler(filters.StatusUpdate.WEB_APP_DATA, web_app_data_handler))
+
+    # Второй слой (group=1): пишется по любому входящему апдейту, кроме тех,
+    # где есть текст - команды и сообщения видны и здесь.
+    app.add_handler(MessageHandler(filters.ALL, log_any_update), group=1)
+    app.add_handler(CallbackQueryHandler(log_any_update), group=1)
 
     # Планировщик автосборщика в фоне процесса (по умолчанию 3600 сек = 1 час)
     if app.job_queue:
