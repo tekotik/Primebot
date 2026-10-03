@@ -22,6 +22,7 @@ PrimeAvtoExport Telegram Bot (Primebot)
 """
 
 import os
+import secrets
 import sys
 import time
 import json
@@ -66,6 +67,23 @@ SUBSCRIBE_API_URL = os.getenv("PRIME_SUBSCRIBE_URL", f"{SITE_BASE_URL}/api/bot-s
 # Mini App лежит на Vercel. Открывать его нужно из чата бота - только тогда
 # Telegram даёт приложению право sendData, и подписка доходит до воркера.
 BOT_APP_URL = os.getenv("PRIME_APP_URL", "https://primebot-yw54.vercel.app").rstrip("/")
+
+# Username бота приходит из getMe. Приложение нужно открывать именно с ним:
+# по этому username мини-апп строит deep-link /start ac_... - запасной способ
+# передать подписку, когда сервер не принимает подпись Telegram.
+BOT_USERNAME = os.getenv("PRIME_BOT_USERNAME", "")
+
+
+def app_url(user_id = None) -> str:
+    params = []
+    if BOT_USERNAME:
+        params.append("bot=" + BOT_USERNAME)
+    if user_id is not None and APP_NONCES.get(user_id):
+        params.append("n=" + APP_NONCES[user_id])
+    return BOT_APP_URL + ("/?" + "&".join(params) if params else "")
+
+# Ключи сессии, выданные мини-аппу: nonce -> подтверждён сервером.
+APP_NONCES: Dict[int, str] = {}
 
 # Токен берется из переменной окружения TELEGRAM_BOT_TOKEN
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
@@ -165,11 +183,14 @@ async def server_subscribers() -> Optional[Dict[int, Dict[str, Any]]]:
     return result
 
 
-async def push_subscription(user_id: int, action: str, subscription: Optional[Dict[str, Any]] = None) -> bool:
+async def push_subscription(user_id: int, action: str, subscription: Optional[Dict[str, Any]] = None,
+                            nonce: str = "") -> bool:
     """Записать подписку из чата на тот же сервер, где живёт подписка из Mini App."""
     payload: Dict[str, Any] = {"key": API_STATIC_KEY, "user_id": user_id, "action": action}
     if subscription is not None:
         payload["filter"] = subscription
+    if nonce:
+        payload["nonce"] = nonce
 
     try:
         timeout = aiohttp.ClientTimeout(total=15)
@@ -181,6 +202,18 @@ async def push_subscription(user_id: int, action: str, subscription: Optional[Di
     except Exception as e:
         logger.error(f"Ошибка отправки подписки на сервер ({action}): {e}")
     return False
+
+
+async def issue_session_key(user_id: int) -> str:
+    """Ключ сессии для мини-аппа: сервер запоминает, за каким человеком он
+    выдан, и принимает подписку без подписи initData. Без ключа остаётся
+    только проверка подписи Telegram."""
+    nonce = secrets.token_hex(16)
+    if await push_subscription(user_id, "auth_nonce", nonce=nonce):
+        APP_NONCES[user_id] = nonce
+        return nonce
+    logger.info(f"Сервер не выдал ключ сессии для {user_id}")
+    return ""
 
 
 async def sync_subscribers():
@@ -457,6 +490,8 @@ async def fetch_bot_watch(params: Dict[str, Any], reset: bool = False) -> Option
 
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Команда /start"""
+    await issue_session_key(update.effective_user.id)
+    url = app_url(update.effective_user.id)
     text = (
         "👋 <b>Добро пожаловать в бота PrimeAvtoExport!</b>\n\n"
         "Я ищу актуальные автомобили на аукционах <b>Copart</b> и <b>IAAI (Timed)</b> "
@@ -467,7 +502,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
     keyboard = [
         [
-            InlineKeyboardButton("🤖 Открыть автоподбор", web_app=WebAppInfo(url=BOT_APP_URL))
+            InlineKeyboardButton("🤖 Открыть автоподбор", web_app=WebAppInfo(url=url))
         ],
         [
             InlineKeyboardButton("⚡ Быстрый поиск Timed", callback_data="cmd_quick_timed"),
@@ -1277,13 +1312,16 @@ def main():
 
 async def open_mini_app_entry(app: Application):
     """Кнопка меню чата бота (рядом с полем ввода) должна вести в Mini App.
-    Без неё приложение открывается вне Telegram и sendData не имеет права
-    отправлять сообщения боту."""
+    Без неё приложение открывается вне Telegram и подписка не имеет ни подписи
+    initData, ни username бота для запасного deep-link."""
+    global BOT_USERNAME
     try:
+        BOT_USERNAME = app.bot.username or BOT_USERNAME
+        url = app_url()
         await app.bot.set_chat_menu_button(menu_button=MenuButtonWebApp(
-            text="Автоподбор", web_app=WebAppInfo(url=BOT_APP_URL)
+            text="Автоподбор", web_app=WebAppInfo(url=url)
         ))
-        logger.info(f"Кнопка меню бота ведёт в Mini App: {BOT_APP_URL}")
+        logger.info(f"Кнопка меню бота ведёт в Mini App: {url}")
     except Exception as e:
         logger.warning(f"Не удалось задать кнопку меню бота: {e}")
 

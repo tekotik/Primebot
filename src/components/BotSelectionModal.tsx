@@ -13,6 +13,8 @@ import {
 import { BotConfig, PrimeFilterState, AutoCollectorConfig } from '../types/car';
 import { US_MAKES_MODELS } from '../data/auctionLots';
 
+type SendResult = { ok: boolean; via: 'server'; why: string };
+
 interface BotSelectionModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -98,8 +100,7 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
 
   const [toastText, setToastText] = useState<string | null>(null);
 
-  // Что о нас знает Telegram: без права писать боту sendData не сработает,
-  // а видно это только изнутри самого WebView.
+  // Что о нас знает Telegram: видно только изнутри самого WebView.
   const [tgInfo, setTgInfo] = useState('Telegram не определён - открывай раздел из чата бота');
   const [sendNote, setSendNote] = useState('');
   useEffect(() => {
@@ -141,30 +142,14 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
 
   if (!isOpen) return null;
 
-  // Toggle AutoCollector. Каждое нажатие уходит боту, иначе память приложения
-  // и реальная подписка разъезжаются и кнопка ничего не запускает.
-  const sendViaTelegram = async (payload: Record<string, string>) => {
-    const tg = (window as any).Telegram?.WebApp;
-    if (typeof tg?.sendData !== 'function') return false;
-    try {
-      // Telegram даёт sendData только после согласия человека писать боту.
-      const canWrite = tg.botPermissions?.can_write_to_pm;
-      if (!canWrite && typeof tg.requestWriteAccess === 'function') {
-        const res = await tg.requestWriteAccess();
-        const granted = res === true || res?.granted === true || res?.status === 'granted';
-        if (!granted) return false;
-      }
-      tg.sendData(JSON.stringify(payload));
-      return true;
-    } catch (e) {
-      console.error('Telegram sendData error', e);
-      return false;
-    }
-  };
+  // Ключ сессии выдаёт бот вместе со ссылкой на приложение. Он привязан к
+  // конкретному человеку на стороне сервера, поэтому подписку можно принять
+  // и без проверки подписи Telegram - фильтр приедет целым JSON-ом.
+  const sessionKey = () => new URLSearchParams(window.location.search).get('n') || '';
 
   // Основной канал - наш сервер: приложение POSTит подписку, сервер сверяет
-  // подпись initData. sendData остаётся запасным, если сервер не ответил.
-  const sendBotPayload = async (payload: Record<string, string>) => {
+  // подпись initData. Deep-link в чат остаётся запасным, если сервер отверг.
+  const sendBotPayload = async (payload: Record<string, string>): Promise<SendResult> => {
     const { action, ...filter } = payload;
     const tgApp = (window as any).Telegram?.WebApp;
     // Сервер сверяет подпись по сырой строке initData: в свежем SDK
@@ -172,24 +157,22 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
     const initData = typeof tgApp?.initDataRaw === 'string' && tgApp.initDataRaw
       ? tgApp.initDataRaw
       : (typeof tgApp?.initData === 'string' ? tgApp.initData : '');
+    let why = 'сервер не ответил';
     try {
       const res = await fetch('/api/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ init_data: initData, action, filter })
+        body: JSON.stringify({ init_data: initData, nonce: sessionKey(), action, filter })
       });
       const data = await res.json().catch(() => null);
       if (res.ok && data?.status === 'ok') {
-        setSendNote(`сервер принял, подписчиков: ${data.total}`);
-        return true;
+        return { ok: true, via: 'server', why: `сервер принял, подписчиков: ${data.total}` };
       }
-      setSendNote(`сервер: ${data?.message || ('код ' + res.status)}`);
+      why = data?.message || ('код ' + res.status);
     } catch (e: any) {
-      setSendNote(`сервер недоступен: ${e?.message || e}`);
+      why = 'сервер недоступен: ' + (e?.message || e);
     }
-    const sent = await sendViaTelegram(payload);
-    if (!sent) setSendNote('ни сервер, ни Telegram не приняли подписку');
-    return sent;
+    return { ok: false, via: 'server', why: `${why}${sessionKey() ? '' : ', ключ сессии не передан - открывай из кнопки бота'}` };
   };
 
   const currentSignature = JSON.stringify(collectorSubscription(config, filters));
@@ -208,18 +191,19 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
       ...subscription
     });
 
+    setSendNote(sent.why);
+
+    if (!sent.ok) {
+      setToastText('Подписка не ушла: ' + sent.why);
+      return;
+    }
+
     setAutoCollector((prev) => ({
       ...prev,
       isActive: starting,
       lastRun: starting ? Date.now() : prev.lastRun,
       sentFilter: starting ? currentSignature : ''
     }));
-
-    if (!sent) {
-      setAutoCollector((prev) => ({ ...prev, isActive: !starting }));
-      setToastText('Подписка не ушла: сервер не ответил, Telegram записи не дал');
-      return;
-    }
 
     setToastText(starting
       ? `⚡ Автосборщик запущен! Ищем ${subscription.make} ${subscription.model}`
@@ -232,8 +216,10 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
     autoCollector.isActive && !!autoCollector.sentFilter && autoCollector.sentFilter !== currentSignature;
 
   const handleApplyFilter = async () => {
-    if (!(await sendBotPayload({ action: 'autocollect_update', ...collectorSubscription(config, filters) }))) {
-      setToastText('Ни сервер, ни Telegram не приняли фильтр');
+    const sent = await sendBotPayload({ action: 'autocollect_update', ...collectorSubscription(config, filters) });
+    setSendNote(sent.why);
+    if (!sent.ok) {
+      setToastText('Фильтр не принят: ' + sent.why);
       return;
     }
     setAutoCollector((prev) => ({ ...prev, sentFilter: currentSignature }));
