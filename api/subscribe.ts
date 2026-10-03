@@ -28,30 +28,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return;
   }
 
+  if (req.method !== 'POST') {
+    // Только приём подписки. Список подписок читает воркер напрямую из PHP
+    // по ключу: через публичный прокси он утекал бы любому желающему.
+    res.status(405).json({ status: 'error', message: 'Метод не поддерживается' });
+    return;
+  }
+
   try {
     // Тестируемся на staging: в корне прода bot-subscribe.php ещё не лежит.
-    // Когда точку поднимем на прод - достаточно задать PRIME_SUBSCRIBE_URL.
     const base = process.env.PRIME_SUBSCRIBE_URL
       || 'https://primeavtoexport.com/staging/api/bot-subscribe.php';
 
-    let target = base;
-    let init: RequestInit = {
+    const apiRes = await fetch(base, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
       body: JSON.stringify(req.body ?? {}),
-    };
-
-    if (req.method === 'GET') {
-      // Список подписок читает только воркер: ключ подставляем на сервере,
-      // чтобы он не лежал в коде приложения.
-      const params = new URLSearchParams(req.url?.split('?')[1] || '');
-      params.delete('key');
-      params.set('key', process.env.BOT_FEED_KEY || process.env.PRIME_FEED_KEY || '5f17153da0663379d06efa746e2fe65a');
-      target = `${base}?${params.toString()}`;
-      init = { method: 'GET', headers: { Accept: 'application/json' } };
-    }
-
-    const apiRes = await fetch(target, init);
+    });
     const data = await apiRes.json().catch(() => ({ status: 'error', message: 'Не JSON в ответе' }));
     res.status(apiRes.status).json(data);
   } catch (err: any) {
