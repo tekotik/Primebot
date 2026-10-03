@@ -824,6 +824,36 @@ async def log_any_update(update: Update, context: ContextTypes.DEFAULT_TYPE):
     logger.info(f"Входящее [{kind}] от {who}: {body[:300]}")
 
 
+# Команды, которые человек печатает руками. Telegram помечает текст командой
+# только если знает её из списка команд бота; без этой метки CommandHandler не
+# срабатывает и бот молчит. Разбираем текст сами.
+PLAIN_TEXT_COMMANDS = {
+    "start": "start_command",
+    "help": "help_command",
+    "timed": "timed_command",
+    "day": "day_command",
+    "filter": "filter_command",
+    "autocollect": "autocollect_command",
+    "autocollect_now": "watch_now_command",
+    "watch": "watch_now_command",
+    "watch_reset": "watch_reset_command",
+}
+
+
+async def plain_text_command_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    text = (update.message.text or "").strip()
+    if not text.startswith("/"):
+        return
+    parts = text.split()
+    name = parts[0][1:].split("@")[0].lower()
+    target = PLAIN_TEXT_COMMANDS.get(name)
+    if not target:
+        return
+    context.args = parts[1:]
+    logger.info(f"Команда без разметки Telegram: {text[:80]}")
+    await globals()[target](update, context)
+
+
 # ==================== СЕРВЕРНЫЙ АВТОСБОРЩИК (BOT-WATCH) ====================
 
 # Поля главного фильтра из приложения, которые понимает bot-watch. Двигатель,
@@ -1091,6 +1121,9 @@ def main():
     app.add_handler(CommandHandler("watch_reset", watch_reset_command))
     app.add_handler(CallbackQueryHandler(button_callback_handler))
     app.add_handler(MessageHandler(filters.StatusUpdate.WEB_APP_DATA, web_app_data_handler))
+    # Команда, которую Telegram не разметил как команду, приходит обычным
+    # текстом и до CommandHandler не доходит. Добраливаемся сами.
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, plain_text_command_handler))
 
     # Второй слой (group=1): пишется по любому входящему апдейту, кроме тех,
     # где есть текст - команды и сообщения видны и здесь.
