@@ -477,7 +477,7 @@ export default function App() {
               Переключаться можно и позже: кнопки внизу экрана
             </p>
             <p className="text-[11px] text-slate-400 text-center mb-3">
-              Возможно работа через папки
+              Реализована работа через папки
             </p>
 
             <div className="space-y-2">
