@@ -11,7 +11,7 @@ import {
   Play
 } from 'lucide-react';
 import { BotConfig, PrimeFilterState, AutoCollectorConfig, missingRequiredFilters } from '../types/car';
-import { US_MAKES_MODELS } from '../data/auctionLots';
+import { US_MAKES_MODELS, DOCUMENT_OPTIONS, DAMAGE_TYPES, US_STATES } from '../data/auctionLots';
 
 type SendResult = { ok: boolean; via: 'server'; why: string };
 
@@ -130,6 +130,22 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
 
   const handleCollectorMakeChange = (make: string) => {
     onChangeFilters({ ...filters, make, model: '' });
+  };
+
+  const auctionValue = filters.timed === 'only' ? 'iaai_timed' : filters.auction;
+
+  const handleAuctionChange = (val: string) => {
+    if (val === 'iaai_timed') onChangeFilters({ ...filters, auction: 'iaai', timed: 'only' });
+    else if (val === 'iaai') onChangeFilters({ ...filters, auction: 'iaai', timed: '' });
+    else if (val === 'copart') onChangeFilters({ ...filters, auction: 'copart', timed: '' });
+    else onChangeFilters({ ...filters, auction: '', timed: '' });
+  };
+
+  const toggleDocument = (value: string) => {
+    const documents = filters.documents.includes(value)
+      ? filters.documents.filter((d) => d !== value)
+      : [...filters.documents, value];
+    onChangeFilters({ ...filters, documents });
   };
 
   // Toast timer
@@ -296,25 +312,22 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
 
         {/* ===================== АВТОСБОРЩИК: ПОДБОРКА МАШИН 1 РАЗ В ДЕНЬ ===================== */}
         <div className="space-y-4">
-          {/* Кнопка главного фильтра: открывается поверх этого окна */}
-          <button
-            type="button"
-            onClick={onOpenFilter}
-            className="w-full p-3 bg-[#131724] border border-slate-800 hover:border-[#068eff]/60 rounded-2xl flex items-center gap-2.5 transition-colors text-left"
-          >
-            <div className="w-9 h-9 rounded-xl bg-[#068eff]/15 border border-[#068eff]/30 text-[#068eff] flex items-center justify-center shrink-0">
-              <Sliders className="w-4.5 h-4.5" />
+          {/* Фильтр развёрнут: поля ниже правят тот же стейт, что и шторка ленты */}
+          <div className="flex items-center justify-between gap-2 px-0.5">
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="w-8 h-8 rounded-xl bg-[#068eff]/15 border border-[#068eff]/30 text-[#068eff] flex items-center justify-center shrink-0">
+                <Sliders className="w-4 h-4" />
+              </div>
+              <span className="text-[11px] text-slate-400 truncate">{filterSummary(filters)}</span>
             </div>
-            <div className="flex-1 min-w-0">
-              <span className="block text-xs font-bold text-white uppercase tracking-wider font-['Exo_2',sans-serif]">
-                Фильтр
-              </span>
-              <span className="block text-[11px] text-slate-400 truncate">
-                {filterSummary(filters)}
-              </span>
-            </div>
-            <span className="text-[11px] font-semibold text-[#068eff] shrink-0">Изменить</span>
-          </button>
+            <button
+              type="button"
+              onClick={onOpenFilter}
+              className="text-[11px] font-semibold text-[#068eff] shrink-0 whitespace-nowrap"
+            >
+              Все поля
+            </button>
+          </div>
 
           <p className="text-[10px] text-slate-500 px-1">{[tgInfo, sendNote].filter(Boolean).join(' · ')}</p>
 
@@ -380,13 +393,33 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
           <div className="space-y-3 bg-[#131724] border border-slate-800 rounded-2xl p-3.5">
             <h4 className="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-1.5 font-['Exo_2',sans-serif]">
               <Car className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Какую модель искать:</span>
+              <span>Фильтр подбора:</span>
+              <span className="text-[10px] font-normal normal-case tracking-normal text-slate-500">
+                *- обязательно
+              </span>
             </h4>
+
+            {/* Аукцион */}
+            <div>
+              <label className="text-[10px] text-slate-400 block mb-1">Аукцион</label>
+              <select
+                value={auctionValue}
+                onChange={(e) => handleAuctionChange(e.target.value)}
+                className="w-full px-3 py-2 bg-[#0d1017] border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-emerald-500 cursor-pointer"
+              >
+                <option value="" className="bg-[#0d1017] text-slate-400">Все аукционы</option>
+                <option value="iaai_timed" className="bg-[#0d1017] text-white">IAAI Timed</option>
+                <option value="iaai" className="bg-[#0d1017] text-white">IAAI</option>
+                <option value="copart" className="bg-[#0d1017] text-white">Copart</option>
+              </select>
+            </div>
 
             {/* Марка & Модель (Выбор из списков) */}
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="text-[10px] text-slate-400 block mb-1 font-medium">Марка</label>
+                <label className="text-[10px] text-slate-400 block mb-1 font-medium">
+                  Марка <span className="text-[#ff6b6b]">*</span>
+                </label>
                 <select
                   value={filters.make}
                   onChange={(e) => handleCollectorMakeChange(e.target.value)}
@@ -401,7 +434,9 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
                 </select>
               </div>
               <div>
-                <label className="text-[10px] text-slate-400 block mb-1 font-medium">Модель</label>
+                <label className="text-[10px] text-slate-400 block mb-1 font-medium">
+                  Модель <span className="text-[#ff6b6b]">*</span>
+                </label>
                 <select
                   value={filters.model}
                   onChange={(e) => onChangeFilters({ ...filters, model: e.target.value })}
@@ -420,27 +455,140 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
               </div>
             </div>
 
-            {/* Год выпуска диапазон */}
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <label className="text-[10px] text-slate-400 block mb-1">Год от</label>
+            {/* Год выпуска: достаточно одной границы */}
+            <div>
+              <label className="text-[10px] text-slate-400 block mb-1">
+                Год выпуска <span className="text-[#ff6b6b]">*</span>
+              </label>
+              <div className="grid grid-cols-2 gap-2">
                 <input
                   type="number"
                   value={filters.yearFrom}
                   onChange={(e) => onChangeFilters({ ...filters, yearFrom: e.target.value })}
-                  placeholder="2020"
-                  className="w-full px-3 py-2 bg-[#0d1017] border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-emerald-500"
+                  placeholder="Год от"
+                  className="w-full px-3 py-2 bg-[#0d1017] border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-emerald-500 placeholder:text-slate-600"
                 />
-              </div>
-              <div>
-                <label className="text-[10px] text-slate-400 block mb-1">Год до</label>
                 <input
                   type="number"
                   value={filters.yearTo}
                   onChange={(e) => onChangeFilters({ ...filters, yearTo: e.target.value })}
-                  placeholder="2024"
-                  className="w-full px-3 py-2 bg-[#0d1017] border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-emerald-500"
+                  placeholder="Год до"
+                  className="w-full px-3 py-2 bg-[#0d1017] border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-emerald-500 placeholder:text-slate-600"
                 />
+              </div>
+            </div>
+
+            {/* Пробег в милях: достаточно одной границы */}
+            <div>
+              <label className="text-[10px] text-slate-400 block mb-1">
+                Пробег (миль) <span className="text-[#ff6b6b]">*</span>
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                <input
+                  type="number"
+                  value={filters.odometerFrom}
+                  onChange={(e) => onChangeFilters({ ...filters, odometerFrom: e.target.value })}
+                  placeholder="От миль"
+                  className="w-full px-3 py-2 bg-[#0d1017] border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-emerald-500 placeholder:text-slate-600"
+                />
+                <input
+                  type="number"
+                  value={filters.odometerTo}
+                  onChange={(e) => onChangeFilters({ ...filters, odometerTo: e.target.value })}
+                  placeholder="До миль"
+                  className="w-full px-3 py-2 bg-[#0d1017] border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-emerald-500 placeholder:text-slate-600"
+                />
+              </div>
+            </div>
+
+            {/* Топливо и штат */}
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="text-[10px] text-slate-400 block mb-1">Топливо</label>
+                <select
+                  value={filters.fuel}
+                  onChange={(e) => onChangeFilters({ ...filters, fuel: e.target.value })}
+                  className="w-full px-3 py-2 bg-[#0d1017] border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-emerald-500 cursor-pointer"
+                >
+                  <option value="" className="bg-[#0d1017] text-slate-400">Любое</option>
+                  <option value="Gasoline" className="bg-[#0d1017] text-white">Бензин</option>
+                  <option value="Diesel" className="bg-[#0d1017] text-white">Дизель</option>
+                  <option value="Electric" className="bg-[#0d1017] text-white">Электро</option>
+                  <option value="Flexible Fuel" className="bg-[#0d1017] text-white">Flex Fuel</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-[10px] text-slate-400 block mb-1">Штат</label>
+                <select
+                  value={filters.state}
+                  onChange={(e) => onChangeFilters({ ...filters, state: e.target.value })}
+                  className="w-full px-3 py-2 bg-[#0d1017] border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-emerald-500 cursor-pointer"
+                >
+                  <option value="" className="bg-[#0d1017] text-slate-400">Все штаты</option>
+                  {US_STATES.map((s) => (
+                    <option key={s.code} value={s.code} className="bg-[#0d1017] text-white">
+                      {s.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Повреждение: искать / исключить */}
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="text-[10px] text-slate-400 block mb-1">Повреждение</label>
+                <select
+                  value={filters.damage}
+                  onChange={(e) => onChangeFilters({ ...filters, damage: e.target.value })}
+                  className="w-full px-3 py-2 bg-[#0d1017] border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-emerald-500 cursor-pointer"
+                >
+                  <option value="" className="bg-[#0d1017] text-slate-400">Все типы</option>
+                  {DAMAGE_TYPES.map((d) => (
+                    <option key={d.value} value={d.value} className="bg-[#0d1017] text-white">
+                      {d.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="text-[10px] text-slate-400 block mb-1">Исключить</label>
+                <select
+                  value={filters.damageExclude}
+                  onChange={(e) => onChangeFilters({ ...filters, damageExclude: e.target.value })}
+                  className="w-full px-3 py-2 bg-[#0d1017] border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-emerald-500 cursor-pointer"
+                >
+                  <option value="" className="bg-[#0d1017] text-slate-400">Не исключать</option>
+                  {DAMAGE_TYPES.map((d) => (
+                    <option key={d.value} value={d.value} className="bg-[#0d1017] text-white">
+                      {d.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Тип титула */}
+            <div>
+              <label className="text-[10px] text-slate-400 block mb-1.5">Документы</label>
+              <div className="grid grid-cols-2 gap-1.5">
+                {DOCUMENT_OPTIONS.map((doc) => {
+                  const checked = filters.documents.includes(doc.value);
+                  return (
+                    <button
+                      key={doc.value}
+                      type="button"
+                      onClick={() => toggleDocument(doc.value)}
+                      className={`px-2 py-1.5 rounded-lg text-[11px] font-medium border text-left truncate transition-colors ${
+                        checked
+                          ? 'bg-[#068eff]/20 border-[#068eff] text-white'
+                          : 'bg-[#0d1017] border-slate-800 text-slate-400'
+                      }`}
+                    >
+                      {doc.label}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
