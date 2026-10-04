@@ -272,7 +272,7 @@ export const TimedCarCard: React.FC<TimedCarCardProps> = ({
             className="flex items-center justify-center gap-1 rounded-xl bg-[#068eff] hover:bg-[#007be5] text-white text-[10px] font-bold uppercase tracking-wide py-2 px-1 transition-colors shadow-md shadow-[#068eff]/25"
           >
             <MessageSquare className="w-3.5 h-3.5 shrink-0" />
-            <span>Запрос консультации</span>
+            <span>Консультация</span>
           </a>
         </div>
       </div>
