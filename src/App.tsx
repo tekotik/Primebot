@@ -475,7 +475,10 @@ export default function App() {
             <div className="space-y-2">
               <button
                 type="button"
-                onClick={() => setEntryChoice('browse')}
+                onClick={() => {
+                  setEntryChoice('browse');
+                  setIsFilterOpen(true);
+                }}
                 className="w-full p-3.5 bg-[#131724] border border-slate-800 hover:border-[#068eff]/60 rounded-2xl flex items-center gap-3 transition-colors text-left"
               >
                 <div className="w-10 h-10 rounded-xl bg-[#068eff]/15 border border-[#068eff]/30 text-[#068eff] flex items-center justify-center shrink-0">
