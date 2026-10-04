@@ -279,7 +279,7 @@ export const LotDetailModal: React.FC<LotDetailModalProps> = ({
               </div>
               <div className="p-2.5 bg-[#141824] rounded-lg border border-slate-800">
                 <span className="text-slate-500 text-[10px] block">Документы:</span>
-                <span className="font-semibold text-blue-300 capitalize">{lot.document}</span>
+                <span className="font-semibold text-blue-300 capitalize">{lot.documentOld || lot.document}</span>
               </div>
               <div className="p-2.5 bg-[#141824] rounded-lg border border-slate-800">
                 <span className="text-slate-500 text-[10px] block">VIN-код:</span>

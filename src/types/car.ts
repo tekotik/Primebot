@@ -23,7 +23,8 @@ export interface CarLot {
   primaryDamage: string;
   secondaryDamage?: string;
   condition: 'run' | 'enhanced' | 'stationary';
-  document: string; // e.g. 'clean', 'salvage', 'rebuilt', 'certificate of destruction', 'bill of sale'
+  document: string; // разряд титула: 'clean', 'salvage', 'other'
+  documentOld?: string; // точная строка документа: 'Clear (New Jersey)', 'Original (Maine)'
   state: string; // e.g. 'CA', 'TX', 'FL', 'NY', 'GA'
   location: string;
   images: string[];

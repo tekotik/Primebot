@@ -45,6 +45,8 @@ export const US_STATES = [
 
 export const DOCUMENT_OPTIONS = [
   { value: 'clean', label: 'Clean Title' },
+  { value: 'clear', label: 'Clear' },
+  { value: 'original', label: 'Original' },
   { value: 'salvage', label: 'Salvage' },
   { value: 'rebuilt', label: 'Rebuilt' },
   { value: 'non repairable', label: 'Non-Repairable' },

@@ -249,7 +249,13 @@ export default function App() {
       if (filters.condition && lot.condition !== filters.condition) return false;
 
       // Documents multi-select
-      if (filters.documents.length > 0 && !filters.documents.includes(lot.document)) return false;
+      // Как на сервере: разряд (clean/salvage/other) или точная строка титула
+      // (clear/original/rebuilt/parts only и т.п.)
+      if (filters.documents.length > 0) {
+        const old = (lot.documentOld || '').toLowerCase();
+        const hit = filters.documents.some((d) => d === lot.document || old.includes(d === 'rebuilt' ? 'rebuild' : d));
+        if (!hit) return false;
+      }
 
       return true;
     });

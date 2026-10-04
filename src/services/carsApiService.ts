@@ -82,7 +82,8 @@ export interface BotFeedRawLot {
   vin: string;
   odometer_mi: number;
   status: string;
-  document: string; // "clean", "salvage", "rebuilt", etc.
+  document: string; // "clean", "salvage", "other"
+  document_old?: string; // "Clear (New Jersey)", "NY - CERT OF TITLE SLVVG REBUILDABLE"
   damage_primary: string;
   damage_secondary?: string;
   fuel: string;
@@ -226,6 +227,7 @@ export class CarsApiService {
       secondaryDamage: raw.damage_secondary,
       condition: String(raw.status || '').toLowerCase().includes('run') ? 'run' : 'stationary',
       document: String(raw.document || 'clean').toLowerCase(),
+      documentOld: String(raw.document_old || '').trim(),
       state: raw.state || 'US',
       location: raw.location || 'США',
       images,
