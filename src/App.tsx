@@ -466,6 +466,12 @@ export default function App() {
           />
           <div className="relative w-full max-w-md mx-auto bg-[#0f131c] border-t border-slate-800 rounded-t-3xl shadow-2xl p-5 z-10 animate-slide-up-fast">
             <div className="w-12 h-1.5 bg-slate-700/80 rounded-full mx-auto mb-4 shrink-0" />
+            <img
+              src="/primeavtobot.jpg"
+              alt="PrimeAvtoBOT"
+              draggable={false}
+              className="w-full h-44 object-cover object-top rounded-2xl border border-slate-800 mb-4 select-none"
+            />
             <h2 className="text-base font-bold text-white uppercase tracking-wide font-['Exo_2',sans-serif] text-center">
               Выбери действие
             </h2>
