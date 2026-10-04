@@ -59,6 +59,20 @@ export interface PrimeFilterState {
   state: string;
 }
 
+// Обязательные поля главного фильтра: без них подписка автосборщика
+// бессмысленна, а выдача ленты слишком широкая. Год и пробег считаются
+// заполненными, если указана хотя бы одна граница.
+export function missingRequiredFilters(f: PrimeFilterState): string[] {
+  const missing: string[] = [];
+
+  if (!f.make) missing.push('марка');
+  if (!f.model) missing.push('модель');
+  if (!f.yearFrom && !f.yearTo) missing.push('год');
+  if (!f.odometerFrom && !f.odometerTo) missing.push('пробег');
+
+  return missing;
+}
+
 export interface BotConfig {
   datePreset: 'today' | 'tomorrow' | 'exact' | 'any';
   dateExact: string;

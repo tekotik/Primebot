@@ -16,7 +16,7 @@ import {
   Compass,
   MapPin
 } from 'lucide-react';
-import { PrimeFilterState } from '../types/car';
+import { PrimeFilterState, missingRequiredFilters } from '../types/car';
 import {
   US_MAKES_MODELS,
   DAMAGE_TYPES,
@@ -42,10 +42,13 @@ export const MobileFilterDrawer: React.FC<MobileFilterDrawerProps> = ({
   onReset,
   matchedCount
 }) => {
-  if (!isOpen) return null;
-
   // Documents are HIDDEN BY DEFAULT as requested by user
   const [showDocuments, setShowDocuments] = useState(false);
+  // Пропуск обязательных полей показываем только после нажатия кнопки
+  const [showRequired, setShowRequired] = useState(false);
+  const missing = missingRequiredFilters(filters);
+
+  if (!isOpen) return null;
 
   const availableModels = filters.make && US_MAKES_MODELS[filters.make]
     ? US_MAKES_MODELS[filters.make]
@@ -119,6 +122,7 @@ export const MobileFilterDrawer: React.FC<MobileFilterDrawerProps> = ({
             <h2 className="text-base font-bold text-white font-['Exo_2',sans-serif] uppercase tracking-wide">
               Фильтры поиска
             </h2>
+            <span className="text-[10px] font-bold text-red-300 uppercase">*- обязательно</span>
             {filters.timed === 'only' && (
               <span className="text-[10px] font-bold text-amber-400 bg-amber-950/70 border border-amber-500/40 px-2 py-0.5 rounded-full flex items-center gap-1 font-mono">
                 <Clock className="w-3 h-3" />
@@ -207,6 +211,7 @@ export const MobileFilterDrawer: React.FC<MobileFilterDrawerProps> = ({
             <label className="text-xs font-semibold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
               <CarFront className="w-3.5 h-3.5 text-[#068eff]" />
               Марка
+              <span className="text-[#ff6b6b]">*</span>
             </label>
             <select
               value={filters.make}
@@ -226,6 +231,7 @@ export const MobileFilterDrawer: React.FC<MobileFilterDrawerProps> = ({
           <div className="space-y-1.5">
             <label className="text-xs font-semibold uppercase tracking-wider text-slate-300">
               Модель
+              <span className="text-[#ff6b6b]">*</span>
             </label>
             <select
               value={filters.model}
@@ -248,6 +254,7 @@ export const MobileFilterDrawer: React.FC<MobileFilterDrawerProps> = ({
           <div className="space-y-1.5">
             <label className="text-xs font-semibold uppercase tracking-wider text-slate-300">
               Год выпуска
+              <span className="text-[#ff6b6b]">*</span>
             </label>
             <div className="grid grid-cols-2 gap-2">
               <input
@@ -275,6 +282,7 @@ export const MobileFilterDrawer: React.FC<MobileFilterDrawerProps> = ({
           <div className="space-y-1.5">
             <label className="text-xs font-semibold uppercase tracking-wider text-slate-300">
               Пробег (миль)
+              <span className="text-[#ff6b6b]">*</span>
             </label>
             <div className="grid grid-cols-2 gap-2">
               <input
@@ -517,14 +525,35 @@ export const MobileFilterDrawer: React.FC<MobileFilterDrawerProps> = ({
           </div>
         </div>
 
-        {/* Sticky Apply Button */}
-        <div className="p-4 border-t border-slate-800/90 bg-[#0c1018] shrink-0">
+        {/* Sticky Apply Button: без обязательных полей не выпускаем */}
+        <div className="p-4 border-t border-slate-800/90 bg-[#0c1018] shrink-0 space-y-2">
+          {showRequired && missing.length > 0 && (
+            <p className="text-[11px] text-red-300 bg-red-950/40 border border-red-900/40 rounded-lg px-2.5 py-1.5">
+              Нужно заполнить: {missing.join(', ')}
+            </p>
+          )}
+
           <button
             type="button"
-            onClick={onClose}
-            className="w-full py-3 bg-[#068eff] hover:bg-[#007be5] active:bg-[#006cc8] text-white font-['Exo_2',sans-serif] font-bold text-sm uppercase tracking-wider rounded-xl transition-all shadow-lg shadow-[#068eff]/25 flex items-center justify-center gap-2"
+            onClick={() => {
+              if (missing.length > 0) {
+                setShowRequired(true);
+                return;
+              }
+              setShowRequired(false);
+              onClose();
+            }}
+            className={`w-full py-3 font-['Exo_2',sans-serif] font-bold text-sm uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-2 ${
+              missing.length > 0
+                ? 'bg-slate-700/80 text-slate-300'
+                : 'bg-[#068eff] hover:bg-[#007be5] active:bg-[#006cc8] text-white shadow-lg shadow-[#068eff]/25'
+            }`}
           >
-            <span>Показать лоты ({matchedCount})</span>
+            <span>
+              {missing.length > 0
+                ? 'Заполните обязательные поля'
+                : `Показать лоты (${matchedCount})`}
+            </span>
           </button>
         </div>
       </div>

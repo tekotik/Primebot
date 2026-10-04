@@ -10,7 +10,7 @@ import {
   Pause,
   Play
 } from 'lucide-react';
-import { BotConfig, PrimeFilterState, AutoCollectorConfig } from '../types/car';
+import { BotConfig, PrimeFilterState, AutoCollectorConfig, missingRequiredFilters } from '../types/car';
 import { US_MAKES_MODELS } from '../data/auctionLots';
 
 type SendResult = { ok: boolean; via: 'server'; why: string };
@@ -189,9 +189,13 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
     const subscription = collectorSubscription(config, filters);
     const starting = !autoCollector.isActive;
 
-    if (starting && !subscription.make) {
-      setToastText('Сначала выбери марку в фильтре');
-      return;
+    if (starting) {
+      const missing = missingRequiredFilters(filters);
+
+      if (missing.length > 0) {
+        setToastText('В фильтре не заполнено: ' + missing.join(', '));
+        return;
+      }
     }
 
     const sent = await sendBotPayload({
@@ -224,6 +228,13 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
     autoCollector.isActive && !!autoCollector.sentFilter && autoCollector.sentFilter !== currentSignature;
 
   const handleApplyFilter = async () => {
+    const missing = missingRequiredFilters(filters);
+
+    if (missing.length > 0) {
+      setToastText('В фильтре не заполнено: ' + missing.join(', '));
+      return;
+    }
+
     const sent = await sendBotPayload({ action: 'autocollect_update', ...collectorSubscription(config, filters) });
     setSendNote(sent.why);
     if (!sent.ok) {
