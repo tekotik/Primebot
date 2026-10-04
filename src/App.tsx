@@ -460,27 +460,19 @@ export default function App() {
       {/* 1.5. Выбор раздела при входе: просмотр авто или автоподбор */}
       {entryChoice === 'ask' && (
         <div className="fixed inset-0 z-[60] flex flex-col justify-end">
-          {/* Заставка вместо чёрного фона: картинка во всю ширину сверху, ниже затемнение под шторку */}
+          {/* Заставка вместо чёрного фона: картинка во всю ширину сверху, без затемнения */}
           <div
             onClick={() => setEntryChoice('browse')}
-            className="absolute inset-0 bg-[#05070d] animate-fade-in-fast"
-          >
-            <div
-              className="absolute inset-0 bg-top bg-no-repeat"
-              style={{ backgroundImage: "url('/primeavtobot.jpg')", backgroundSize: '100% auto' }}
-            />
-            <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/50 to-[#05070d]" />
-          </div>
-          <div className="relative w-full max-w-md mx-auto bg-[#0f131c]/95 backdrop-blur-md border-t border-slate-800 rounded-t-3xl shadow-2xl p-5 z-10 animate-slide-up-fast">
-            <div className="w-12 h-1.5 bg-slate-700/80 rounded-full mx-auto mb-4 shrink-0" />
-            <h2 className="text-base font-bold text-white uppercase tracking-wide font-['Exo_2',sans-serif] text-center">
+            className="absolute inset-0 bg-[#05070d] animate-fade-in-fast bg-top bg-no-repeat"
+            style={{ backgroundImage: "url('/primeavtobot.jpg')", backgroundSize: '100% auto' }}
+          />
+          <div className="relative w-full max-w-md mx-auto bg-[#0f131c]/95 backdrop-blur-md border-t border-slate-800 rounded-t-3xl shadow-2xl px-5 pt-2.5 pb-4 z-10 animate-slide-up-fast">
+            <div className="w-12 h-1.5 bg-slate-700/80 rounded-full mx-auto mb-3 shrink-0" />
+            <h2 className="text-base font-bold text-white uppercase tracking-wide font-['Exo_2',sans-serif] text-center mb-3">
               Выбери действие
             </h2>
-            <p className="text-[11px] text-slate-400 text-center mt-1.5 mb-4">
-              Переключаться можно и позже: кнопки внизу экрана
-            </p>
 
-            <div className="space-y-2.5">
+            <div className="space-y-2">
               <button
                 type="button"
                 onClick={() => setEntryChoice('browse')}
