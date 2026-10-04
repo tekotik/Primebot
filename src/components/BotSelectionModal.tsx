@@ -145,7 +145,15 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
   // Ключ сессии выдаёт бот вместе со ссылкой на приложение. Он привязан к
   // конкретному человеку на стороне сервера, поэтому подписку можно принять
   // и без проверки подписи Telegram - фильтр приедет целым JSON-ом.
-  const sessionKey = () => new URLSearchParams(window.location.search).get('n') || '';
+  const sessionKey = () => {
+    const fromUrl = new URLSearchParams(window.location.search).get('n') || '';
+    if (fromUrl) return fromUrl;
+    // Telegram может не донести наш query до страницы - тогда ключ приходит
+    // через start_param того же deep-link.
+    const tg = (window as any).Telegram?.WebApp;
+    const viaStart = String(tg?.startParam || (tg?.initData && tg.initData.start_param) || '');
+    return viaStart.startsWith('k') ? viaStart.slice(1) : '';
+  };
 
   // Основной канал - наш сервер: приложение POSTит подписку, сервер сверяет
   // подпись initData. Deep-link в чат остаётся запасным, если сервер отверг.

@@ -79,7 +79,11 @@ def app_url(user_id = None) -> str:
     if BOT_USERNAME:
         params.append("bot=" + BOT_USERNAME)
     if user_id is not None and APP_NONCES.get(user_id):
-        params.append("n=" + APP_NONCES[user_id])
+        nonce = APP_NONCES[user_id]
+        # startapp - способ донести значение до приложения даже если Telegram
+        # выбросит наш query: тогда ключ придёт как start_param.
+        params.append("n=" + nonce)
+        params.append("startapp=k" + nonce)
     return BOT_APP_URL + ("/?" + "&".join(params) if params else "")
 
 # Ключи сессии, выданные мини-аппу: nonce -> подтверждён сервером.
