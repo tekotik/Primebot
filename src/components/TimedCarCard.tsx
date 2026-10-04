@@ -16,7 +16,7 @@ import {
   MessageSquare
 } from 'lucide-react';
 import { CarLot, Currency } from '../types/car';
-import { formatPrice, formatRubDirect } from '../utils/currency';
+import { formatPrice } from '../utils/currency';
 import { TimedCountdownBadge } from './TimedCountdownBadge';
 import { CAR_PLACEHOLDER_SVG } from '../services/carsApiService';
 
@@ -221,25 +221,14 @@ export const TimedCarCard: React.FC<TimedCarCardProps> = ({
           </div>
         </div>
 
-        {/* Pricing Block */}
-        <div className="pt-2 border-t border-slate-800/80 flex items-end justify-between">
-          <div>
-            <span className="block text-[10px] text-slate-500 uppercase tracking-wider">
-              Текущая ставка:
-            </span>
-            <span className="text-sm font-bold text-slate-200 font-mono">
-              {formatPrice(lot.currentBidUsd, currency)}
-            </span>
-          </div>
-
-          <div className="text-right">
-            <span className="block text-[10px] text-blue-400 font-medium uppercase tracking-wider">
-              Под ключ в РФ:
-            </span>
-            <span className="text-base font-extrabold text-white font-mono tracking-tight">
-              {formatRubDirect(lot.estTurnkeyRub, currency)}
-            </span>
-          </div>
+        {/* На карточке только реальная ставка источника */}
+        <div className="pt-2 border-t border-slate-800/80">
+          <span className="block text-[10px] text-slate-500 uppercase tracking-wider">
+            Текущая ставка:
+          </span>
+          <span className="text-sm font-bold text-slate-200 font-mono">
+            {formatPrice(lot.currentBidUsd, currency)}
+          </span>
         </div>
 
         {/* Все четыре действия видны сразу, без раскрытия карточки */}
