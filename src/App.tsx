@@ -27,7 +27,7 @@ import { carsApiService } from './services/carsApiService';
 
 const DEFAULT_FILTERS: PrimeFilterState = {
   auction: '',
-  timed: 'only', // By default displaying Timed auctions
+  timed: '', // По умолчанию лента показывает все аукционы, не только Timed
   make: '',
   model: '',
   yearFrom: '',
@@ -51,7 +51,7 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [currency, setCurrency] = useState<Currency>('USD');
   const [isSearchingAnimation, setIsSearchingAnimation] = useState(false);
-  const [liveLots, setLiveLots] = useState<CarLot[]>(() => AUCTION_LOTS.filter((l) => l.isTimed));
+  const [liveLots, setLiveLots] = useState<CarLot[]>(() => AUCTION_LOTS);
   const [apiConnectionStatus, setApiConnectionStatus] = useState<'connected' | 'cache'>('cache');
   const [feedMeta, setFeedMeta] = useState<{
     cached: boolean;
@@ -112,7 +112,7 @@ export default function App() {
     let isMounted = true;
     (async () => {
       try {
-        const lots = await carsApiService.performTimedSearch(filters);
+        const lots = await carsApiService.searchCars(filters);
         if (isMounted && lots && lots.length > 0) {
           setLiveLots(lots);
           setApiConnectionStatus('connected');
