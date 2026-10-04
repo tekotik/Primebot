@@ -10,7 +10,10 @@ import {
   AlertCircle,
   AlertTriangle,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  ExternalLink,
+  Calculator,
+  MessageSquare
 } from 'lucide-react';
 import { CarLot, Currency } from '../types/car';
 import { formatPrice, formatRubDirect } from '../utils/currency';
@@ -22,21 +25,26 @@ interface TimedCarCardProps {
   currency: Currency;
   isBookmarked: boolean;
   onToggleBookmark: (lot: CarLot) => void;
-  onSelectLot: (lot: CarLot) => void;
 }
 
 export const TimedCarCard: React.FC<TimedCarCardProps> = ({
   lot,
   currency,
   isBookmarked,
-  onToggleBookmark,
-  onSelectLot
+  onToggleBookmark
 }) => {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const touchStartXRef = useRef<number | null>(null);
 
   const images = lot.images && lot.images.length > 0 ? lot.images : [CAR_PLACEHOLDER_SVG];
   const totalImages = images.length;
+
+  const auctionUrl = lot.externalLink
+    || (lot.auction === 'iaai'
+      ? `https://www.iaai.com/VehicleDetail/${lot.lotId}`
+      : `https://www.copart.com/lot/${lot.lotId}`);
+  const calculatorUrl = lot.calculatorUrl || `https://primeavtoexport.com/ru/calculator/?lot=${lot.lotId}`;
+  const vinCheckUrl = `https://carcheckbot.com/ru/car/${lot.vin}?lot=${lot.lotId}`;
 
   const handlePrevImage = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -70,8 +78,7 @@ export const TimedCarCard: React.FC<TimedCarCardProps> = ({
 
   return (
     <article
-      onClick={() => onSelectLot(lot)}
-      className="group bg-[#111520] hover:bg-[#151a28] rounded-2xl border border-slate-800/90 hover:border-[#068eff]/60 transition-all duration-200 overflow-hidden flex flex-col cursor-pointer shadow-lg"
+      className="group bg-[#111520] hover:bg-[#151a28] rounded-2xl border border-slate-800/90 hover:border-[#068eff]/60 transition-all duration-200 overflow-hidden flex flex-col shadow-lg"
       data-timed={lot.isTimed ? '1' : '0'}
       data-timed-lot={lot.lotId}
       data-bid-close={lot.timedCloseDate || ''}
@@ -198,7 +205,7 @@ export const TimedCarCard: React.FC<TimedCarCardProps> = ({
             </span>
             <span className="px-2 py-0.5 rounded bg-blue-950/40 text-blue-300 border border-blue-900/30 capitalize flex items-center gap-1">
               <FileText className="w-3 h-3 text-blue-400" />
-              {lot.document}
+              {lot.documentOld || lot.document}
             </span>
             {lot.condition === 'run' ? (
               <span className="px-2 py-0.5 rounded bg-emerald-950/40 text-emerald-300 border border-emerald-900/30 flex items-center gap-1">
@@ -235,18 +242,50 @@ export const TimedCarCard: React.FC<TimedCarCardProps> = ({
           </div>
         </div>
 
-        {lot.vin && lot.vin !== 'VIN не указан' && (
+        {/* Все четыре действия видны сразу, без раскрытия карточки */}
+        <div className="mt-3 grid grid-cols-2 gap-2">
           <a
-            href={`https://carcheckbot.com/ru/car/${lot.vin}?lot=${lot.lotId}`}
+            href={auctionUrl}
             target="_blank"
             rel="noreferrer"
-            onClick={(e) => e.stopPropagation()}
-            className="mt-3 flex items-center justify-center gap-1.5 rounded-xl border border-[#068eff]/40 bg-[#068eff]/10 hover:bg-[#068eff]/20 text-[#068eff] text-[11px] font-bold uppercase tracking-wider py-2 transition-colors"
+            className="flex items-center justify-center gap-1 rounded-xl border border-[#068eff]/40 bg-[#068eff]/10 hover:bg-[#068eff]/20 text-[#068eff] text-[10px] font-bold uppercase tracking-wide py-2 px-1 transition-colors"
           >
-            <ShieldCheck className="w-3.5 h-3.5" />
-            Проверка по VIN
+            <ExternalLink className="w-3.5 h-3.5 shrink-0" />
+            <span>Лот на аукционе</span>
           </a>
-        )}
+
+          <a
+            href={calculatorUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center justify-center gap-1 rounded-xl border border-emerald-500/40 bg-emerald-950/40 hover:bg-emerald-900/50 text-emerald-300 text-[10px] font-bold uppercase tracking-wide py-2 px-1 transition-colors"
+          >
+            <Calculator className="w-3.5 h-3.5 shrink-0" />
+            <span>Расчёт под ключ</span>
+          </a>
+
+          {lot.vin && lot.vin !== 'VIN не указан' && (
+            <a
+              href={vinCheckUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center justify-center gap-1 rounded-xl border border-slate-700 bg-slate-800/60 hover:bg-slate-700/70 text-slate-300 text-[10px] font-bold uppercase tracking-wide py-2 px-1 transition-colors"
+            >
+              <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
+              <span>Проверка по VIN</span>
+            </a>
+          )}
+
+          <a
+            href="https://t.me/primeavtoexport"
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center justify-center gap-1 rounded-xl bg-[#068eff] hover:bg-[#007be5] text-white text-[10px] font-bold uppercase tracking-wide py-2 px-1 transition-colors shadow-md shadow-[#068eff]/25"
+          >
+            <MessageSquare className="w-3.5 h-3.5 shrink-0" />
+            <span>Запрос консультации</span>
+          </a>
+        </div>
       </div>
     </article>
   );

@@ -26,7 +26,6 @@ interface MobileBookmarksDrawerProps {
   lots: CarLot[];
   onRemove: (id: string) => void;
   onClear: () => void;
-  onSelect: (lot: CarLot) => void;
   currency: Currency;
   folders?: ClientFolder[];
   onUpdateFolders?: (folders: ClientFolder[]) => void;
@@ -55,7 +54,6 @@ export const MobileBookmarksDrawer: React.FC<MobileBookmarksDrawerProps> = ({
   lots,
   onRemove,
   onClear,
-  onSelect,
   currency,
   folders: externalFolders,
   onUpdateFolders
@@ -533,7 +531,6 @@ export const MobileBookmarksDrawer: React.FC<MobileBookmarksDrawerProps> = ({
                     if (isSelectionMode) {
                       handleToggleSelectCard(lot.id, {} as any);
                     } else {
-                      onSelect(lot);
                       onClose();
                     }
                   }}

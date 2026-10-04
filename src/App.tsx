@@ -18,8 +18,6 @@ import { MobileFilterDrawer } from './components/MobileFilterDrawer';
 import { BotSelectionModal } from './components/BotSelectionModal';
 import { MobileBookmarksDrawer } from './components/MobileBookmarksDrawer';
 import { TimedCarCard } from './components/TimedCarCard';
-import { LotDetailModal } from './components/LotDetailModal';
-import { ConsultationModal } from './components/ConsultationModal';
 import { MobileBottomNav } from './components/MobileBottomNav';
 import { ClockDialAnimation } from './components/ClockDialAnimation';
 import { SaveToFolderModal } from './components/SaveToFolderModal';
@@ -100,9 +98,6 @@ export default function App() {
   // настраивать автосборщик. Без этого человек попадает в ленту молча.
   const [entryChoice, setEntryChoice] = useState<'ask' | 'browse' | 'bot'>('ask');
   const [isBookmarksOpen, setIsBookmarksOpen] = useState(false);
-  const [selectedLot, setSelectedLot] = useState<CarLot | null>(null);
-  const [consultationLot, setConsultationLot] = useState<CarLot | null>(null);
-  const [isConsultationOpen, setIsConsultationOpen] = useState(false);
 
   // Bot Auto-Podbor state
   const [botConfig, setBotConfig] = useState<BotConfig>({
@@ -456,7 +451,6 @@ export default function App() {
                 currency={currency}
                 isBookmarked={bookmarkedIds.includes(lot.id)}
                 onToggleBookmark={handleToggleBookmark}
-                onSelectLot={setSelectedLot}
               />
             ))}
           </div>
@@ -565,7 +559,6 @@ export default function App() {
           setBookmarkedIds([]);
           setFolders((prev) => prev.map((f) => ({ ...f, lotIds: [] })));
         }}
-        onSelect={setSelectedLot}
         currency={currency}
       />
 
@@ -585,30 +578,6 @@ export default function App() {
         }}
       />
 
-      {/* 7. Lot Detailed Modal */}
-      <LotDetailModal
-        lot={selectedLot}
-        isOpen={!!selectedLot}
-        onClose={() => setSelectedLot(null)}
-        currency={currency}
-        isBookmarked={selectedLot ? bookmarkedIds.includes(selectedLot.id) : false}
-        onToggleBookmark={handleToggleBookmark}
-        onOpenConsultation={(lot) => {
-          setConsultationLot(lot as any);
-          setIsConsultationOpen(true);
-        }}
-      />
-
-      {/* 7. Consultation / Lot Order Modal */}
-      <ConsultationModal
-        isOpen={isConsultationOpen}
-        onClose={() => {
-          setIsConsultationOpen(false);
-          setConsultationLot(null);
-        }}
-        selectedCar={consultationLot as any}
-        bookmarkedCarsCount={bookmarkedIds.length}
-      />
     </div>
   );
 }
