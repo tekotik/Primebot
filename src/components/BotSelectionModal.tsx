@@ -51,7 +51,7 @@ function RapidLinkStreamer({ isRefreshing, onStop }: { isRefreshing: boolean; on
 
   return (
     <div className="relative overflow-hidden rounded-2xl bg-[#090d16] border border-cyan-500/25 p-3 shadow-lg shadow-cyan-950/20">
-      {/* Анимированный луч высокоскоростного сканирования по верхней грани */}
+      {/* Бегущий луч по верхней грани окна */}
       <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent animate-scan opacity-90" />
 
       {/* Верхняя панель радара сканера */}
@@ -68,9 +68,6 @@ function RapidLinkStreamer({ isRefreshing, onStop }: { isRefreshing: boolean; on
         </div>
 
         <div className="flex items-center gap-1.5 shrink-0">
-          <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-cyan-950/80 border border-cyan-500/30 text-cyan-300 font-bold">
-            {isRefreshing ? '⚡ 280 лот/с' : '⚡ 140 лот/с'}
-          </span>
           <button
             type="button"
             onClick={onStop}
@@ -617,14 +614,6 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
                 </div>
 
                 <div className="flex items-center gap-1.5 shrink-0">
-                  <button
-                    type="button"
-                    onClick={handleCancelSearch}
-                    className="px-2 py-1 rounded-lg bg-red-950/40 border border-red-800/60 text-red-400 hover:text-red-300 text-[10px] font-semibold uppercase transition-colors"
-                  >
-                    Отменить
-                  </button>
-
                   <button
                     type="button"
                     onClick={refreshServerSubscription}
