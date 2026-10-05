@@ -70,15 +70,15 @@ function NyTimePlate() {
   }, []);
 
   return (
-    <div className="mt-2 pt-1 pb-1.5 text-center">
+    <div className="pt-0.5 pb-3 text-center">
       <div className="flex items-baseline justify-center gap-1">
-        <span className="font-mono tabular-nums text-[30px] leading-none font-black text-white tracking-tighter">
+        <span className="font-mono tabular-nums text-[34px] leading-none font-black text-white tracking-tighter">
           {NY_CLOCK.format(now)}
         </span>
-        <span className="font-mono text-[11px] leading-none font-bold uppercase text-[#068eff]">NYC</span>
+        <span className="font-mono text-[12px] leading-none font-bold uppercase text-[#068eff]">NYC</span>
       </div>
-      <p className="mt-1.5 text-[10px] leading-tight text-slate-500">
-        время аукциона - по Нью-Йорку
+      <p className="mt-1.5 text-[10px] leading-tight text-slate-400">
+        торги идут по этому времени - нью-йоркскому
       </p>
     </div>
   );
@@ -535,15 +535,7 @@ export default function App() {
           />
           <div className="relative flex-1 w-full max-w-md mx-auto bg-[#0f131c]/95 backdrop-blur-md border-t border-slate-800 rounded-t-3xl shadow-2xl px-5 pt-2.5 pb-4 animate-slide-up-fast overflow-y-auto">
             <div className="w-12 h-1.5 bg-slate-700/80 rounded-full mx-auto mb-3 shrink-0" />
-            <h2 className="text-base font-bold text-white uppercase tracking-wide font-['Exo_2',sans-serif] text-center">
-              Выбери действие
-            </h2>
-            <p className="text-[11px] text-slate-400 text-center mt-1.5">
-              Переключаться можно и позже: кнопки внизу экрана
-            </p>
-            <p className="text-[11px] text-slate-400 text-center mb-3">
-              Реализована работа через папки
-            </p>
+            <NyTimePlate />
 
             <div className="space-y-2">
               <button
@@ -588,8 +580,6 @@ export default function App() {
                 </div>
               </button>
             </div>
-
-            <NyTimePlate />
           </div>
         </div>
       )}
