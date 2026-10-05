@@ -1042,6 +1042,13 @@ def subscriber_filter(source: Dict[str, Any]) -> Dict[str, str]:
     return clean
 
 
+def _fmt_miles(raw: str) -> str:
+    try:
+        return f"{int(raw):,}".replace(",", " ")
+    except ValueError:
+        return raw
+
+
 def describe_subscription(config: Dict[str, Any]) -> str:
     """Подписка одним словом для ответа пользователю."""
     parts = [(config.get("make") or "").strip(), (config.get("model") or "").strip()]
@@ -1055,6 +1062,28 @@ def describe_subscription(config: Dict[str, Any]) -> str:
     years = [config.get("year_from", ""), config.get("year_to", "")]
     if any(years):
         label += ", годы {}-{}".format(years[0] or "любой", years[1] or "любой")
+    odo_from = (config.get("odometer_from") or "").strip()
+    odo_to = (config.get("odometer_to") or "").strip()
+    try:
+        low = int(odo_from) > 1
+    except ValueError:
+        low = bool(odo_from)
+    if odo_to or low:
+        if low and odo_to:
+            label += f", пробег {_fmt_miles(odo_from)}-{_fmt_miles(odo_to)} миль"
+        elif odo_to:
+            label += f", пробег до {_fmt_miles(odo_to)} миль"
+        else:
+            label += f", пробег от {_fmt_miles(odo_from)} миль"
+    docs = [d.strip().title() for d in (config.get("document") or "").split(",") if d.strip()]
+    if docs:
+        label += ", титул " + "/".join(dict.fromkeys(docs))
+    exclude = (config.get("damage_exclude") or "").strip()
+    if exclude:
+        label += ", кроме " + exclude.replace("_", " ")
+    state = (config.get("state") or "").strip()
+    if state:
+        label += ", штат " + state.upper()
     return label
 
 
@@ -1127,7 +1156,7 @@ async def watch_now_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     lots = data.get("lots", [])
     await update.message.reply_text(
-        f"🔔 <b>Найдено {count} новых лотов по подписке «{make} {model}»</b> (из {found} найденных, scanned: {scanned}){time_formatted}:",
+        f"🔔 <b>Найдено {count} новых лотов по подписке «{describe_subscription(config)}»</b> (из {found} найденных, просканировано {scanned}){time_formatted}:",
         parse_mode=ParseMode.HTML
     )
 
@@ -1225,7 +1254,7 @@ async def daily_auto_collect_job(context: ContextTypes.DEFAULT_TYPE):
 
             await context.bot.send_message(
                 chat_id=user_id,
-                text=f"🔔 <b>Автосборщик: {count} новых лотов по подписке «{make} {model}»</b>{time_formatted}:",
+                text=f"🔔 <b>Автосборщик: {count} новых лотов по подписке «{describe_subscription(config)}»</b>{time_formatted}:",
                 parse_mode=ParseMode.HTML
             )
 

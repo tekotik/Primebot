@@ -13,7 +13,7 @@ import {
 import { BotConfig, PrimeFilterState, AutoCollectorConfig, missingRequiredFilters } from '../types/car';
 import { US_MAKES_MODELS, DOCUMENT_OPTIONS, DAMAGE_TYPES, US_STATES } from '../data/auctionLots';
 
-type SendResult = { ok: boolean; via: 'server'; why: string };
+type SendResult = { ok: boolean; via: 'server'; why: string; data?: any };
 
 interface BotSelectionModalProps {
   isOpen: boolean;
@@ -76,6 +76,40 @@ const collectorSubscription = (cfg: BotConfig, f: PrimeFilterState) => ({
   document: (f.documents || []).join(',')
 });
 
+// Сервер хранит только непустые поля - приводим запись к тому же набору и
+// порядку ключей, что считает клиент, иначе сравнение фильтров всегда врёт.
+const serverSignature = (s: Record<string, string>): string => JSON.stringify({
+  make: s.make || '', model: s.model || '', timed: s.timed || 'all', site: s.site || '',
+  date: s.date || '', year_from: s.year_from || '', year_to: s.year_to || '',
+  odometer_from: s.odometer_from || '', odometer_to: s.odometer_to || '', fuel: s.fuel || '',
+  state: s.state || '', damage_pr: s.damage_pr || '', damage_exclude: s.damage_exclude || '',
+  document: s.document || ''
+});
+
+const capFirst = (word: string) => word.charAt(0).toUpperCase() + word.slice(1);
+const miles = (v: string) => (v ? Number(v).toLocaleString('ru-RU') : v);
+
+// «Какое конкретно авто ищет» - одна строка по серверной записи подписки.
+const describeServerSubscription = (s: Record<string, string>): string => {
+  const bits: string[] = [];
+  const car = [s.make, s.model].filter(Boolean).join(' ');
+  bits.push(car || 'все лоты США');
+  if (s.timed === '1') bits.push('IAAI Timed');
+  else if (s.site) bits.push(s.site === '1' ? 'Copart' : 'IAAI');
+  if (s.date) bits.push('торги ' + s.date);
+  if (s.year_from || s.year_to) bits.push((s.year_from || 'любой') + '-' + (s.year_to || 'любой') + ' гг.');
+  const odoFrom = s.odometer_from && Number(s.odometer_from) > 1 ? s.odometer_from : '';
+  if (odoFrom && s.odometer_to) bits.push('пробег ' + miles(odoFrom) + '-' + miles(s.odometer_to) + ' миль');
+  else if (s.odometer_to) bits.push('пробег до ' + miles(s.odometer_to) + ' миль');
+  else if (odoFrom) bits.push('пробег от ' + miles(odoFrom) + ' миль');
+  if (s.document) bits.push('титул ' + s.document.split(',').filter(Boolean).map(capFirst).join('/'));
+  if (s.damage_pr) bits.push('повреждение ' + s.damage_pr);
+  if (s.damage_exclude) bits.push('кроме ' + s.damage_exclude);
+  if (s.fuel) bits.push(s.fuel);
+  if (s.state) bits.push('штат ' + s.state);
+  return bits.join(' · ');
+};
+
 
 export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
   isOpen,
@@ -103,6 +137,11 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
   // Что о нас знает Telegram: видно только изнутри самого WebView.
   const [tgInfo, setTgInfo] = useState('Telegram не определён - открывай раздел из чата бота');
   const [sendNote, setSendNote] = useState('');
+
+  // Что сервер по этому человеку уже держит - чтобы видеть до нового подбора.
+  const [serverSub, setServerSub] = useState<{
+    state: 'idle' | 'loading' | 'ok' | 'error'; text: string; signature: string; total: number; savedAt: string; why: string;
+  }>({ state: 'idle', text: '', signature: '', total: 0, savedAt: '', why: '' });
   useEffect(() => {
     const tg = (window as any).Telegram?.WebApp;
     if (!tg) return;
@@ -156,8 +195,6 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
     }
   }, [toastText]);
 
-  if (!isOpen) return null;
-
   // Ключ сессии выдаёт бот вместе со ссылкой на приложение. Он привязан к
   // конкретному человеку на стороне сервера, поэтому подписку можно принять
   // и без проверки подписи Telegram - фильтр приедет целым JSON-ом.
@@ -190,7 +227,7 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
       });
       const data = await res.json().catch(() => null);
       if (res.ok && data?.status === 'ok') {
-        return { ok: true, via: 'server', why: `сервер принял, подписчиков: ${data.total}` };
+        return { ok: true, via: 'server', data, why: 'сервер принял, подписчиков: ' + data.total };
       }
       why = data?.message || ('код ' + res.status);
     } catch (e: any) {
@@ -198,6 +235,36 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
     }
     return { ok: false, via: 'server', why: `${why}${sessionKey() ? '' : ', ключ сессии не передан - открывай из кнопки бота'}` };
   };
+
+  // Сервер - единственный правдивый источник о подписке: локальная плашка
+  // переживает /stop и показывает то, чего уже нет.
+  const refreshServerSubscription = async () => {
+    setServerSub((prev) => ({ ...prev, state: 'loading' }));
+    const res = await sendBotPayload({ action: 'autocollect_list' });
+
+    if (!res.ok) {
+      setServerSub({ state: 'error', text: '', signature: '', total: 0, savedAt: '', why: res.why });
+      return;
+    }
+
+    const sub: Record<string, string> | null = res.data?.subscription || null;
+    const signature = sub ? serverSignature(sub) : '';
+    setServerSub({
+      state: 'ok',
+      text: sub ? describeServerSubscription(sub) : '',
+      signature,
+      total: Number(res.data?.total || 0),
+      savedAt: (sub && sub.updated_at) || '',
+      why: ''
+    });
+    setAutoCollector((prev) => (sub
+      ? { ...prev, isActive: true, sentFilter: signature }
+      : prev.isActive ? { ...prev, isActive: false, sentFilter: '' } : prev));
+  };
+
+  useEffect(() => {
+    if (isOpen) refreshServerSubscription();
+  }, [isOpen]);
 
   const currentSignature = JSON.stringify(collectorSubscription(config, filters));
 
@@ -236,6 +303,7 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
     setToastText(starting
       ? `⚡ Автосборщик запущен! Ищем ${subscription.make} ${subscription.model}`
       : 'Автосборщик остановлен');
+    await refreshServerSubscription();
   };
 
   // Фильтр поменяли при активной подписке: применяем отдельно, чтобы смена
@@ -259,7 +327,10 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
     }
     setAutoCollector((prev) => ({ ...prev, sentFilter: currentSignature }));
     setToastText('🔄 Новый фильтр применён к автосборщику');
+    await refreshServerSubscription();
   };
+
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden flex flex-col justify-end">
@@ -344,6 +415,38 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
             </div>
           )}
 
+          {/* Что уже подписано на этом человеке - до запуска нового подбора */}
+          <div className={`p-3 rounded-xl border text-[11px] leading-relaxed ${
+            serverSub.state === 'ok' && serverSub.text
+              ? 'bg-[#0e1626] border-[#068eff]/40 text-slate-200'
+              : 'bg-[#0d1017] border-slate-800 text-slate-400'
+          }`}>
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-[10px] font-bold uppercase tracking-wide text-slate-300">
+                {serverSub.state === 'loading' ? 'Проверяем, что уже ищем...' : 'Сейчас ищет по твоей подписке'}
+              </span>
+              <button
+                type="button"
+                onClick={refreshServerSubscription}
+                className="text-[10px] font-semibold uppercase text-[#068eff] shrink-0"
+              >
+                Обновить
+              </button>
+            </div>
+            <p className="mt-1 break-words text-white">
+              {serverSub.state === 'ok' && serverSub.text ? serverSub.text : null}
+              {serverSub.state === 'ok' && !serverSub.text ? 'Подписки нет - подбор не идёт.' : null}
+              {serverSub.state === 'error' ? 'Сервер не показал: ' + serverSub.why : null}
+              {serverSub.state === 'idle' || serverSub.state === 'loading' ? 'Уточняем...' : null}
+            </p>
+            {serverSub.state === 'ok' && (
+              <p className="text-[10px] text-slate-500 mt-1">
+                подписок всего: {serverSub.total}
+                {serverSub.savedAt ? ' · сохранено ' + serverSub.savedAt + ' UTC' : ''}
+              </p>
+            )}
+          </div>
+
           {/* Активная статус-плашка, если уже запущен */}
           {autoCollector.isActive ? (
             <div className="p-3.5 bg-emerald-950/40 border border-emerald-500/50 rounded-2xl flex items-center justify-between">
@@ -359,7 +462,7 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
                     <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
                   </div>
                   <p className="text-[11px] text-slate-300 mt-0.5">
-                    Ищет {filters.make || 'авто'} {filters.model || ''} и отправляет подборку
+                    Подборка уходит 1 раз в день, что именно ищем - строкой выше
                   </p>
                 </div>
               </div>
