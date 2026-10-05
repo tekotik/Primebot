@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   X,
   Gauge,
@@ -157,6 +157,9 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
   // «Нет» на напоминании о смене фильтра: молчим, пока фильтр не поменяется снова.
   const [dismissedDiff, setDismissedDiff] = useState('');
 
+  // Активный запрос списка подписок: по кнопке «Отменить» он обрывается.
+  const abortRef = useRef<AbortController | null>(null);
+
   const [serverSub, setServerSub] = useState<{
     state: 'idle' | 'loading' | 'ok' | 'error'; text: string; signature: string; total: number; savedAt: string; why: string;
   }>({ state: 'idle', text: '', signature: '', total: 0, savedAt: '', why: '' });
@@ -228,7 +231,7 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
 
   // Основной канал - наш сервер: приложение POSTит подписку, сервер сверяет
   // подпись initData. Deep-link в чат остаётся запасным, если сервер отверг.
-  const sendBotPayload = async (payload: Record<string, string>): Promise<SendResult> => {
+  const sendBotPayload = async (payload: Record<string, string>, signal?: AbortSignal): Promise<SendResult> => {
     const { action, ...filter } = payload;
     const tgApp = (window as any).Telegram?.WebApp;
     // Сервер сверяет подпись по сырой строке initData: в свежем SDK
@@ -241,7 +244,8 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
       const res = await fetch('/api/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ init_data: initData, nonce: sessionKey(), action, filter })
+        body: JSON.stringify({ init_data: initData, nonce: sessionKey(), action, filter }),
+        signal
       });
       const data = await res.json().catch(() => null);
       if (res.ok && data?.status === 'ok') {
@@ -259,7 +263,14 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
   const refreshServerSubscription = async () => {
     setServerSub((prev) => ({ ...prev, state: 'loading' }));
     const startedAt = Date.now();
-    const res = await sendBotPayload({ action: 'autocollect_list' });
+    const controller = new AbortController();
+    abortRef.current = controller;
+    const res = await sendBotPayload({ action: 'autocollect_list' }, controller.signal);
+
+    if (controller.signal.aborted) {
+      abortRef.current = null;
+      return;
+    }
 
     // Ответ приходит за полсекунды, и перебор страниц успел бы только мелькнуть.
     // Держим его минимум 1,2 секунды, чтобы человек видел работу, а не мигание.
@@ -349,6 +360,27 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
     sentSubscription = autoCollector.sentFilter ? JSON.parse(autoCollector.sentFilter) : null;
   } catch {}
   const sentLabel = serverSub.text || (sentSubscription ? describeServerSubscription(sentSubscription) : '');
+
+  // Отмена поиска: перебор гаснем сразу, подписку снимаем на сервере.
+  const handleCancelSearch = async () => {
+    abortRef.current?.abort();
+    abortRef.current = null;
+    setServerSub((prev) => ({ ...prev, state: 'idle', text: '', signature: '', savedAt: '', why: '' }));
+
+    const sent = await sendBotPayload({ action: 'autocollect_stop', ...collectorSubscription(config, filters) });
+    setSendNote(sent.why);
+
+    if (!sent.ok) {
+      setServerSub((prev) => ({ ...prev, state: 'error', why: sent.why }));
+      setToastText('Поиск не отменён: ' + sent.why);
+      return;
+    }
+
+    setAutoCollector((prev) => ({ ...prev, isActive: false, sentFilter: '' }));
+    setDismissedDiff('');
+    setToastText('Отменено: поиск остановлен, подписка снята');
+    await refreshServerSubscription();
+  };
 
   const handleApplyFilter = async () => {
     const missing = missingRequiredFilters(filters);
@@ -459,13 +491,10 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
                 </button>
                 <button
                   type="button"
-                  onClick={() => {
-                    setDismissedDiff(currentSignature);
-                    setToastText('Оставляем подписку по-старому');
-                  }}
-                  className="px-2.5 py-1.5 rounded-lg bg-[#0d1017] border border-slate-700 text-slate-300 text-[11px] font-semibold uppercase hover:text-white transition-colors"
+                  onClick={handleCancelSearch}
+                  className="px-2.5 py-1.5 rounded-lg bg-[#0d1017] border border-red-800/70 text-red-300 text-[11px] font-semibold uppercase hover:bg-red-950/50 transition-colors"
                 >
-                  Нет
+                  Отменить
                 </button>
               </div>
             </div>
@@ -485,19 +514,28 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
                   <span className="font-mono tabular-nums text-[13px] leading-none text-white">{serverSub.total}</span>
                 )}
               </span>
-              <button
-                type="button"
-                onClick={refreshServerSubscription}
-                className="text-[10px] font-semibold uppercase text-[#068eff] shrink-0"
-              >
-                Обновить
-              </button>
+              <div className="flex items-center gap-2.5 shrink-0">
+                <button
+                  type="button"
+                  onClick={handleCancelSearch}
+                  className="text-[10px] font-semibold uppercase text-red-400 hover:text-red-300"
+                >
+                  Отменить
+                </button>
+                <button
+                  type="button"
+                  onClick={refreshServerSubscription}
+                  className="text-[10px] font-semibold uppercase text-[#068eff] hover:text-blue-300"
+                >
+                  Обновить
+                </button>
+              </div>
             </div>
             <p className="mt-1 break-words text-white">
               {serverSub.state === 'ok' && serverSub.text ? serverSub.text : null}
               {serverSub.state === 'ok' && !serverSub.text ? 'Подписки нет - подбор не идёт.' : null}
               {serverSub.state === 'error' ? 'Сервер не показал: ' + serverSub.why : null}
-              {serverSub.state === 'idle' ? 'Уточняем...' : null}
+              {serverSub.state === 'idle' ? 'Поиск остановлен.' : null}
             </p>
             {serverSub.state === 'ok' && serverSub.savedAt && (
               <p className="text-[10px] text-slate-500 mt-1">сохранено {serverSub.savedAt} UTC</p>
