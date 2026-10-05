@@ -78,7 +78,7 @@ function NyTimePlate() {
         <span className="font-mono text-[12px] leading-none font-bold uppercase text-[#068eff]">NYC</span>
       </div>
       <p className="mt-1.5 text-[10px] leading-tight text-slate-400">
-        торги идут по этому времени - нью-йоркскому
+        Время торгов указано по часовому поясу Нью-Йорка
       </p>
     </div>
   );

@@ -131,7 +131,7 @@ function RapidLinkStreamer({
         </span>
         <span className={`text-[9px] font-semibold flex items-center gap-1 ${running ? 'text-emerald-400' : 'text-slate-500'}`}>
           {running && <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block animate-ping" />}
-          {running ? 'Поиск на максимальной скорости' : 'Подборка в Telegram не придёт'}
+          {running ? 'Идёт поиск' : 'Подборка в Telegram не придёт'}
         </span>
       </div>
     </div>
