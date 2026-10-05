@@ -60,16 +60,18 @@ function NyTimePlate() {
   }, []);
 
   return (
-    <div className="mt-3 rounded-2xl border border-slate-800 bg-[#131724] px-4 py-3">
-      <div className="flex items-baseline justify-center gap-2">
-        <Clock className="w-4 h-4 text-[#068eff] shrink-0 self-center" />
-        <span className="font-mono tabular-nums text-[28px] leading-none font-black text-white tracking-tight">
+    <div className="mt-2.5 flex items-center justify-between gap-3 rounded-2xl border border-slate-800 bg-[#131724] px-4 py-3">
+      <div className="flex items-baseline gap-1.5 shrink-0">
+        <Clock className="w-4 h-4 text-[#068eff] self-center" />
+        <span className="font-mono tabular-nums text-[26px] leading-none font-black text-white tracking-tight">
           {NY_CLOCK.format(now)}
         </span>
-        <span className="font-mono text-[11px] font-bold uppercase text-[#068eff]">{NY_ZONE}</span>
+        <span className="font-mono text-[10px] font-bold uppercase text-[#068eff]">{NY_ZONE}</span>
       </div>
-      <p className="text-[11px] text-slate-400 text-center mt-2">
-        {NY_DAY.format(now)} · время торгов считается по Нью-Йорку (NYC)
+      <p className="text-[10px] leading-tight text-slate-400 text-right">
+        {NY_DAY.format(now)}
+        <br />
+        время торгов - по Нью-Йорку (NYC)
       </p>
     </div>
   );
@@ -521,7 +523,7 @@ export default function App() {
             alt="PrimeAvtoBOT"
             draggable={false}
             onClick={() => setEntryChoice('browse')}
-            className="w-full aspect-square max-h-[55vh] object-cover object-top shrink-0 select-none animate-fade-in-fast"
+            className="w-full aspect-square max-h-[44vh] object-cover object-top shrink-0 select-none animate-fade-in-fast"
           />
           <div className="relative flex-1 w-full max-w-md mx-auto bg-[#0f131c]/95 backdrop-blur-md border-t border-slate-800 rounded-t-3xl shadow-2xl px-5 pt-2.5 pb-4 animate-slide-up-fast overflow-y-auto">
             <div className="w-12 h-1.5 bg-slate-700/80 rounded-full mx-auto mb-3 shrink-0" />
