@@ -13,28 +13,16 @@ import {
 import { BotConfig, PrimeFilterState, AutoCollectorConfig, missingRequiredFilters } from '../types/car';
 import { US_MAKES_MODELS, DOCUMENT_OPTIONS, DAMAGE_TYPES, US_STATES } from '../data/auctionLots';
 
-// Пока сервер отвечает, число быстро перебирает ленты - окно выглядит так,
-// будто подбор действительно идёт прямо сейчас, а не висит заглушка.
-function ScanCounter({ active, value }: { active: boolean; value: number }) {
-  const [scanned, setScanned] = useState(0);
-
-  useEffect(() => {
-    if (!active) return;
-    setScanned(0);
-    const id = window.setInterval(() => setScanned((v) => (v < 240 ? v + 3 : v)), 60);
-    return () => window.clearInterval(id);
-  }, [active]);
-
-  if (!active) {
-    return <span className="font-mono tabular-nums text-[13px] leading-none text-white">{value}</span>;
-  }
-
+// Ответ сервера приходит меньше чем за секунду, но за это время должно быть
+// видно, что подбор листает ленты, а не висит заглушка.
+function ScanWork() {
   return (
-    <span className="flex items-center gap-1.5">
-      <Zap className="w-3 h-3 text-[#068eff] animate-pulse" />
-      <span className="font-mono tabular-nums text-[13px] leading-none text-[#068eff]">{scanned}</span>
-      <span className="text-[9px] font-semibold text-slate-400 normal-case tracking-normal">
-        лент просмотрено
+    <span className="flex items-center gap-2">
+      <span className="relative h-1.5 w-[74px] overflow-hidden rounded-full bg-slate-800">
+        <span className="absolute inset-y-0 w-[34%] rounded-full bg-[#068eff] animate-scan" />
+      </span>
+      <span className="text-[9px] font-semibold normal-case tracking-normal text-slate-400">
+        перебираем страницы лент
       </span>
     </span>
   );
@@ -481,7 +469,11 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
           }`}>
             <div className="flex items-center justify-between gap-2">
               <span className="text-[10px] font-bold uppercase tracking-wide text-slate-300">
-                <ScanCounter active={serverSub.state === 'loading'} value={serverSub.total} />
+                {serverSub.state === 'loading' ? (
+                  <ScanWork />
+                ) : (
+                  <span className="font-mono tabular-nums text-[13px] leading-none text-white">{serverSub.total}</span>
+                )}
               </span>
               <button
                 type="button"
@@ -495,7 +487,7 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
               {serverSub.state === 'ok' && serverSub.text ? serverSub.text : null}
               {serverSub.state === 'ok' && !serverSub.text ? 'Подписки нет - подбор не идёт.' : null}
               {serverSub.state === 'error' ? 'Сервер не показал: ' + serverSub.why : null}
-              {serverSub.state === 'idle' || serverSub.state === 'loading' ? 'Уточняем...' : null}
+              {serverSub.state === 'idle' ? 'Уточняем...' : null}
             </p>
             {serverSub.state === 'ok' && serverSub.savedAt && (
               <p className="text-[10px] text-slate-500 mt-1">сохранено {serverSub.savedAt} UTC</p>
