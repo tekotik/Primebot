@@ -596,9 +596,12 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
                       </span>
                       <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping shrink-0" />
                     </div>
-                    <p className="text-[10px] text-slate-400 font-mono mt-0.5">
-                      Рассылка 1 раз в сутки в Telegram
-                    </p>
+                    <div className="mt-1.5 flex items-center gap-2 min-w-0">
+                      <span className="relative h-1.5 w-[74px] shrink-0 overflow-hidden rounded-full bg-emerald-900/60">
+                        <span className="absolute inset-y-0 w-[34%] rounded-full bg-emerald-400 animate-scan" />
+                      </span>
+                      <span className="text-[10px] text-slate-400 truncate">листает ленты</span>
+                    </div>
                   </div>
                 </div>
 
