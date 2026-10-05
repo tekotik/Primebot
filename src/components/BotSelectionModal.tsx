@@ -33,47 +33,68 @@ const STREAM_AUCTION_ITEMS = [
   { site: 'iaai.com', path: '/VehicleDetail/43920195', name: 'Tesla Model Y Long Range', vin: '7SAYGDEE*PF', bid: '$21,800', loc: 'San Diego, CA' }
 ];
 
-function RapidLinkStreamer({ isRefreshing }: { isRefreshing: boolean }) {
+function RapidLinkStreamer({
+  isRefreshing,
+  running,
+  onToggle
+}: {
+  isRefreshing: boolean;
+  running: boolean;
+  onToggle: () => void;
+}) {
   const [index, setIndex] = useState(0);
   const [lotsScanned, setLotsScanned] = useState(14820);
 
   useEffect(() => {
-    // Высокоскоростной темп перебора: 70мс в фоне, 35мс во время принудительного обновления
+    // Перебор живёт ровно столько, сколько включён поиск: 70мс в фоне,
+    // 35мс во время принудительного обновления. На «Стоп» замирает.
+    if (!running) return;
     const speed = isRefreshing ? 35 : 70;
     const interval = setInterval(() => {
       setIndex((prev) => (prev + 1) % STREAM_AUCTION_ITEMS.length);
       setLotsScanned((prev) => prev + 1);
     }, speed);
     return () => clearInterval(interval);
-  }, [isRefreshing]);
+  }, [running, isRefreshing]);
 
   const current = STREAM_AUCTION_ITEMS[index];
 
   return (
     <div className="relative overflow-hidden rounded-2xl bg-[#090d16] border border-cyan-500/25 p-3 shadow-lg shadow-cyan-950/20">
       {/* Анимированный луч высокоскоростного сканирования по верхней грани */}
-      <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent animate-scan opacity-90" />
+      {running && (
+        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent animate-scan opacity-90" />
+      )}
 
       {/* Верхняя панель радара сканера */}
       <div className="flex items-center justify-between gap-2 mb-2 pb-1.5 border-b border-slate-800/80">
         <div className="flex items-center gap-1.5 min-w-0">
           <span className="relative flex h-2 w-2 shrink-0">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
+            {running && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>}
+            <span className={`relative inline-flex rounded-full h-2 w-2 ${running ? 'bg-cyan-500' : 'bg-slate-600'}`}></span>
           </span>
-          <span className="text-[10px] font-bold uppercase tracking-wider text-cyan-400 font-mono flex items-center gap-1 truncate">
-            <Radio className="w-3 h-3 animate-pulse shrink-0" />
-            <span>Парсинг лотов в реальном времени</span>
+          <span className={`text-[10px] font-bold uppercase tracking-wider font-mono flex items-center gap-1 truncate ${running ? 'text-cyan-400' : 'text-slate-500'}`}>
+            <Radio className={`w-3 h-3 shrink-0 ${running ? 'animate-pulse' : ''}`} />
+            <span>{running ? 'Парсинг лотов в реальном времени' : 'Поиск остановлен'}</span>
           </span>
         </div>
 
         <div className="flex items-center gap-1.5 shrink-0">
-          <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-cyan-950/80 border border-cyan-500/30 text-cyan-300 font-bold">
-            {isRefreshing ? '⚡ 280 лот/с' : '⚡ 140 лот/с'}
+          <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded font-bold ${running ? 'bg-cyan-950/80 border border-cyan-500/30 text-cyan-300' : 'bg-slate-800/80 border border-slate-700 text-slate-500'}`}>
+            {running ? (isRefreshing ? '⚡ 280 лот/с' : '⚡ 140 лот/с') : 'пауза'}
           </span>
-          <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-slate-800/80 text-slate-300">
-            Copart & IAAI
-          </span>
+          <button
+            type="button"
+            onClick={onToggle}
+            className={`text-[9px] font-mono px-1.5 py-0.5 rounded border font-bold uppercase flex items-center gap-1 transition-colors ${
+              running
+                ? 'bg-red-950/70 border-red-800 text-red-300 hover:bg-red-900/70'
+                : 'bg-emerald-950/60 border-emerald-700 text-emerald-300 hover:bg-emerald-900/60'
+            }`}
+          >
+            {running ? <Pause className="w-2.5 h-2.5" /> : <Play className="w-2.5 h-2.5" />}
+            <span>{running ? 'Стоп' : 'Запустить'}</span>
+          </button>
         </div>
       </div>
 
@@ -105,12 +126,12 @@ function RapidLinkStreamer({ isRefreshing }: { isRefreshing: boolean }) {
       {/* Метрика просканированных лотов */}
       <div className="flex items-center justify-between text-[10px] text-slate-400 pt-2 mt-1.5 border-t border-slate-800/60 font-mono">
         <span className="flex items-center gap-1 text-slate-400">
-          <Activity className="w-3 h-3 text-cyan-400 animate-pulse" />
-          <span>Поток: <strong className="text-white tabular-nums">{lotsScanned.toLocaleString('ru-RU')}</strong> лотов</span>
+          <Activity className={`w-3 h-3 ${running ? 'text-cyan-400 animate-pulse' : 'text-slate-600'}`} />
+          <span>Поток: <strong className={`tabular-nums ${running ? 'text-white' : 'text-slate-500'}`}>{lotsScanned.toLocaleString('ru-RU')}</strong> лотов</span>
         </span>
-        <span className="text-emerald-400 text-[9px] font-semibold flex items-center gap-1">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block animate-ping" />
-          Поиск на максимальной скорости
+        <span className={`text-[9px] font-semibold flex items-center gap-1 ${running ? 'text-emerald-400' : 'text-slate-500'}`}>
+          {running && <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block animate-ping" />}
+          {running ? 'Поиск на максимальной скорости' : 'Подборка в Telegram не придёт'}
         </span>
       </div>
     </div>
@@ -505,6 +526,10 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
     await refreshServerSubscription();
   };
 
+  // Поиск считается включённым по серверной записи: локальный флаг может
+  // отстать, и тогда «Стоп» по ошибке запустил бы новый подбор.
+  const searchRunning = autoCollector.isActive || (serverSub.state === 'ok' && !!serverSub.text);
+
   if (!isOpen) return null;
 
   return (
@@ -559,7 +584,11 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
         {/* ===================== АВТОСБОРЩИК: ПОДБОРКА МАШИН 1 РАЗ В ДЕНЬ ===================== */}
         <div className="space-y-3.5">
           {/* 1. ВЫСОКОСКОРОСТНОЙ СКАНЕР ПОТОКА ССЫЛОК И ЛОТОВ (АНИМАЦИЯ ПЕРЕБОРА) */}
-          <RapidLinkStreamer isRefreshing={serverSub.state === 'loading'} />
+          <RapidLinkStreamer
+            isRefreshing={serverSub.state === 'loading'}
+            running={searchRunning}
+            onToggle={searchRunning ? handleCancelSearch : handleToggleAutoCollector}
+          />
 
           {/* 2. БЫСТРАЯ СВОДКА ТЕКУЩЕГО ФИЛЬТРА */}
           <div className="flex items-center justify-between gap-2 px-1 py-0.5">
