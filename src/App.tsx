@@ -51,6 +51,32 @@ const NY_ZONE =
     .formatToParts(new Date())
     .find((part) => part.type === 'timeZoneName')?.value ?? 'NYC';
 
+const NY_HM = new Intl.DateTimeFormat('ru-RU', {
+  timeZone: 'America/New_York',
+  hour: '2-digit',
+  minute: '2-digit',
+  hourCycle: 'h23'
+});
+
+function HeaderNyTime() {
+  const [now, setNow] = useState(() => new Date());
+
+  useEffect(() => {
+    const id = window.setInterval(() => setNow(new Date()), 1000);
+    return () => window.clearInterval(id);
+  }, []);
+
+  return (
+    <div className="flex items-center gap-1 shrink-0" title="Время торгов - по Нью-Йорку">
+      <Clock className="w-3 h-3 text-[#068eff]" />
+      <span className="font-mono tabular-nums text-[11px] leading-none font-bold text-white">
+        {NY_HM.format(now)}
+      </span>
+      <span className="font-mono text-[8px] leading-none font-bold uppercase text-[#068eff]">{NY_ZONE}</span>
+    </div>
+  );
+}
+
 function NyTimePlate() {
   const [now, setNow] = useState(() => new Date());
 
@@ -343,7 +369,8 @@ export default function App() {
       <header className="sticky top-0 z-30 w-full bg-[#0c1018]/95 backdrop-blur-md border-b border-slate-800/90 px-4 py-3 flex items-center justify-between">
         <PrimeLogo size={28} showText={true} />
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
+          <HeaderNyTime />
           {/* Quick Bookmarks Indicator */}
           {bookmarkedLots.length > 0 && (
             <button

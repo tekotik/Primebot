@@ -42,12 +42,9 @@ export const PrimeLogo: React.FC<PrimeLogoProps> = ({
 
       {/* Serious, high-contrast typography without rainbow accents */}
       {showText && (
-        <div className="flex flex-col">
+        <div className="flex items-center">
           <span className="font-['Exo_2',sans-serif] font-extrabold tracking-wider text-base uppercase text-white leading-none">
-            PRIME<span className="text-[#008fff] ml-0.5">AVTO</span>EXPORT
-          </span>
-          <span className="text-[9px] tracking-widest text-slate-400 uppercase font-medium mt-0.5">
-            US & GLOBAL AUCTIONS
+            PRIME<span className="text-[#008fff] ml-0.5">AVTO</span>
           </span>
         </div>
       )}

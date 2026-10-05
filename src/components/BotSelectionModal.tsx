@@ -454,7 +454,7 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
           }`}>
             <div className="flex items-center justify-between gap-2">
               <span className="text-[10px] font-bold uppercase tracking-wide text-slate-300">
-                {serverSub.state === 'loading' ? 'Проверяем, что уже ищем...' : 'Сейчас ищет по твоей подписке'}
+                {serverSub.state === 'loading' ? '...' : <span className="font-mono tabular-nums text-[13px] leading-none text-white">{serverSub.total}</span>}
               </span>
               <button
                 type="button"
@@ -470,11 +470,8 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
               {serverSub.state === 'error' ? 'Сервер не показал: ' + serverSub.why : null}
               {serverSub.state === 'idle' || serverSub.state === 'loading' ? 'Уточняем...' : null}
             </p>
-            {serverSub.state === 'ok' && (
-              <p className="text-[10px] text-slate-500 mt-1">
-                подписок всего: {serverSub.total}
-                {serverSub.savedAt ? ' · сохранено ' + serverSub.savedAt + ' UTC' : ''}
-              </p>
+            {serverSub.state === 'ok' && serverSub.savedAt && (
+              <p className="text-[10px] text-slate-500 mt-1">сохранено {serverSub.savedAt} UTC</p>
             )}
           </div>
 
