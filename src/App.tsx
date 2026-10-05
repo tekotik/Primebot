@@ -35,22 +35,6 @@ const NY_CLOCK = new Intl.DateTimeFormat('ru-RU', {
   hourCycle: 'h23'
 });
 
-const NY_DAY = new Intl.DateTimeFormat('ru-RU', {
-  timeZone: 'America/New_York',
-  weekday: 'short',
-  day: 'numeric',
-  month: 'long'
-});
-
-const NY_ZONE =
-  new Intl.DateTimeFormat('en-US', {
-    timeZone: 'America/New_York',
-    hour: '2-digit',
-    timeZoneName: 'short'
-  })
-    .formatToParts(new Date())
-    .find((part) => part.type === 'timeZoneName')?.value ?? 'NYC';
-
 const NY_HM = new Intl.DateTimeFormat('ru-RU', {
   timeZone: 'America/New_York',
   hour: '2-digit',
@@ -72,7 +56,7 @@ function HeaderNyTime() {
       <span className="font-mono tabular-nums text-[11px] leading-none font-bold text-white">
         {NY_HM.format(now)}
       </span>
-      <span className="font-mono text-[8px] leading-none font-bold uppercase text-[#068eff]">{NY_ZONE}</span>
+      <span className="font-mono text-[8px] leading-none font-bold uppercase text-[#068eff]">NYC</span>
     </div>
   );
 }
@@ -86,18 +70,15 @@ function NyTimePlate() {
   }, []);
 
   return (
-    <div className="mt-2.5 flex items-center justify-between gap-3 rounded-2xl border border-slate-800 bg-[#131724] px-4 py-3">
-      <div className="flex items-baseline gap-1.5 shrink-0">
-        <Clock className="w-4 h-4 text-[#068eff] self-center" />
-        <span className="font-mono tabular-nums text-[26px] leading-none font-black text-white tracking-tight">
+    <div className="mt-2 pt-1 pb-1.5 text-center">
+      <div className="flex items-baseline justify-center gap-1">
+        <span className="font-mono tabular-nums text-[30px] leading-none font-black text-white tracking-tighter">
           {NY_CLOCK.format(now)}
         </span>
-        <span className="font-mono text-[10px] font-bold uppercase text-[#068eff]">{NY_ZONE}</span>
+        <span className="font-mono text-[11px] leading-none font-bold uppercase text-[#068eff]">NYC</span>
       </div>
-      <p className="text-[10px] leading-tight text-slate-400 text-right">
-        {NY_DAY.format(now)}
-        <br />
-        время торгов - по Нью-Йорку (NYC)
+      <p className="mt-1.5 text-[10px] leading-tight text-slate-500">
+        время аукциона - по Нью-Йорку
       </p>
     </div>
   );
