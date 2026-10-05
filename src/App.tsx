@@ -378,10 +378,15 @@ export default function App() {
           <button
             type="button"
             onClick={() => setIsFilterOpen(true)}
-            className="flex items-center gap-1 text-[#068eff] hover:text-blue-400 font-semibold text-[11px] font-['Exo_2',sans-serif] uppercase"
+            aria-label={"Параметры фильтра: " + activeFiltersCount}
+            className="relative flex items-center justify-center w-8 h-8 shrink-0 rounded-lg text-[#068eff] hover:text-blue-400 hover:bg-[#068eff]/10"
           >
-            <SlidersHorizontal className="w-3.5 h-3.5" />
-            <span>Параметры ({activeFiltersCount})</span>
+            <SlidersHorizontal className="w-4 h-4" />
+            {activeFiltersCount > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 min-w-[15px] h-[15px] px-[3px] rounded-full bg-[#068eff] text-[#0b0e14] text-[9px] font-bold leading-[15px] text-center">
+                {activeFiltersCount}
+              </span>
+            )}
           </button>
         </div>
 
