@@ -25,6 +25,56 @@ import { AUCTION_LOTS } from './data/auctionLots';
 import { CarLot, PrimeFilterState, BotConfig, Currency, ClientFolder, DEFAULT_CLIENT_FOLDERS } from './types/car';
 import { carsApiService } from './services/carsApiService';
 
+// Площадки ведут торги по своему времени, и на лентах оно нью-йоркское:
+// отсюда живые часы на стартовом экране.
+const NY_CLOCK = new Intl.DateTimeFormat('ru-RU', {
+  timeZone: 'America/New_York',
+  hour: '2-digit',
+  minute: '2-digit',
+  second: '2-digit',
+  hourCycle: 'h23'
+});
+
+const NY_DAY = new Intl.DateTimeFormat('ru-RU', {
+  timeZone: 'America/New_York',
+  weekday: 'short',
+  day: 'numeric',
+  month: 'long'
+});
+
+const NY_ZONE =
+  new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/New_York',
+    hour: '2-digit',
+    timeZoneName: 'short'
+  })
+    .formatToParts(new Date())
+    .find((part) => part.type === 'timeZoneName')?.value ?? 'NYC';
+
+function NyTimePlate() {
+  const [now, setNow] = useState(() => new Date());
+
+  useEffect(() => {
+    const id = window.setInterval(() => setNow(new Date()), 1000);
+    return () => window.clearInterval(id);
+  }, []);
+
+  return (
+    <div className="mt-3 rounded-2xl border border-slate-800 bg-[#131724] px-4 py-3">
+      <div className="flex items-baseline justify-center gap-2">
+        <Clock className="w-4 h-4 text-[#068eff] shrink-0 self-center" />
+        <span className="font-mono tabular-nums text-[28px] leading-none font-black text-white tracking-tight">
+          {NY_CLOCK.format(now)}
+        </span>
+        <span className="font-mono text-[11px] font-bold uppercase text-[#068eff]">{NY_ZONE}</span>
+      </div>
+      <p className="text-[11px] text-slate-400 text-center mt-2">
+        {NY_DAY.format(now)} · время торгов считается по Нью-Йорку (NYC)
+      </p>
+    </div>
+  );
+}
+
 const DEFAULT_FILTERS: PrimeFilterState = {
   auction: '',
   timed: '', // По умолчанию лента показывает все аукционы, не только Timed
@@ -528,6 +578,8 @@ export default function App() {
                 </div>
               </button>
             </div>
+
+            <NyTimePlate />
           </div>
         </div>
       )}
