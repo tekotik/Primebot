@@ -394,9 +394,6 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
             <h4 className="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-1.5 font-['Exo_2',sans-serif]">
               <Car className="w-3.5 h-3.5 text-emerald-400" />
               <span>Фильтр подбора:</span>
-              <span className="text-[10px] font-normal normal-case tracking-normal text-slate-500">
-                *- обязательно
-              </span>
             </h4>
 
             {/* Аукцион */}

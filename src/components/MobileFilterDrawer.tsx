@@ -122,7 +122,6 @@ export const MobileFilterDrawer: React.FC<MobileFilterDrawerProps> = ({
             <h2 className="text-base font-bold text-white font-['Exo_2',sans-serif] uppercase tracking-wide">
               Фильтры поиска
             </h2>
-            <span className="text-[10px] font-bold text-red-300 uppercase">*- обязательно</span>
             {filters.timed === 'only' && (
               <span className="text-[10px] font-bold text-amber-400 bg-amber-950/70 border border-amber-500/40 px-2 py-0.5 rounded-full flex items-center gap-1 font-mono">
                 <Clock className="w-3 h-3" />
