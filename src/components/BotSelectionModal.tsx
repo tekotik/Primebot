@@ -139,6 +139,9 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
   const [sendNote, setSendNote] = useState('');
 
   // Что сервер по этому человеку уже держит - чтобы видеть до нового подбора.
+  // «Нет» на напоминании о смене фильтра: молчим, пока фильтр не поменяется снова.
+  const [dismissedDiff, setDismissedDiff] = useState('');
+
   const [serverSub, setServerSub] = useState<{
     state: 'idle' | 'loading' | 'ok' | 'error'; text: string; signature: string; total: number; savedAt: string; why: string;
   }>({ state: 'idle', text: '', signature: '', total: 0, savedAt: '', why: '' });
@@ -309,7 +312,18 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
   // Фильтр поменяли при активной подписке: применяем отдельно, чтобы смена
   // настройки не запускала новый скан каждый раз.
   const filterNeedsApply =
-    autoCollector.isActive && !!autoCollector.sentFilter && autoCollector.sentFilter !== currentSignature;
+    autoCollector.isActive
+    && !!autoCollector.sentFilter
+    && autoCollector.sentFilter !== currentSignature
+    && dismissedDiff !== currentSignature;
+
+  // Что подписка ищет прямо сейчас: серверная запись точнее, локальная
+  // строка сравнения - запасной вариант, если сервер молчит.
+  let sentSubscription: Record<string, string> | null = null;
+  try {
+    sentSubscription = autoCollector.sentFilter ? JSON.parse(autoCollector.sentFilter) : null;
+  } catch {}
+  const sentLabel = serverSub.text || (sentSubscription ? describeServerSubscription(sentSubscription) : '');
 
   const handleApplyFilter = async () => {
     const missing = missingRequiredFilters(filters);
@@ -403,15 +417,32 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
           <p className="text-[10px] text-slate-500 px-1">{[tgInfo, sendNote].filter(Boolean).join(' · ')}</p>
 
           {filterNeedsApply && (
-            <div className="p-2.5 bg-amber-950/40 border border-amber-600/50 rounded-xl flex items-center justify-between gap-2">
-              <span className="text-[11px] text-amber-200">Фильтр изменён, подписка ещё со старым</span>
-              <button
-                type="button"
-                onClick={handleApplyFilter}
-                className="px-2.5 py-1.5 rounded-lg bg-amber-500 text-black text-[11px] font-bold uppercase tracking-wide hover:bg-amber-400 transition-colors shrink-0"
-              >
-                Применить
-              </button>
+            <div className="p-2.5 bg-amber-950/40 border border-amber-600/50 rounded-xl space-y-1">
+              <p className="text-[11px] text-amber-100 leading-snug">
+                <span className="text-slate-400">Подписка идёт по: </span>{sentLabel || 'уточняется...'}
+              </p>
+              <p className="text-[11px] text-amber-100 leading-snug">
+                <span className="text-slate-400">В фильтре сейчас: </span>{filterSummary(filters)}
+              </p>
+              <div className="flex items-center gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={handleApplyFilter}
+                  className="px-2.5 py-1.5 rounded-lg bg-amber-500 text-black text-[11px] font-bold uppercase tracking-wide hover:bg-amber-400 transition-colors"
+                >
+                  Применить новый
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDismissedDiff(currentSignature);
+                    setToastText('Оставляем подписку по-старому');
+                  }}
+                  className="px-2.5 py-1.5 rounded-lg bg-[#0d1017] border border-slate-700 text-slate-300 text-[11px] font-semibold uppercase hover:text-white transition-colors"
+                >
+                  Нет
+                </button>
+              </div>
             </div>
           )}
 
