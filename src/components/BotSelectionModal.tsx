@@ -258,15 +258,25 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
   // переживает /stop и показывает то, чего уже нет.
   const refreshServerSubscription = async () => {
     setServerSub((prev) => ({ ...prev, state: 'loading' }));
+    const startedAt = Date.now();
     const res = await sendBotPayload({ action: 'autocollect_list' });
 
+    // Ответ приходит за полсекунды, и перебор страниц успел бы только мелькнуть.
+    // Держим его минимум 1,2 секунды, чтобы человек видел работу, а не мигание.
+    const holdScan = async () => {
+      const rest = 1200 - (Date.now() - startedAt);
+      if (rest > 0) await new Promise((resolve) => setTimeout(resolve, rest));
+    };
+
     if (!res.ok) {
+      await holdScan();
       setServerSub({ state: 'error', text: '', signature: '', total: 0, savedAt: '', why: res.why });
       return;
     }
 
     const sub: Record<string, string> | null = res.data?.subscription || null;
     const signature = sub ? serverSignature(sub) : '';
+    await holdScan();
     setServerSub({
       state: 'ok',
       text: sub ? describeServerSubscription(sub) : '',

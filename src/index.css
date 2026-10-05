@@ -83,7 +83,7 @@
 }
 
 .animate-scan {
-  animation: scanSweep 0.9s linear infinite;
+  animation: scanSweep 0.5s linear infinite;
   will-change: transform;
 }
 
