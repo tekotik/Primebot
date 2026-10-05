@@ -589,10 +589,10 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
               </div>
             </div>
 
-            {/* Периодичность проверки (1 раз в день) */}
+            {/* Периодичность фиксирована: квота источника */}
             <div className="space-y-1.5 pt-1">
               <label className="text-[10px] text-slate-400 block">Периодичность отправки подборки:</label>
-              <div className="grid grid-cols-3 gap-1.5">
+              <div>
                 <button
                   type="button"
                   onClick={() => setAutoCollector((prev) => ({ ...prev, intervalHours: 24 }))}
@@ -603,30 +603,6 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
                   }`}
                 >
                   1 раз в день
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setAutoCollector((prev) => ({ ...prev, intervalHours: 12 }))}
-                  className={`py-2 px-2 rounded-xl text-xs font-semibold border transition-all ${
-                    autoCollector.intervalHours === 12
-                      ? 'bg-emerald-600/25 border-emerald-500 text-white font-bold'
-                      : 'bg-[#0d1017] border-slate-800 text-slate-400'
-                  }`}
-                >
-                  2 раза в день
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setAutoCollector((prev) => ({ ...prev, intervalHours: 1 }))}
-                  className={`py-2 px-2 rounded-xl text-xs font-semibold border transition-all ${
-                    autoCollector.intervalHours === 1
-                      ? 'bg-emerald-600/25 border-emerald-500 text-white font-bold'
-                      : 'bg-[#0d1017] border-slate-800 text-slate-400'
-                  }`}
-                >
-                  Каждый час
                 </button>
               </div>
             </div>
