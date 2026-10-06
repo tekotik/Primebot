@@ -38,7 +38,7 @@ from telegram import (
     InlineKeyboardMarkup,
     InputMediaPhoto,
     WebAppInfo,
-    MenuButtonWebApp
+    MenuButtonDefault
 )
 from telegram.constants import ParseMode
 from telegram.ext import (
@@ -501,19 +501,11 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "Я ищу актуальные автомобили на аукционах <b>Copart</b> и <b>IAAI (Timed)</b> "
         "и считаю время до закрытия торгов.\n\n"
         "🤖 Кнопка «Открыть автоподбор» ведёт в мини-приложение: там лента лотов, "
-        "фильтр и автосборщик, который сам присылает подборку 1 раз в день.\n\n"
-        "Остальное подскажет <code>/help</code>."
+        "фильтр и автосборщик, который сам присылает подборку 1 раз в день."
     )
     keyboard = [
         [
             InlineKeyboardButton("🤖 Открыть автоподбор", web_app=WebAppInfo(url=url))
-        ],
-        [
-            InlineKeyboardButton("⚡ Быстрый поиск Timed", callback_data="cmd_quick_timed"),
-            InlineKeyboardButton("⚙️ Фильтры", callback_data="cmd_open_filters")
-        ],
-        [
-            InlineKeyboardButton("🌐 Открыть веб-каталог", url=f"{SITE_BASE_URL}/")
         ]
     ]
     await update.message.reply_text(text, parse_mode=ParseMode.HTML, reply_markup=InlineKeyboardMarkup(keyboard))
@@ -1344,19 +1336,16 @@ def main():
 
 
 async def open_mini_app_entry(app: Application):
-    """Кнопка меню чата бота (рядом с полем ввода) должна вести в Mini App.
-    Без неё приложение открывается вне Telegram и подписка не имеет ни подписи
-    initData, ни username бота для запасного deep-link."""
+    """Кнопку у поля ввода не показываем: в боте остаётся одна кнопка -
+    «Открыть автоподбор» в приветствии. Сброс нужен и для старых чатов, где
+    кнопка уже была установлена."""
     global BOT_USERNAME
     try:
         BOT_USERNAME = app.bot.username or BOT_USERNAME
-        url = app_url()
-        await app.bot.set_chat_menu_button(menu_button=MenuButtonWebApp(
-            text="Автоподбор", web_app=WebAppInfo(url=url)
-        ))
-        logger.info(f"Кнопка меню бота ведёт в Mini App: {url}")
+        await app.bot.set_chat_menu_button(menu_button=MenuButtonDefault())
+        logger.info("Кнопка меню чата сброшена на стандартную.")
     except Exception as e:
-        logger.warning(f"Не удалось задать кнопку меню бота: {e}")
+        logger.warning(f"Не удалось сбросить кнопку меню чата: {e}")
 
 
 if __name__ == "__main__":
