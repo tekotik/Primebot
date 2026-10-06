@@ -426,6 +426,14 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
       }
     }
 
+    if (!starting) {
+      abortRef.current?.abort();
+      abortRef.current = null;
+      setServerSub((prev) => ({ ...prev, state: 'idle', text: '', signature: '', savedAt: '', why: '' }));
+      setAutoCollector((prev) => ({ ...prev, isActive: false, sentFilter: '' }));
+      setToastText('Поиск остановлен');
+    }
+
     const sent = await sendBotPayload({
       action: starting ? 'autocollect' : 'autocollect_stop',
       ...subscription
@@ -434,20 +442,23 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
     setSendNote(sent.why);
 
     if (!sent.ok) {
-      setToastText('Подписка не ушла: ' + sent.why);
+      setServerSub((prev) => ({ ...prev, state: 'error', why: sent.why }));
+      setToastText(starting
+        ? 'Подписка не ушла: ' + sent.why
+        : 'Поиск остановлен, но сервер не снял подписку: ' + sent.why);
       return;
     }
 
-    setAutoCollector((prev) => ({
-      ...prev,
-      isActive: starting,
-      lastRun: starting ? Date.now() : prev.lastRun,
-      sentFilter: starting ? currentSignature : ''
-    }));
+    if (starting) {
+      setAutoCollector((prev) => ({
+        ...prev,
+        isActive: true,
+        lastRun: Date.now(),
+        sentFilter: currentSignature
+      }));
+      setToastText(`⚡ Автосборщик запущен! Ищем ${subscription.make} ${subscription.model}`);
+    }
 
-    setToastText(starting
-      ? `⚡ Автосборщик запущен! Ищем ${subscription.make} ${subscription.model}`
-      : 'Автосборщик остановлен');
     await refreshServerSubscription();
   };
 
@@ -467,23 +478,25 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
   } catch {}
   const sentLabel = serverSub.text || (sentSubscription ? describeServerSubscription(sentSubscription) : '');
 
-  // Отмена поиска: перебор гаснем сразу, подписку снимаем на сервере.
+  // Отмена гаснит перебор сразу, не дожидаясь ответа сервера: иначе при отказе
+  // кнопка выглядит сломанной, а отказ показываем отдельной строкой.
   const handleCancelSearch = async () => {
     abortRef.current?.abort();
     abortRef.current = null;
     setServerSub((prev) => ({ ...prev, state: 'idle', text: '', signature: '', savedAt: '', why: '' }));
+    setAutoCollector((prev) => ({ ...prev, isActive: false, sentFilter: '' }));
+    setDismissedDiff('');
+    setToastText('Поиск остановлен');
 
     const sent = await sendBotPayload({ action: 'autocollect_stop', ...collectorSubscription(config, filters) });
     setSendNote(sent.why);
 
     if (!sent.ok) {
       setServerSub((prev) => ({ ...prev, state: 'error', why: sent.why }));
-      setToastText('Поиск не отменён: ' + sent.why);
+      setToastText('Поиск остановлен, но сервер не снял подписку: ' + sent.why);
       return;
     }
 
-    setAutoCollector((prev) => ({ ...prev, isActive: false, sentFilter: '' }));
-    setDismissedDiff('');
     setToastText('Отменено: поиск остановлен, подписка снята');
     await refreshServerSubscription();
   };
