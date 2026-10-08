@@ -17,8 +17,7 @@ PrimeAvtoExport Telegram Bot (Primebot)
 4. Кэширование:
    - 5 минут на идентичные запросы (не перегружать сервер).
 5. Ссылки:
-   - Кнопка 1: "🔗 Лот на аукционе" -> lot['link']
-   - Кнопка 2: "💰 Расчёт под ключ" -> {site_base}/ru/calculator/?lot={lot_id}
+   - Одна кнопка "🔎 Проверка по VIN" -> carcheckbot.com с подставленными VIN и номером лота
 """
 
 import os
@@ -294,15 +293,6 @@ def calculate_live_countdown(lot: Dict[str, Any]) -> str:
         return countdown.get("text_days") or lot.get("auction_date", "уточняется")
 
 
-def normalize_lot_url(url: str) -> str:
-    """Нормализует ссылку в зависимости от окружения (staging vs prod)."""
-    if not url:
-        return url
-    if IS_PRODUCTION:
-        return url.replace("https://primeavtoexport.com/staging", "https://primeavtoexport.com")
-    return url
-
-
 def get_cached(key: str) -> Optional[Dict[str, Any]]:
     """Возвращает кэшированный ответ, если прошло меньше 5 минут."""
     if key in QUERY_CACHE:
@@ -368,15 +358,31 @@ def get_lot_primary_photo(lot: Dict[str, Any]) -> Optional[str]:
     return lot.get("photo")
 
 
+# Тип продавца в источнике приходит латиницей; неизвестные значения отдаём как есть.
+SELLER_TYPES = {
+    "dealer": "дилер",
+    "financial company/lending": "финансовая компания",
+    "rental company": "прокатная компания",
+    "government": "государственная структура",
+    "government/municipality": "государственная структура",
+    "insurance": "страховая компания",
+    "repossession": "изъятие по кредиту",
+    "auction": "аукцион",
+    "commercial": "коммерческий продавец",
+    "individual": "частный продавец",
+    "fleet": "ведомственный автопарк",
+}
+
+
 def format_lot_message(lot: Dict[str, Any]) -> tuple[str, InlineKeyboardMarkup]:
     """
     Форматирует карточку лота согласно техническому заданию:
     - Фото: sendPhoto
     - Год + Марка + Модель + Серия
-    - Ставка и «купить сейчас»
+    - Ставка, резерв продавца и «купить сейчас»
     - Площадка + номер лота + штат
     - До закрытия (часы для timed)
-    - Ссылка на лот и ссылка на расчет под ключ
+    - Продавец
     """
     year = lot.get("year", "")
     make = lot.get("make", "")
@@ -418,6 +424,23 @@ def format_lot_message(lot: Dict[str, Any]) -> tuple[str, InlineKeyboardMarkup]:
     status = lot.get("status", "Runs")
     specs_line = f"📄 <b>Титул:</b> {doc.capitalize()} | <b>Статус:</b> {status}"
 
+    seller = (lot.get("seller") or "").strip()
+    seller_type = (lot.get("seller_type") or "").strip()
+    seller_text = seller or SELLER_TYPES.get(seller_type.lower()) or seller_type or "не указан"
+    seller_line = f"🏢 <b>Продавец:</b> {seller_text}"
+
+    # Резерв показывает только когда источник назвал цифру: без неё в карточке
+    # нечего выдумывать.
+    reserve = lot.get("reserve_price")
+
+    if isinstance(reserve, (int, float)) and reserve > 0:
+        reserve_text = f"${int(reserve):,}".replace(",", " ")
+        bid_value = bid if isinstance(bid, (int, float)) else 0
+        reached = "достигнут" if bid_value >= reserve else "не достигнут"
+        reserve_line = f"🔒 <b>Резерв продавца:</b> {reserve_text} ({reached})"
+    else:
+        reserve_line = ""
+
     odometer = lot.get("odometer_mi")
     odo_line = f"🛣 <b>Пробег:</b> {odometer:,} миль".replace(",", " ") if odometer else ""
 
@@ -427,26 +450,18 @@ def format_lot_message(lot: Dict[str, Any]) -> tuple[str, InlineKeyboardMarkup]:
     text_parts = [title_line]
     if vin_line:
         text_parts.append(vin_line)
-    text_parts.extend([price_line, site_info, time_line, specs_line])
+    text_parts.extend([price_line, site_info, time_line, specs_line, seller_line])
+
+    if reserve_line:
+        text_parts.append(reserve_line)
+
     if odo_line:
         text_parts.append(odo_line)
 
     caption = "\n".join(text_parts)
 
-    # Три ссылки:
-    # 1. link - прямая ссылка на страницу лота
-    # 2. {site_base}/ru/calculator/?lot={lot_id} - ссылка на официальный расчет
-    # 3. carcheckbot - проверка по VIN, лот подставляется в ?lot=
-    raw_lot_link = lot.get("link") or f"https://www.iaai.com/VehicleDetail/{lot_id}"
-    lot_link = normalize_lot_url(raw_lot_link)
-    calc_link = f"{SITE_BASE_URL}/ru/calculator/?lot={lot_id}"
-
-    keyboard = [
-        [
-            InlineKeyboardButton("🔗 Лот на аукционе", url=lot_link),
-            InlineKeyboardButton("💰 Расчёт под ключ", url=calc_link)
-        ]
-    ]
+    # Кнопка одна: проверка по VIN, лот подставляется в ?lot=
+    keyboard = []
 
     if vin and lot_id:
         check_link = f"https://carcheckbot.com/ru/car/{vin}?lot={lot_id}"
