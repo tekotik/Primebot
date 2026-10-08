@@ -458,13 +458,18 @@ def format_lot_message(lot: Dict[str, Any]) -> tuple[str, InlineKeyboardMarkup]:
     if odo_line:
         text_parts.append(odo_line)
 
+    # Одна и та же ссылка ведёт в carcheckbot сразу по этому лоту: и синей
+    # строкой в карточке, и кнопкой.
+    check_link = f"https://carcheckbot.com/ru/car/{vin}?lot={lot_id}" if vin and lot_id else ""
+
+    if check_link:
+        text_parts.append(f'🔎 <a href="{check_link}">Кто продавец? Резерв продавца</a>')
+
     caption = "\n".join(text_parts)
 
-    # Кнопка одна: проверка по VIN, лот подставляется в ?lot=
     keyboard = []
 
-    if vin and lot_id:
-        check_link = f"https://carcheckbot.com/ru/car/{vin}?lot={lot_id}"
+    if check_link:
         keyboard.append([InlineKeyboardButton("🔎 Проверка по VIN", url=check_link)])
 
     return caption, InlineKeyboardMarkup(keyboard)
