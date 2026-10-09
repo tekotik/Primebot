@@ -21,6 +21,7 @@ PrimeAvtoExport Telegram Bot (Primebot)
 """
 
 import os
+import re
 import secrets
 import sys
 import time
@@ -119,6 +120,12 @@ USER_PREFERENCES: Dict[int, Dict[str, Any]] = {}
 SUBSCRIBERS_FILE = os.path.join(os.path.dirname(__file__), "subscribers.json")
 # Лёгкая локальная база бота: один SQLite-файл, без серверной СУБД.
 DB_PATH = os.getenv("PRIME_DB_PATH", "/opt/primebot/primebot.db")
+
+# Кто имеет право на служебные команды (/send). Пусто - команда запрещена для всех,
+# а id обратившегося попадает в журнал, чтобы владелец добавил себя в PRIME_ADMIN_IDS.
+ADMIN_IDS = {
+    int(x) for x in re.split(r"[,;\s]+", os.getenv("PRIME_ADMIN_IDS", "")) if x.isdigit()
+}
 DAILY_SUBSCRIBERS: Dict[int, Dict[str, str]] = {}
 
 
@@ -137,13 +144,51 @@ def normalize_make(raw_make: str) -> str:
 
 
 def _db_conn():
-    """Подключение к primebot.db с созданием таблицы при первом запуске."""
+    """Подключение к primebot.db с созданием таблиц при первом запуске."""
     conn = sqlite3.connect(DB_PATH)
     conn.execute(
         "CREATE TABLE IF NOT EXISTS subscribers ("
         "user_id INTEGER PRIMARY KEY, cfg TEXT NOT NULL, updated_at TEXT)"
     )
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS chats ("
+        "user_id INTEGER PRIMARY KEY, name TEXT, username TEXT, last_seen TEXT)"
+    )
     return conn
+
+
+def record_chat(user) -> None:
+    """Пишет адресата в таблицу chats: из неё собирается список получателей рассылки."""
+    if not user or not user.id:
+        return
+    try:
+        conn = _db_conn()
+        conn.execute(
+            "INSERT OR REPLACE INTO chats (user_id, name, username, last_seen) VALUES (?, ?, ?, ?)",
+            (
+                user.id,
+                user.first_name or "",
+                user.username or "",
+                datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            ),
+        )
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        logger.error(f"Ошибка записи chats в {DB_PATH}: {e}")
+
+
+def known_chats() -> List[int]:
+    """Все, кому бот имеет право писать: сохранённые чаты плюс действующие подписчики."""
+    ids: set = set()
+    try:
+        conn = _db_conn()
+        ids = {int(r[0]) for r in conn.execute("SELECT user_id FROM chats")}
+        conn.close()
+    except Exception as e:
+        logger.error(f"Ошибка чтения chats из {DB_PATH}: {e}")
+    ids.update(int(uid) for uid in DAILY_SUBSCRIBERS)
+    return sorted(ids)
 
 
 def load_subscribers():
@@ -1018,12 +1063,46 @@ async def web_app_data_handler(update: Update, context: ContextTypes.DEFAULT_TYP
         logger.error(f"Ошибка парсинга web_app_data: {e}")
 
 
+async def send_broadcast_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Служебная рассылка: /send <текст> - сообщение всем, кто писал боту."""
+    user = update.effective_user
+    if not user or user.id not in ADMIN_IDS:
+        if user:
+            logger.info(f"Рассылку запросил не служебный id: {user.id}")
+        await update.message.reply_text("Команда доступна владельцу бота.")
+        return
+
+    text = " ".join(context.args or []).strip()
+    if not text:
+        await update.message.reply_text("Формат: /send <текст сообщения>")
+        return
+
+    recipients = known_chats()
+    if not recipients:
+        await update.message.reply_text("Получателей нет: бот ещё ни с кем не общался.")
+        return
+
+    await update.message.reply_text(f"Отправляю {len(recipients)} адресатам...")
+    sent, failed = 0, 0
+    for chat_id in recipients:
+        try:
+            await context.bot.send_message(chat_id=chat_id, text=text)
+            sent += 1
+        except Exception as e:
+            failed += 1
+            logger.warning(f"Рассылка не дошла до {chat_id}: {e}")
+        await asyncio.sleep(0.05)
+
+    await update.message.reply_text(f"Доставлено: {sent}. Не доставлено: {failed}.")
+
+
 async def log_any_update(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Журнал входящих апдейтов во второй группе обработчиков: пишет, что бот
     получил сообщение, даже если его никто не обслужил. Без него нельзя
     отличить «не дошло» от «дошло, но проигнорировано»."""
     user = update.effective_user
     who = f"{user.id}" if user else "без автора"
+    record_chat(user)
     if update.message:
         kind = "web_app_data" if update.message.web_app_data else "сообщение"
         body = (update.message.web_app_data.data if update.message.web_app_data
@@ -1050,6 +1129,7 @@ PLAIN_TEXT_COMMANDS = {
     "autocollect_now": "watch_now_command",
     "watch": "watch_now_command",
     "watch_reset": "watch_reset_command",
+    "send": "send_broadcast_command",
 }
 
 
@@ -1365,6 +1445,7 @@ def main():
     app.add_handler(CommandHandler("autocollect_now", watch_now_command))
     app.add_handler(CommandHandler("watch", watch_now_command))
     app.add_handler(CommandHandler("watch_reset", watch_reset_command))
+    app.add_handler(CommandHandler("send", send_broadcast_command))
     app.add_handler(CallbackQueryHandler(button_callback_handler))
     app.add_handler(MessageHandler(filters.StatusUpdate.WEB_APP_DATA, web_app_data_handler))
     # Команда, которую Telegram не разметил как команду, приходит обычным

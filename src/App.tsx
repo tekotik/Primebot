@@ -23,7 +23,7 @@ import { ClockDialAnimation } from './components/ClockDialAnimation';
 import { SaveToFolderModal } from './components/SaveToFolderModal';
 import { UserSettingsModal } from './components/UserSettingsModal';
 import { AUCTION_LOTS } from './data/auctionLots';
-import { CarLot, PrimeFilterState, BotConfig, Currency, ClientFolder, DEFAULT_CLIENT_FOLDERS, AppTheme } from './types/car';
+import { CarLot, PrimeFilterState, BotConfig, Currency, ClientFolder, DEFAULT_CLIENT_FOLDERS, sanitizeFolders, AppTheme } from './types/car';
 import { carsApiService } from './services/carsApiService';
 
 // Площадки ведут торги по своему времени, и на лентах оно нью-йоркское:
@@ -137,7 +137,7 @@ export default function App() {
   const [folders, setFolders] = useState<ClientFolder[]>(() => {
     try {
       const saved = localStorage.getItem('prime_client_folders');
-      return saved ? JSON.parse(saved) : DEFAULT_CLIENT_FOLDERS;
+      return saved ? sanitizeFolders(JSON.parse(saved)) : DEFAULT_CLIENT_FOLDERS;
     } catch {
       return DEFAULT_CLIENT_FOLDERS;
     }
@@ -167,11 +167,13 @@ export default function App() {
   });
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // App theme state: 'light' (CarCheckBot Light, по умолчанию) vs 'dark' (Carbon Dark)
+  // App theme state: 'light' (CarCheckBot Light) — единственная открытая тема.
+  // 'dark' (Carbon Dark) отдаётся только после служебного пароля и живёт до сброса ключа.
   const [theme, setTheme] = useState<AppTheme>(() => {
     try {
+      const unlocked = localStorage.getItem('prime_dark_unlocked') === '1';
       const saved = localStorage.getItem('prime_app_theme') as AppTheme;
-      return saved === 'light' || saved === 'dark' ? saved : 'light';
+      return unlocked && saved === 'dark' ? 'dark' : 'light';
     } catch {
       return 'light';
     }

@@ -42,14 +42,27 @@ export const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
 }) => {
   const [darkPrompt, setDarkPrompt] = useState<'closed' | 'open' | 'wrong'>('closed');
   const [darkInput, setDarkInput] = useState('');
+  const [darkUnlocked, setDarkUnlocked] = useState(() => {
+    try {
+      return localStorage.getItem('prime_dark_unlocked') === '1';
+    } catch {
+      return false;
+    }
+  });
 
   if (!isOpen) return null;
 
   const isLight = theme === 'light';
+  // Карточка тёмной темы видна только после разблокировки (или когда она уже включена).
+  const showDarkCard = darkUnlocked || !isLight;
 
   // Тёмная тема открывается только по служебному паролю: витрина по умолчанию светлая.
   const submitDarkUnlock = () => {
     if (darkInput === 'adminadmin') {
+      try {
+        localStorage.setItem('prime_dark_unlocked', '1');
+      } catch {}
+      setDarkUnlocked(true);
       setDarkPrompt('closed');
       setDarkInput('');
       onChangeTheme('dark');
@@ -154,13 +167,18 @@ export const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
               </span>
             </div>
 
-            {/* Две карточки тем: Тёмная и Светлая */}
-            <div className="grid grid-cols-2 gap-2.5">
+            {/* Карточки тем: тёмная показывается только после служебного пароля */}
+            <div className={`grid gap-2.5 ${showDarkCard ? 'grid-cols-2' : 'grid-cols-1'}`}>
               {/* 1. ТЁМНАЯ ТЕМА */}
+              {showDarkCard && (
               <button
                 type="button"
                 onClick={() => {
                   if (!isLight) return;
+                  if (darkUnlocked) {
+                    onChangeTheme('dark');
+                    return;
+                  }
                   setDarkInput('');
                   setDarkPrompt('open');
                 }}
@@ -202,11 +220,9 @@ export const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
                     </div>
                   )}
                 </div>
-                <span className="text-[10px] text-slate-400 mt-0.5 flex items-center gap-1">
-                  <Lock className="w-2.5 h-2.5 shrink-0" />
-                  Carbon &amp; Neon Blue - по паролю
-                </span>
+                <span className="text-[10px] text-slate-400 mt-0.5">Carbon &amp; Neon Blue</span>
               </button>
+              )}
 
               {/* 2. СВЕТЛАЯ ТЕМА (CARCHECKBOT STYLE) */}
               <button
@@ -255,6 +271,22 @@ export const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
                 </span>
               </button>
             </div>
+
+            {!showDarkCard && darkPrompt === 'closed' && (
+              <button
+                type="button"
+                onClick={() => {
+                  setDarkInput('');
+                  setDarkPrompt('open');
+                }}
+                className={`mt-2 flex items-center gap-1.5 text-[11px] font-semibold ${
+                  isLight ? 'text-slate-400' : 'text-slate-500'
+                }`}
+              >
+                <Lock className="w-3 h-3" />
+                Служебный доступ
+              </button>
+            )}
 
             {darkPrompt !== 'closed' && (
               <div

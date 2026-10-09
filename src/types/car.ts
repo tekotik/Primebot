@@ -100,22 +100,18 @@ export interface ClientFolder {
   notificationsEnabled?: boolean;
 }
 
-export const DEFAULT_CLIENT_FOLDERS: ClientFolder[] = [
-  {
-    id: 'folder-sergey',
-    name: 'Сергей',
-    createdAt: 1727700000000,
-    lotIds: ['lot-892104'],
-    notificationsEnabled: false
-  },
-  {
-    id: 'folder-alex',
-    name: 'Алексей',
-    createdAt: 1727703600000,
-    lotIds: [],
-    notificationsEnabled: false
-  }
-];
+// Демонстрационные папки «Сергей»/«Алексей» больше не создаются: каждый юзер называет папки сам.
+export const LEGACY_DEMO_FOLDER_IDS = ['folder-sergey', 'folder-alex'];
+
+export const DEFAULT_CLIENT_FOLDERS: ClientFolder[] = [];
+
+// Вычищает из сохранённого списка демо-папки старых версий.
+export function sanitizeFolders(list: unknown): ClientFolder[] {
+  if (!Array.isArray(list)) return [];
+  return list.filter(
+    (f): f is ClientFolder => !!f && !LEGACY_DEMO_FOLDER_IDS.includes(f.id)
+  );
+}
 
 export type Currency = 'USD' | 'RUB' | 'EUR';
 
