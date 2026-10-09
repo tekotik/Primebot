@@ -135,7 +135,7 @@ body.theme-light {
 .theme-light ::-webkit-scrollbar-thumb { background: #D8CCC5 !important; }
 .theme-light ::selection { background: #FBE3DA !important; color: #22140F !important; }
 
-/* Поверхности (117) */
+/* Поверхности (116) */
 .theme-light .active\:bg-\[\#006cc8\]:active {
   background-color:#C43B15 !important;
 }
@@ -484,9 +484,6 @@ body.theme-light {
 .theme-light .hover\:bg-slate-800\/80:hover {
   background-color:#FFFFFF !important;
 }
-.theme-light .selection\:bg-\[\#068eff\] {
-  background-color:#C43B15 !important;
-}
 
 /* Тёмные стопы градиентов (10) */
 .theme-light .from-\[\#0c1626\] {
@@ -678,7 +675,7 @@ body.theme-light {
   border-color:#E8D8CD !important;
 }
 
-/* Текст (46) */
+/* Текст (44) */
 .theme-light .group:hover .group-hover\:text-\[\#068eff\] {
   color:#C43B15 !important;
 }
@@ -716,12 +713,6 @@ body.theme-light {
   color:#22140F !important;
 }
 .theme-light .hover\:text-white:hover {
-  color:#22140F !important;
-}
-.theme-light .placeholder\:text-slate-600 {
-  color:#A08D82 !important;
-}
-.theme-light .selection\:text-white {
   color:#22140F !important;
 }
 .theme-light .text-\[\#008fff\] {
@@ -839,28 +830,44 @@ body.theme-light {
 .theme-light .bg-\[\#068eff\].text-white,
 .theme-light .bg-cyan-500 .text-white,
 .theme-light .bg-cyan-500.text-white,
-.theme-light .bg-red-600 .text-white,
-.theme-light .bg-red-600.text-white {
+.theme-light .bg-black\/80 .text-white,
+.theme-light .bg-black\/80.text-white {
   color: #FFFFFF !important;
 }
+.theme-light .bg-red-600 .text-white,
+.theme-light .bg-red-600.text-white,
 .theme-light .bg-emerald-600 .text-white,
 .theme-light .bg-emerald-600.text-white,
+.theme-light .bg-black\/70 .text-white,
+.theme-light .bg-black\/70.text-white {
+  color: #FFFFFF !important;
+}
 .theme-light .bg-blue-600 .text-white,
 .theme-light .bg-blue-600.text-white,
+.theme-light .bg-black\/60 .text-white,
+.theme-light .bg-black\/60.text-white,
 .theme-light .bg-blue-500 .text-white,
 .theme-light .bg-blue-500.text-white {
   color: #FFFFFF !important;
 }
+.theme-light .bg-black\/75 .text-white,
+.theme-light .bg-black\/75.text-white,
+.theme-light .bg-black\/90 .text-white,
+.theme-light .bg-black\/90.text-white,
 .theme-light .bg-\[\#D94625\] .text-white,
-.theme-light .bg-\[\#D94625\].text-white,
+.theme-light .bg-\[\#D94625\].text-white {
+  color: #FFFFFF !important;
+}
 .theme-light .bg-blue-400 .text-white,
 .theme-light .bg-blue-400.text-white,
 .theme-light .bg-amber-600 .text-white,
-.theme-light .bg-amber-600.text-white {
+.theme-light .bg-amber-600.text-white,
+.theme-light .bg-emerald-500 .text-white,
+.theme-light .bg-emerald-500.text-white {
   color: #FFFFFF !important;
 }
-.theme-light .bg-emerald-500 .text-white,
-.theme-light .bg-emerald-500.text-white,
+.theme-light .bg-black\/85 .text-white,
+.theme-light .bg-black\/85.text-white,
 .theme-light .bg-red-400 .text-white,
 .theme-light .bg-red-400.text-white,
 .theme-light .bg-red-500 .text-white,
@@ -884,14 +891,22 @@ body.theme-light {
 /* Наследование светлого текста для очень тёмных плашек: акцентные кнопки, затемнения фото */
 /* Наследуемый светлый текст: #FFFFFF */
 .theme-light .bg-\[\#068eff\],
+.theme-light .bg-black\/80,
 .theme-light .bg-red-600,
 .theme-light .bg-emerald-600,
-.theme-light .bg-blue-600,
-.theme-light .bg-blue-500,
-.theme-light .bg-\[\#D94625\] {
+.theme-light .bg-black\/70,
+.theme-light .bg-blue-600 {
   color: #FFFFFF !important;
 }
-.theme-light .bg-amber-600,
+.theme-light .bg-black\/60,
+.theme-light .bg-blue-500,
+.theme-light .bg-black\/75,
+.theme-light .bg-black\/90,
+.theme-light .bg-\[\#D94625\],
+.theme-light .bg-amber-600 {
+  color: #FFFFFF !important;
+}
+.theme-light .bg-black\/85,
 .theme-light .bg-red-400,
 .theme-light .bg-red-500,
 .theme-light .bg-\[\#068eff\]\/60,
@@ -904,30 +919,46 @@ body.theme-light {
 .theme-light .bg-\[\#068eff\]text-slate-100,
 .theme-light .bg-cyan-500 .text-slate-100,
 .theme-light .bg-cyan-500text-slate-100,
-.theme-light .bg-amber-500 .text-slate-100,
-.theme-light .bg-amber-500text-slate-100 {
+.theme-light .bg-black\/80 .text-slate-100,
+.theme-light .bg-black\/80text-slate-100 {
   color: #F1F5F9 !important;
 }
+.theme-light .bg-amber-500 .text-slate-100,
+.theme-light .bg-amber-500text-slate-100,
 .theme-light .bg-red-600 .text-slate-100,
 .theme-light .bg-red-600text-slate-100,
 .theme-light .bg-emerald-600 .text-slate-100,
-.theme-light .bg-emerald-600text-slate-100,
+.theme-light .bg-emerald-600text-slate-100 {
+  color: #F1F5F9 !important;
+}
+.theme-light .bg-black\/70 .text-slate-100,
+.theme-light .bg-black\/70text-slate-100,
 .theme-light .bg-blue-600 .text-slate-100,
-.theme-light .bg-blue-600text-slate-100 {
+.theme-light .bg-blue-600text-slate-100,
+.theme-light .bg-black\/60 .text-slate-100,
+.theme-light .bg-black\/60text-slate-100 {
   color: #F1F5F9 !important;
 }
 .theme-light .bg-blue-500 .text-slate-100,
 .theme-light .bg-blue-500text-slate-100,
+.theme-light .bg-black\/75 .text-slate-100,
+.theme-light .bg-black\/75text-slate-100,
+.theme-light .bg-black\/90 .text-slate-100,
+.theme-light .bg-black\/90text-slate-100 {
+  color: #F1F5F9 !important;
+}
 .theme-light .bg-\[\#D94625\] .text-slate-100,
 .theme-light .bg-\[\#D94625\]text-slate-100,
 .theme-light .bg-blue-400 .text-slate-100,
-.theme-light .bg-blue-400text-slate-100 {
+.theme-light .bg-blue-400text-slate-100,
+.theme-light .bg-amber-600 .text-slate-100,
+.theme-light .bg-amber-600text-slate-100 {
   color: #F1F5F9 !important;
 }
-.theme-light .bg-amber-600 .text-slate-100,
-.theme-light .bg-amber-600text-slate-100,
 .theme-light .bg-emerald-500 .text-slate-100,
 .theme-light .bg-emerald-500text-slate-100,
+.theme-light .bg-black\/85 .text-slate-100,
+.theme-light .bg-black\/85text-slate-100,
 .theme-light .bg-red-400 .text-slate-100,
 .theme-light .bg-red-400text-slate-100 {
   color: #F1F5F9 !important;
@@ -948,30 +979,46 @@ body.theme-light {
 .theme-light .bg-\[\#068eff\]text-slate-200,
 .theme-light .bg-cyan-500 .text-slate-200,
 .theme-light .bg-cyan-500text-slate-200,
-.theme-light .bg-amber-500 .text-slate-200,
-.theme-light .bg-amber-500text-slate-200 {
+.theme-light .bg-black\/80 .text-slate-200,
+.theme-light .bg-black\/80text-slate-200 {
   color: #E2E8F0 !important;
 }
+.theme-light .bg-amber-500 .text-slate-200,
+.theme-light .bg-amber-500text-slate-200,
 .theme-light .bg-red-600 .text-slate-200,
 .theme-light .bg-red-600text-slate-200,
 .theme-light .bg-emerald-600 .text-slate-200,
-.theme-light .bg-emerald-600text-slate-200,
+.theme-light .bg-emerald-600text-slate-200 {
+  color: #E2E8F0 !important;
+}
+.theme-light .bg-black\/70 .text-slate-200,
+.theme-light .bg-black\/70text-slate-200,
 .theme-light .bg-blue-600 .text-slate-200,
-.theme-light .bg-blue-600text-slate-200 {
+.theme-light .bg-blue-600text-slate-200,
+.theme-light .bg-black\/60 .text-slate-200,
+.theme-light .bg-black\/60text-slate-200 {
   color: #E2E8F0 !important;
 }
 .theme-light .bg-blue-500 .text-slate-200,
 .theme-light .bg-blue-500text-slate-200,
+.theme-light .bg-black\/75 .text-slate-200,
+.theme-light .bg-black\/75text-slate-200,
+.theme-light .bg-black\/90 .text-slate-200,
+.theme-light .bg-black\/90text-slate-200 {
+  color: #E2E8F0 !important;
+}
 .theme-light .bg-\[\#D94625\] .text-slate-200,
 .theme-light .bg-\[\#D94625\]text-slate-200,
 .theme-light .bg-blue-400 .text-slate-200,
-.theme-light .bg-blue-400text-slate-200 {
+.theme-light .bg-blue-400text-slate-200,
+.theme-light .bg-amber-600 .text-slate-200,
+.theme-light .bg-amber-600text-slate-200 {
   color: #E2E8F0 !important;
 }
-.theme-light .bg-amber-600 .text-slate-200,
-.theme-light .bg-amber-600text-slate-200,
 .theme-light .bg-emerald-500 .text-slate-200,
 .theme-light .bg-emerald-500text-slate-200,
+.theme-light .bg-black\/85 .text-slate-200,
+.theme-light .bg-black\/85text-slate-200,
 .theme-light .bg-red-400 .text-slate-200,
 .theme-light .bg-red-400text-slate-200 {
   color: #E2E8F0 !important;
@@ -992,30 +1039,46 @@ body.theme-light {
 .theme-light .bg-\[\#068eff\]text-slate-300,
 .theme-light .bg-cyan-500 .text-slate-300,
 .theme-light .bg-cyan-500text-slate-300,
-.theme-light .bg-amber-500 .text-slate-300,
-.theme-light .bg-amber-500text-slate-300 {
+.theme-light .bg-black\/80 .text-slate-300,
+.theme-light .bg-black\/80text-slate-300 {
   color: #CBD5E1 !important;
 }
+.theme-light .bg-amber-500 .text-slate-300,
+.theme-light .bg-amber-500text-slate-300,
 .theme-light .bg-red-600 .text-slate-300,
 .theme-light .bg-red-600text-slate-300,
 .theme-light .bg-emerald-600 .text-slate-300,
-.theme-light .bg-emerald-600text-slate-300,
+.theme-light .bg-emerald-600text-slate-300 {
+  color: #CBD5E1 !important;
+}
+.theme-light .bg-black\/70 .text-slate-300,
+.theme-light .bg-black\/70text-slate-300,
 .theme-light .bg-blue-600 .text-slate-300,
-.theme-light .bg-blue-600text-slate-300 {
+.theme-light .bg-blue-600text-slate-300,
+.theme-light .bg-black\/60 .text-slate-300,
+.theme-light .bg-black\/60text-slate-300 {
   color: #CBD5E1 !important;
 }
 .theme-light .bg-blue-500 .text-slate-300,
 .theme-light .bg-blue-500text-slate-300,
+.theme-light .bg-black\/75 .text-slate-300,
+.theme-light .bg-black\/75text-slate-300,
+.theme-light .bg-black\/90 .text-slate-300,
+.theme-light .bg-black\/90text-slate-300 {
+  color: #CBD5E1 !important;
+}
 .theme-light .bg-\[\#D94625\] .text-slate-300,
 .theme-light .bg-\[\#D94625\]text-slate-300,
 .theme-light .bg-blue-400 .text-slate-300,
-.theme-light .bg-blue-400text-slate-300 {
+.theme-light .bg-blue-400text-slate-300,
+.theme-light .bg-amber-600 .text-slate-300,
+.theme-light .bg-amber-600text-slate-300 {
   color: #CBD5E1 !important;
 }
-.theme-light .bg-amber-600 .text-slate-300,
-.theme-light .bg-amber-600text-slate-300,
 .theme-light .bg-emerald-500 .text-slate-300,
 .theme-light .bg-emerald-500text-slate-300,
+.theme-light .bg-black\/85 .text-slate-300,
+.theme-light .bg-black\/85text-slate-300,
 .theme-light .bg-red-400 .text-slate-300,
 .theme-light .bg-red-400text-slate-300 {
   color: #CBD5E1 !important;
@@ -1036,30 +1099,46 @@ body.theme-light {
 .theme-light .bg-\[\#068eff\]text-slate-400,
 .theme-light .bg-cyan-500 .text-slate-400,
 .theme-light .bg-cyan-500text-slate-400,
-.theme-light .bg-amber-500 .text-slate-400,
-.theme-light .bg-amber-500text-slate-400 {
+.theme-light .bg-black\/80 .text-slate-400,
+.theme-light .bg-black\/80text-slate-400 {
   color: #CBD5E1 !important;
 }
+.theme-light .bg-amber-500 .text-slate-400,
+.theme-light .bg-amber-500text-slate-400,
 .theme-light .bg-red-600 .text-slate-400,
 .theme-light .bg-red-600text-slate-400,
 .theme-light .bg-emerald-600 .text-slate-400,
-.theme-light .bg-emerald-600text-slate-400,
+.theme-light .bg-emerald-600text-slate-400 {
+  color: #CBD5E1 !important;
+}
+.theme-light .bg-black\/70 .text-slate-400,
+.theme-light .bg-black\/70text-slate-400,
 .theme-light .bg-blue-600 .text-slate-400,
-.theme-light .bg-blue-600text-slate-400 {
+.theme-light .bg-blue-600text-slate-400,
+.theme-light .bg-black\/60 .text-slate-400,
+.theme-light .bg-black\/60text-slate-400 {
   color: #CBD5E1 !important;
 }
 .theme-light .bg-blue-500 .text-slate-400,
 .theme-light .bg-blue-500text-slate-400,
+.theme-light .bg-black\/75 .text-slate-400,
+.theme-light .bg-black\/75text-slate-400,
+.theme-light .bg-black\/90 .text-slate-400,
+.theme-light .bg-black\/90text-slate-400 {
+  color: #CBD5E1 !important;
+}
 .theme-light .bg-\[\#D94625\] .text-slate-400,
 .theme-light .bg-\[\#D94625\]text-slate-400,
 .theme-light .bg-blue-400 .text-slate-400,
-.theme-light .bg-blue-400text-slate-400 {
+.theme-light .bg-blue-400text-slate-400,
+.theme-light .bg-amber-600 .text-slate-400,
+.theme-light .bg-amber-600text-slate-400 {
   color: #CBD5E1 !important;
 }
-.theme-light .bg-amber-600 .text-slate-400,
-.theme-light .bg-amber-600text-slate-400,
 .theme-light .bg-emerald-500 .text-slate-400,
 .theme-light .bg-emerald-500text-slate-400,
+.theme-light .bg-black\/85 .text-slate-400,
+.theme-light .bg-black\/85text-slate-400,
 .theme-light .bg-red-400 .text-slate-400,
 .theme-light .bg-red-400text-slate-400 {
   color: #CBD5E1 !important;
@@ -1080,30 +1159,46 @@ body.theme-light {
 .theme-light .bg-\[\#068eff\]text-slate-500,
 .theme-light .bg-cyan-500 .text-slate-500,
 .theme-light .bg-cyan-500text-slate-500,
-.theme-light .bg-amber-500 .text-slate-500,
-.theme-light .bg-amber-500text-slate-500 {
+.theme-light .bg-black\/80 .text-slate-500,
+.theme-light .bg-black\/80text-slate-500 {
   color: #CBD5E1 !important;
 }
+.theme-light .bg-amber-500 .text-slate-500,
+.theme-light .bg-amber-500text-slate-500,
 .theme-light .bg-red-600 .text-slate-500,
 .theme-light .bg-red-600text-slate-500,
 .theme-light .bg-emerald-600 .text-slate-500,
-.theme-light .bg-emerald-600text-slate-500,
+.theme-light .bg-emerald-600text-slate-500 {
+  color: #CBD5E1 !important;
+}
+.theme-light .bg-black\/70 .text-slate-500,
+.theme-light .bg-black\/70text-slate-500,
 .theme-light .bg-blue-600 .text-slate-500,
-.theme-light .bg-blue-600text-slate-500 {
+.theme-light .bg-blue-600text-slate-500,
+.theme-light .bg-black\/60 .text-slate-500,
+.theme-light .bg-black\/60text-slate-500 {
   color: #CBD5E1 !important;
 }
 .theme-light .bg-blue-500 .text-slate-500,
 .theme-light .bg-blue-500text-slate-500,
+.theme-light .bg-black\/75 .text-slate-500,
+.theme-light .bg-black\/75text-slate-500,
+.theme-light .bg-black\/90 .text-slate-500,
+.theme-light .bg-black\/90text-slate-500 {
+  color: #CBD5E1 !important;
+}
 .theme-light .bg-\[\#D94625\] .text-slate-500,
 .theme-light .bg-\[\#D94625\]text-slate-500,
 .theme-light .bg-blue-400 .text-slate-500,
-.theme-light .bg-blue-400text-slate-500 {
+.theme-light .bg-blue-400text-slate-500,
+.theme-light .bg-amber-600 .text-slate-500,
+.theme-light .bg-amber-600text-slate-500 {
   color: #CBD5E1 !important;
 }
-.theme-light .bg-amber-600 .text-slate-500,
-.theme-light .bg-amber-600text-slate-500,
 .theme-light .bg-emerald-500 .text-slate-500,
 .theme-light .bg-emerald-500text-slate-500,
+.theme-light .bg-black\/85 .text-slate-500,
+.theme-light .bg-black\/85text-slate-500,
 .theme-light .bg-red-400 .text-slate-500,
 .theme-light .bg-red-400text-slate-500 {
   color: #CBD5E1 !important;
@@ -1124,30 +1219,46 @@ body.theme-light {
 .theme-light .bg-\[\#068eff\]text-slate-600,
 .theme-light .bg-cyan-500 .text-slate-600,
 .theme-light .bg-cyan-500text-slate-600,
-.theme-light .bg-amber-500 .text-slate-600,
-.theme-light .bg-amber-500text-slate-600 {
+.theme-light .bg-black\/80 .text-slate-600,
+.theme-light .bg-black\/80text-slate-600 {
   color: #E2E8F0 !important;
 }
+.theme-light .bg-amber-500 .text-slate-600,
+.theme-light .bg-amber-500text-slate-600,
 .theme-light .bg-red-600 .text-slate-600,
 .theme-light .bg-red-600text-slate-600,
 .theme-light .bg-emerald-600 .text-slate-600,
-.theme-light .bg-emerald-600text-slate-600,
+.theme-light .bg-emerald-600text-slate-600 {
+  color: #E2E8F0 !important;
+}
+.theme-light .bg-black\/70 .text-slate-600,
+.theme-light .bg-black\/70text-slate-600,
 .theme-light .bg-blue-600 .text-slate-600,
-.theme-light .bg-blue-600text-slate-600 {
+.theme-light .bg-blue-600text-slate-600,
+.theme-light .bg-black\/60 .text-slate-600,
+.theme-light .bg-black\/60text-slate-600 {
   color: #E2E8F0 !important;
 }
 .theme-light .bg-blue-500 .text-slate-600,
 .theme-light .bg-blue-500text-slate-600,
+.theme-light .bg-black\/75 .text-slate-600,
+.theme-light .bg-black\/75text-slate-600,
+.theme-light .bg-black\/90 .text-slate-600,
+.theme-light .bg-black\/90text-slate-600 {
+  color: #E2E8F0 !important;
+}
 .theme-light .bg-\[\#D94625\] .text-slate-600,
 .theme-light .bg-\[\#D94625\]text-slate-600,
 .theme-light .bg-blue-400 .text-slate-600,
-.theme-light .bg-blue-400text-slate-600 {
+.theme-light .bg-blue-400text-slate-600,
+.theme-light .bg-amber-600 .text-slate-600,
+.theme-light .bg-amber-600text-slate-600 {
   color: #E2E8F0 !important;
 }
-.theme-light .bg-amber-600 .text-slate-600,
-.theme-light .bg-amber-600text-slate-600,
 .theme-light .bg-emerald-500 .text-slate-600,
 .theme-light .bg-emerald-500text-slate-600,
+.theme-light .bg-black\/85 .text-slate-600,
+.theme-light .bg-black\/85text-slate-600,
 .theme-light .bg-red-400 .text-slate-600,
 .theme-light .bg-red-400text-slate-600 {
   color: #E2E8F0 !important;
@@ -1168,30 +1279,46 @@ body.theme-light {
 .theme-light .bg-\[\#068eff\]text-slate-700,
 .theme-light .bg-cyan-500 .text-slate-700,
 .theme-light .bg-cyan-500text-slate-700,
-.theme-light .bg-amber-500 .text-slate-700,
-.theme-light .bg-amber-500text-slate-700 {
+.theme-light .bg-black\/80 .text-slate-700,
+.theme-light .bg-black\/80text-slate-700 {
   color: #E2E8F0 !important;
 }
+.theme-light .bg-amber-500 .text-slate-700,
+.theme-light .bg-amber-500text-slate-700,
 .theme-light .bg-red-600 .text-slate-700,
 .theme-light .bg-red-600text-slate-700,
 .theme-light .bg-emerald-600 .text-slate-700,
-.theme-light .bg-emerald-600text-slate-700,
+.theme-light .bg-emerald-600text-slate-700 {
+  color: #E2E8F0 !important;
+}
+.theme-light .bg-black\/70 .text-slate-700,
+.theme-light .bg-black\/70text-slate-700,
 .theme-light .bg-blue-600 .text-slate-700,
-.theme-light .bg-blue-600text-slate-700 {
+.theme-light .bg-blue-600text-slate-700,
+.theme-light .bg-black\/60 .text-slate-700,
+.theme-light .bg-black\/60text-slate-700 {
   color: #E2E8F0 !important;
 }
 .theme-light .bg-blue-500 .text-slate-700,
 .theme-light .bg-blue-500text-slate-700,
+.theme-light .bg-black\/75 .text-slate-700,
+.theme-light .bg-black\/75text-slate-700,
+.theme-light .bg-black\/90 .text-slate-700,
+.theme-light .bg-black\/90text-slate-700 {
+  color: #E2E8F0 !important;
+}
 .theme-light .bg-\[\#D94625\] .text-slate-700,
 .theme-light .bg-\[\#D94625\]text-slate-700,
 .theme-light .bg-blue-400 .text-slate-700,
-.theme-light .bg-blue-400text-slate-700 {
+.theme-light .bg-blue-400text-slate-700,
+.theme-light .bg-amber-600 .text-slate-700,
+.theme-light .bg-amber-600text-slate-700 {
   color: #E2E8F0 !important;
 }
-.theme-light .bg-amber-600 .text-slate-700,
-.theme-light .bg-amber-600text-slate-700,
 .theme-light .bg-emerald-500 .text-slate-700,
 .theme-light .bg-emerald-500text-slate-700,
+.theme-light .bg-black\/85 .text-slate-700,
+.theme-light .bg-black\/85text-slate-700,
 .theme-light .bg-red-400 .text-slate-700,
 .theme-light .bg-red-400text-slate-700 {
   color: #E2E8F0 !important;

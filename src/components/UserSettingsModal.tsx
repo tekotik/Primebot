@@ -243,53 +243,6 @@ export const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
             </p>
           </div>
 
-          {/* SECTION 2: ВАЛЮТА КАТАЛОГА */}
-          <div
-            className={`p-3.5 rounded-2xl border space-y-2.5 transition-colors ${
-              isLight
-                ? 'bg-slate-50/80 border-slate-200'
-                : 'bg-[#131724] border-slate-800'
-            }`}
-          >
-            <label
-              className={`text-xs font-bold uppercase tracking-wider font-['Exo_2',sans-serif] flex items-center justify-between ${
-                isLight ? 'text-slate-900' : 'text-slate-200'
-              }`}
-            >
-              <span className="flex items-center gap-1.5">
-                <DollarSign className={`w-3.5 h-3.5 ${isLight ? 'text-[#D94625]' : 'text-emerald-400'}`} />
-                <span>Валюта отображения цен</span>
-              </span>
-              <span className={`text-[10px] font-mono ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
-                {currency}
-              </span>
-            </label>
-
-            <div className="grid grid-cols-3 gap-2">
-              {currencies.map((c) => {
-                const isSelected = currency === c.id;
-                return (
-                  <button
-                    key={c.id}
-                    type="button"
-                    onClick={() => onChangeCurrency(c.id)}
-                    className={`py-2 px-1 rounded-xl text-xs font-bold font-mono transition-all text-center ${
-                      isSelected
-                        ? isLight
-                          ? 'bg-[#D94625] text-white shadow-sm'
-                          : 'bg-[#068eff] text-white shadow-sm'
-                        : isLight
-                        ? 'bg-white border border-slate-200 text-slate-700 hover:border-slate-300'
-                        : 'bg-[#0d1017] border border-slate-800 text-slate-300 hover:text-white'
-                    }`}
-                  >
-                    {c.id}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
           {/* SECTION 3: CARCHECKBOT ИНТЕГРАЦИЯ (КАК В СКРИНШОТЕ) */}
           <div
             className={`p-3.5 rounded-2xl border space-y-2.5 transition-colors ${
