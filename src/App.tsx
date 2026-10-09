@@ -559,9 +559,9 @@ export default function App() {
             alt="CarCheckBot"
             draggable={false}
             onClick={() => setEntryChoice('browse')}
-            className="w-full h-auto max-h-[46vh] object-contain shrink-0 select-none animate-fade-in-fast"
+            className="w-full h-auto max-h-[72vh] object-cover object-top shrink-0 -mb-[22vh] select-none animate-fade-in-fast"
           />
-          <div className="relative flex-1 w-full max-w-md mx-auto bg-[#0f131c]/95 backdrop-blur-md border-t border-slate-800 rounded-t-3xl shadow-2xl px-5 pt-2.5 pb-4 animate-slide-up-fast overflow-y-auto">
+          <div className="relative min-h-0 flex-1 w-full max-w-md mx-auto bg-[#0f131c]/95 backdrop-blur-md border-t border-slate-800 rounded-t-3xl shadow-2xl px-5 pt-2.5 pb-4 animate-slide-up-fast overflow-y-auto">
             <div className="w-12 h-1.5 bg-slate-700/80 rounded-full mx-auto mb-3 shrink-0" />
             <NyTimePlate />
 
