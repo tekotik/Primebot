@@ -119,196 +119,1092 @@
   scrollbar-width: none !important;
   -webkit-overflow-scrolling: touch;
 }
-
 /* ==========================================================================
-   CARCHECKBOT LIGHT THEME (Светлая тема в стиле https://carcheckbot.com/ru)
+   СВЕТЛАЯ ТЕМА. Сгенерировано по реальным классам из src/.
+   Правила сортированы: поверхности -> бордеры -> текст -> исключения.
    ========================================================================== */
 
-body.theme-light,
-.theme-light {
+.theme-light html,
+html.theme-light,
+body.theme-light {
   background-color: #FFF9F5 !important;
   color: #22140F !important;
 }
 
-body.theme-light ::-webkit-scrollbar-track,
-.theme-light ::-webkit-scrollbar-track {
-  background: #F5EBE4 !important;
-}
+.theme-light ::-webkit-scrollbar-track { background: #F5EBE4 !important; }
+.theme-light ::-webkit-scrollbar-thumb { background: #D8CCC5 !important; }
+.theme-light ::selection { background: #FBE3DA !important; color: #22140F !important; }
 
-body.theme-light ::-webkit-scrollbar-thumb,
-.theme-light ::-webkit-scrollbar-thumb {
-  background: #D8CCC5 !important;
+/* Поверхности (117) */
+.theme-light .active\:bg-\[\#006cc8\]:active {
+  background-color:#C43B15 !important;
 }
-
-/* Background overrides in light theme */
-.theme-light .bg-\[\#090c12\],
-.theme-light .bg-\[\#0a0d14\],
-.theme-light .bg-\[\#0b0e14\],
+.theme-light .active\:bg-blue-700:active {
+  background-color:#C43B15 !important;
+}
 .theme-light .bg-\[\#05070d\] {
-  background-color: #FFF9F5 !important;
+  background-color:#FFF9F5 !important;
 }
-
-.theme-light .bg-\[\#0c1018\]\/95,
-.theme-light .bg-\[\#0c1018\] {
-  background-color: rgba(255, 255, 255, 0.98) !important;
-}
-
-.theme-light .bg-\[\#111520\],
-.theme-light .bg-\[\#0f131c\],
-.theme-light .bg-\[\#0f131c\]\/95,
-.theme-light .bg-\[\#131724\],
-.theme-light .bg-\[\#141824\],
-.theme-light .bg-\[\#121624\],
-.theme-light .bg-\[\#121622\],
-.theme-light .bg-\[\#0d1017\],
-.theme-light .bg-\[\#101522\],
-.theme-light .bg-\[\#151a28\] {
-  background-color: #FFFFFF !important;
-}
-
-.theme-light .bg-\[\#131929\] {
-  background-color: #FFF2EB !important;
-}
-
-.theme-light .bg-\[\#0e121d\] {
-  background-color: #FAF6F3 !important;
-}
-
-/* Borders */
-.theme-light .border-slate-800,
-.theme-light .border-slate-800\/90,
-.theme-light .border-slate-800\/80,
-.theme-light .border-slate-800\/60,
-.theme-light .border-slate-800\/40,
-.theme-light .border-slate-700 {
-  border-color: #E8D8CD !important;
-}
-
-.theme-light .border-blue-900\/40,
-.theme-light .border-blue-900\/30 {
-  border-color: #F0D3C3 !important;
-}
-
-/* Text overrides in light theme */
-.theme-light .text-white {
-  color: #22140F !important;
-}
-
-.theme-light .text-slate-100 {
-  color: #22140F !important;
-}
-
-.theme-light .text-slate-200 {
-  color: #38241C !important;
-}
-
-.theme-light .text-slate-300 {
-  color: #553E34 !important;
-}
-
-.theme-light .text-slate-400 {
-  color: #7A665C !important;
-}
-
-.theme-light .text-slate-500 {
-  color: #9C897E !important;
-}
-
-.theme-light .text-slate-600 {
-  color: #B5A49A !important;
-}
-
-/* Primary accent buttons & text - CarCheckBot signature Terracotta #C43B15 */
 .theme-light .bg-\[\#068eff\] {
-  background-color: #C43B15 !important;
+  background-color:#C43B15 !important;
 }
-
+.theme-light .bg-\[\#068eff\]\/10 {
+  background-color:#FDF1EC !important;
+}
+.theme-light .bg-\[\#068eff\]\/15 {
+  background-color:#FDF1EC !important;
+}
+.theme-light .bg-\[\#068eff\]\/20 {
+  background-color:#FDF1EC !important;
+}
+.theme-light .bg-\[\#068eff\]\/60 {
+  background-color:#C43B15dd !important;
+}
+.theme-light .bg-\[\#090c12\] {
+  background-color:#FFF9F5 !important;
+}
+.theme-light .bg-\[\#090d16\] {
+  background-color:#FFF9F5 !important;
+}
+.theme-light .bg-\[\#090d16\]\/90 {
+  background-color:#FFF9F5 !important;
+}
+.theme-light .bg-\[\#0a0d14\] {
+  background-color:#FFF9F5 !important;
+}
+.theme-light .bg-\[\#0b0e14\] {
+  background-color:#FFF9F5 !important;
+}
+.theme-light .bg-\[\#0c0f17\] {
+  background-color:#FFF9F5 !important;
+}
+.theme-light .bg-\[\#0c0f17\]\/95 {
+  background-color:#FFF9F5 !important;
+}
+.theme-light .bg-\[\#0c1018\] {
+  background-color:#FFFFFF !important;
+}
+.theme-light .bg-\[\#0c1018\]\/95 {
+  background-color:#FFFFFF !important;
+}
+.theme-light .bg-\[\#0d1017\] {
+  background-color:#FFFFFF !important;
+}
+.theme-light .bg-\[\#0d1018\] {
+  background-color:#FFFFFF !important;
+}
+.theme-light .bg-\[\#0e121d\] {
+  background-color:#FFFFFF !important;
+}
+.theme-light .bg-\[\#0f131c\] {
+  background-color:#FFFFFF !important;
+}
+.theme-light .bg-\[\#0f131c\]\/95 {
+  background-color:#FFFFFF !important;
+}
+.theme-light .bg-\[\#0f131d\] {
+  background-color:#FFFFFF !important;
+}
+.theme-light .bg-\[\#0f1422\] {
+  background-color:#FFFFFF !important;
+}
+.theme-light .bg-\[\#101420\] {
+  background-color:#FFF9F5 !important;
+}
+.theme-light .bg-\[\#11141e\] {
+  background-color:#FFF9F5 !important;
+}
+.theme-light .bg-\[\#111520\] {
+  background-color:#FFFFFF !important;
+}
+.theme-light .bg-\[\#111522\] {
+  background-color:#FFFFFF !important;
+}
+.theme-light .bg-\[\#111624\] {
+  background-color:#FFFFFF !important;
+}
+.theme-light .bg-\[\#121622\] {
+  background-color:#FFFFFF !important;
+}
+.theme-light .bg-\[\#121a30\] {
+  background-color:#FFFFFF !important;
+}
+.theme-light .bg-\[\#131722\] {
+  background-color:#FFFFFF !important;
+}
+.theme-light .bg-\[\#131724\] {
+  background-color:#FFFFFF !important;
+}
+.theme-light .bg-\[\#131726\] {
+  background-color:#FFFFFF !important;
+}
+.theme-light .bg-\[\#131929\] {
+  background-color:#FFFFFF !important;
+}
+.theme-light .bg-\[\#13192a\] {
+  background-color:#FFFFFF !important;
+}
+.theme-light .bg-\[\#131f34\] {
+  background-color:#FFFFFF !important;
+}
+.theme-light .bg-\[\#141824\] {
+  background-color:#FFFFFF !important;
+}
+.theme-light .bg-\[\#141826\] {
+  background-color:#FFFFFF !important;
+}
+.theme-light .bg-\[\#141b2a\] {
+  background-color:#FFFFFF !important;
+}
+.theme-light .bg-\[\#141b2b\] {
+  background-color:#FFFFFF !important;
+}
+.theme-light .bg-\[\#161c2a\] {
+  background-color:#FFFFFF !important;
+}
+.theme-light .bg-\[\#172036\] {
+  background-color:#FFFFFF !important;
+}
+.theme-light .bg-\[\#1b2238\] {
+  background-color:#FFFFFF !important;
+}
+.theme-light .bg-\[\#1e2638\] {
+  background-color:#FFFFFF !important;
+}
+.theme-light .bg-amber-500\/20 {
+  background-color:#FEF7E6 !important;
+}
+.theme-light .bg-amber-950\/50 {
+  background-color:#FEF7E6 !important;
+}
+.theme-light .bg-amber-950\/70 {
+  background-color:#FEF7E6 !important;
+}
+.theme-light .bg-amber-950\/75 {
+  background-color:#FEF7E6 !important;
+}
+.theme-light .bg-amber-950\/80 {
+  background-color:#FEF7E6 !important;
+}
+.theme-light .bg-amber-950\/85 {
+  background-color:#FEF7E6 !important;
+}
+.theme-light .bg-blue-400 {
+  background-color:#C43B15 !important;
+}
+.theme-light .bg-blue-500 {
+  background-color:#C43B15 !important;
+}
+.theme-light .bg-blue-600 {
+  background-color:#C43B15 !important;
+}
+.theme-light .bg-blue-600\/15 {
+  background-color:#FDF1EC !important;
+}
+.theme-light .bg-blue-600\/20 {
+  background-color:#FDF1EC !important;
+}
+.theme-light .bg-blue-950 {
+  background-color:#FDF1EC !important;
+}
+.theme-light .bg-blue-950\/20 {
+  background-color:#FDF1EC !important;
+}
+.theme-light .bg-blue-950\/30 {
+  background-color:#FDF1EC !important;
+}
+.theme-light .bg-blue-950\/40 {
+  background-color:#FDF1EC !important;
+}
+.theme-light .bg-blue-950\/60 {
+  background-color:#FDF1EC !important;
+}
+.theme-light .bg-blue-950\/70 {
+  background-color:#FDF1EC !important;
+}
+.theme-light .bg-blue-950\/80 {
+  background-color:#FDF1EC !important;
+}
+.theme-light .bg-emerald-500\/15 {
+  background-color:#EBF8F2 !important;
+}
+.theme-light .bg-emerald-500\/20 {
+  background-color:#EBF8F2 !important;
+}
+.theme-light .bg-emerald-600\/15 {
+  background-color:#EBF8F2 !important;
+}
+.theme-light .bg-emerald-600\/25 {
+  background-color:#EBF8F2 !important;
+}
+.theme-light .bg-emerald-900\/60 {
+  background-color:#EBF8F2 !important;
+}
+.theme-light .bg-emerald-950\/40 {
+  background-color:#EBF8F2 !important;
+}
+.theme-light .bg-emerald-950\/60 {
+  background-color:#EBF8F2 !important;
+}
+.theme-light .bg-emerald-950\/80 {
+  background-color:#EBF8F2 !important;
+}
+.theme-light .bg-red-950\/30 {
+  background-color:#FDF1EC !important;
+}
+.theme-light .bg-red-950\/40 {
+  background-color:#FDF1EC !important;
+}
+.theme-light .bg-red-950\/50 {
+  background-color:#FDF1EC !important;
+}
+.theme-light .bg-red-950\/70 {
+  background-color:#FDF1EC !important;
+}
+.theme-light .bg-red-950\/80 {
+  background-color:#FDF1EC !important;
+}
+.theme-light .bg-red-950\/85 {
+  background-color:#FDF1EC !important;
+}
+.theme-light .bg-slate-500 {
+  background-color:#FFFFFF !important;
+}
+.theme-light .bg-slate-600 {
+  background-color:#FFFFFF !important;
+}
+.theme-light .bg-slate-700 {
+  background-color:#FFFFFF !important;
+}
+.theme-light .bg-slate-700\/80 {
+  background-color:#FFFFFF !important;
+}
+.theme-light .bg-slate-800 {
+  background-color:#FFFFFF !important;
+}
+.theme-light .bg-slate-800\/60 {
+  background-color:#FFFFFF !important;
+}
+.theme-light .bg-slate-800\/80 {
+  background-color:#FFFFFF !important;
+}
+.theme-light .bg-slate-800\/90 {
+  background-color:#FFFFFF !important;
+}
+.theme-light .bg-slate-900 {
+  background-color:#FFFFFF !important;
+}
+.theme-light .bg-slate-900\/50 {
+  background-color:#FFFFFF !important;
+}
+.theme-light .bg-slate-900\/80 {
+  background-color:#FFFFFF !important;
+}
+.theme-light .bg-slate-900\/90 {
+  background-color:#FFFFFF !important;
+}
+.theme-light .group:hover .group-hover\:bg-blue-500 {
+  background-color:#C43B15 !important;
+}
 .theme-light .hover\:bg-\[\#007be5\]:hover {
-  background-color: #A9300F !important;
+  background-color:#C43B15 !important;
+}
+.theme-light .hover\:bg-\[\#068eff\]\/10:hover {
+  background-color:#FDF1EC !important;
+}
+.theme-light .hover\:bg-\[\#068eff\]\/20:hover {
+  background-color:#FDF1EC !important;
+}
+.theme-light .hover\:bg-\[\#068eff\]\/25:hover {
+  background-color:#FDF1EC !important;
+}
+.theme-light .hover\:bg-\[\#151a28\]:hover {
+  background-color:#FFFFFF !important;
+}
+.theme-light .hover\:bg-\[\#161c2c\]:hover {
+  background-color:#FFFFFF !important;
+}
+.theme-light .hover\:bg-\[\#181d2e\]:hover {
+  background-color:#FFFFFF !important;
+}
+.theme-light .hover\:bg-\[\#1a2034\]:hover {
+  background-color:#FFFFFF !important;
+}
+.theme-light .hover\:bg-\[\#1a233a\]:hover {
+  background-color:#FFFFFF !important;
+}
+.theme-light .hover\:bg-\[\#1d2538\]:hover {
+  background-color:#FFFFFF !important;
+}
+.theme-light .hover\:bg-amber-500\/30:hover {
+  background-color:#FEF7E6 !important;
+}
+.theme-light .hover\:bg-blue-500:hover {
+  background-color:#C43B15 !important;
+}
+.theme-light .hover\:bg-blue-600\/30:hover {
+  background-color:#FDF1EC !important;
+}
+.theme-light .hover\:bg-blue-900\/60:hover {
+  background-color:#FDF1EC !important;
+}
+.theme-light .hover\:bg-emerald-900\/50:hover {
+  background-color:#EBF8F2 !important;
+}
+.theme-light .hover\:bg-red-900:hover {
+  background-color:#FDF1EC !important;
+}
+.theme-light .hover\:bg-red-900\/30:hover {
+  background-color:#FDF1EC !important;
+}
+.theme-light .hover\:bg-red-900\/60:hover {
+  background-color:#FDF1EC !important;
+}
+.theme-light .hover\:bg-red-900\/70:hover {
+  background-color:#FDF1EC !important;
+}
+.theme-light .hover\:bg-red-950\/50:hover {
+  background-color:#FDF1EC !important;
+}
+.theme-light .hover\:bg-slate-700:hover {
+  background-color:#FFFFFF !important;
+}
+.theme-light .hover\:bg-slate-700\/70:hover {
+  background-color:#FFFFFF !important;
+}
+.theme-light .hover\:bg-slate-700\/80:hover {
+  background-color:#FFFFFF !important;
+}
+.theme-light .hover\:bg-slate-800:hover {
+  background-color:#FFFFFF !important;
+}
+.theme-light .hover\:bg-slate-800\/40:hover {
+  background-color:#FFFFFF !important;
+}
+.theme-light .hover\:bg-slate-800\/80:hover {
+  background-color:#FFFFFF !important;
+}
+.theme-light .selection\:bg-\[\#068eff\] {
+  background-color:#C43B15 !important;
 }
 
-.theme-light .text-\[\#068eff\],
-.theme-light .text-\[\#008fff\] {
-  color: #C43B15 !important;
+/* Тёмные стопы градиентов (10) */
+.theme-light .from-\[\#0c1626\] {
+  --tw-gradient-from:#FFFFFF !important;
+}
+.theme-light .from-\[\#0e1422\] {
+  --tw-gradient-from:#FFFFFF !important;
+}
+.theme-light .from-blue-950\/40 {
+  --tw-gradient-from:#FDF1EC !important;
+}
+.theme-light .from-slate-900 {
+  --tw-gradient-from:#FFFFFF !important;
+}
+.theme-light .to-\[\#090d16\] {
+  --tw-gradient-to:#FFFFFF !important;
+}
+.theme-light .to-\[\#0c121e\] {
+  --tw-gradient-to:#FFFFFF !important;
+}
+.theme-light .to-\[\#0f1422\] {
+  --tw-gradient-to:#FFFFFF !important;
+}
+.theme-light .to-slate-950 {
+  --tw-gradient-to:#FFFFFF !important;
+}
+.theme-light .via-\[\#131929\] {
+  --tw-gradient-via:#FFFFFF !important;
+}
+.theme-light .via-slate-800 {
+  --tw-gradient-via:#FFFFFF !important;
 }
 
+/* Границы (52) */
 .theme-light .border-\[\#068eff\] {
-  border-color: #C43B15 !important;
+  border-color:#C43B15 !important;
 }
-
-.theme-light .border-\[\#068eff\]\/30,
-.theme-light .border-\[\#068eff\]\/40,
+.theme-light .border-\[\#068eff\]\/30 {
+  border-color:#F0D3C3 !important;
+}
+.theme-light .border-\[\#068eff\]\/40 {
+  border-color:#F0D3C3 !important;
+}
+.theme-light .border-\[\#068eff\]\/50 {
+  border-color:#C43B15 !important;
+}
 .theme-light .border-\[\#068eff\]\/60 {
-  border-color: #F0D3C3 !important;
+  border-color:#C43B15 !important;
+}
+.theme-light .border-\[\#D94625\] {
+  border-color:#E8D8CD !important;
+}
+.theme-light .border-amber-500\/40 {
+  border-color:#FDE6B4 !important;
+}
+.theme-light .border-amber-500\/60 {
+  border-color:#FDE6B4 !important;
+}
+.theme-light .border-amber-500\/70 {
+  border-color:#FDE6B4 !important;
+}
+.theme-light .border-amber-600\/50 {
+  border-color:#FDE6B4 !important;
+}
+.theme-light .border-blue-400 {
+  border-color:#C43B15 !important;
+}
+.theme-light .border-blue-500 {
+  border-color:#C43B15 !important;
+}
+.theme-light .border-blue-500\/30 {
+  border-color:#F0D3C3 !important;
+}
+.theme-light .border-blue-500\/40 {
+  border-color:#F0D3C3 !important;
+}
+.theme-light .border-blue-500\/50 {
+  border-color:#C43B15 !important;
+}
+.theme-light .border-blue-800 {
+  border-color:#F0D3C3 !important;
+}
+.theme-light .border-blue-800\/40 {
+  border-color:#F0D3C3 !important;
+}
+.theme-light .border-blue-900\/30 {
+  border-color:#F0D3C3 !important;
+}
+.theme-light .border-blue-900\/40 {
+  border-color:#F0D3C3 !important;
+}
+.theme-light .border-blue-900\/50 {
+  border-color:#F0D3C3 !important;
+}
+.theme-light .border-cyan-500\/25 {
+  border-color:#E8D8CD !important;
+}
+.theme-light .border-emerald-500 {
+  border-color:#C6EEDC !important;
+}
+.theme-light .border-emerald-500\/30 {
+  border-color:#C6EEDC !important;
+}
+.theme-light .border-emerald-500\/40 {
+  border-color:#C6EEDC !important;
+}
+.theme-light .border-emerald-900\/30 {
+  border-color:#C6EEDC !important;
+}
+.theme-light .border-red-200 {
+  border-color:#F0D3C3 !important;
+}
+.theme-light .border-red-500\/70 {
+  border-color:#F0D3C3 !important;
+}
+.theme-light .border-red-500\/80 {
+  border-color:#F0D3C3 !important;
+}
+.theme-light .border-red-900\/30 {
+  border-color:#F0D3C3 !important;
+}
+.theme-light .border-red-900\/40 {
+  border-color:#F0D3C3 !important;
+}
+.theme-light .border-red-900\/60 {
+  border-color:#F0D3C3 !important;
+}
+.theme-light .border-slate-600 {
+  border-color:#E8D8CD !important;
+}
+.theme-light .border-slate-700 {
+  border-color:#E8D8CD !important;
+}
+.theme-light .border-slate-700\/60 {
+  border-color:#E8D8CD !important;
+}
+.theme-light .border-slate-700\/80 {
+  border-color:#E8D8CD !important;
+}
+.theme-light .border-slate-700\/90 {
+  border-color:#E8D8CD !important;
+}
+.theme-light .border-slate-800 {
+  border-color:#E8D8CD !important;
+}
+.theme-light .border-slate-800\/60 {
+  border-color:#E8D8CD !important;
+}
+.theme-light .border-slate-800\/70 {
+  border-color:#E8D8CD !important;
+}
+.theme-light .border-slate-800\/80 {
+  border-color:#E8D8CD !important;
+}
+.theme-light .border-slate-800\/90 {
+  border-color:#E8D8CD !important;
+}
+.theme-light .divide-slate-800 {
+  border-color:#E8D8CD !important;
+}
+.theme-light .divide-slate-800\/80 {
+  border-color:#E8D8CD !important;
+}
+.theme-light .focus\:border-\[\#068eff\]:focus {
+  border-color:#C43B15 !important;
+}
+.theme-light .focus\:border-blue-500:focus {
+  border-color:#C43B15 !important;
+}
+.theme-light .focus\:border-emerald-500:focus {
+  border-color:#C6EEDC !important;
+}
+.theme-light .hover\:border-\[\#068eff\]:hover {
+  border-color:#C43B15 !important;
+}
+.theme-light .hover\:border-\[\#068eff\]\/60:hover {
+  border-color:#C43B15 !important;
+}
+.theme-light .hover\:border-blue-500\/50:hover {
+  border-color:#C43B15 !important;
+}
+.theme-light .hover\:border-emerald-500\/60:hover {
+  border-color:#C6EEDC !important;
+}
+.theme-light .hover\:border-emerald-500\/70:hover {
+  border-color:#C6EEDC !important;
+}
+.theme-light .hover\:border-slate-700:hover {
+  border-color:#E8D8CD !important;
 }
 
-.theme-light .bg-\[\#068eff\]\/10,
-.theme-light .bg-\[\#068eff\]\/15,
-.theme-light .bg-\[\#068eff\]\/20,
-.theme-light .bg-\[\#068eff\]\/25 {
-  background-color: #FDF1EC !important;
+/* Текст (46) */
+.theme-light .group:hover .group-hover\:text-\[\#068eff\] {
+  color:#C43B15 !important;
+}
+.theme-light .group:hover .group-hover\:text-blue-400 {
+  color:#C43B15 !important;
+}
+.theme-light .group:hover .group-hover\:text-white {
+  color:#22140F !important;
+}
+.theme-light .hover\:text-amber-300:hover {
+  color:#965800 !important;
+}
+.theme-light .hover\:text-blue-300:hover {
+  color:#C43B15 !important;
+}
+.theme-light .hover\:text-blue-400:hover {
+  color:#C43B15 !important;
+}
+.theme-light .hover\:text-cyan-400:hover {
+  color:#0E7490 !important;
+}
+.theme-light .hover\:text-emerald-400:hover {
+  color:#0A6A3F !important;
+}
+.theme-light .hover\:text-red-300:hover {
+  color:#B4231B !important;
+}
+.theme-light .hover\:text-red-400:hover {
+  color:#B4231B !important;
+}
+.theme-light .hover\:text-slate-200:hover {
+  color:#22140F !important;
+}
+.theme-light .hover\:text-slate-300:hover {
+  color:#22140F !important;
+}
+.theme-light .hover\:text-white:hover {
+  color:#22140F !important;
+}
+.theme-light .placeholder\:text-slate-600 {
+  color:#A08D82 !important;
+}
+.theme-light .selection\:text-white {
+  color:#22140F !important;
+}
+.theme-light .text-\[\#008fff\] {
+  color:#C43B15 !important;
+}
+.theme-light .text-\[\#068eff\] {
+  color:#C43B15 !important;
+}
+.theme-light .text-amber-100 {
+  color:#965800 !important;
+}
+.theme-light .text-amber-100\/90 {
+  color:#965800 !important;
+}
+.theme-light .text-amber-200 {
+  color:#965800 !important;
+}
+.theme-light .text-amber-300 {
+  color:#965800 !important;
+}
+.theme-light .text-amber-400 {
+  color:#965800 !important;
+}
+.theme-light .text-amber-500\/80 {
+  color:#965800 !important;
+}
+.theme-light .text-amber-600 {
+  color:#965800 !important;
+}
+.theme-light .text-blue-200 {
+  color:#C43B15 !important;
+}
+.theme-light .text-blue-200\/90 {
+  color:#C43B15 !important;
+}
+.theme-light .text-blue-300 {
+  color:#C43B15 !important;
+}
+.theme-light .text-blue-400 {
+  color:#C43B15 !important;
+}
+.theme-light .text-blue-500 {
+  color:#C43B15 !important;
+}
+.theme-light .text-blue-600 {
+  color:#C43B15 !important;
+}
+.theme-light .text-cyan-300 {
+  color:#0E7490 !important;
+}
+.theme-light .text-cyan-400 {
+  color:#0E7490 !important;
+}
+.theme-light .text-emerald-300 {
+  color:#0A6A3F !important;
+}
+.theme-light .text-emerald-400 {
+  color:#0A6A3F !important;
+}
+.theme-light .text-red-200 {
+  color:#B4231B !important;
+}
+.theme-light .text-red-300 {
+  color:#B4231B !important;
+}
+.theme-light .text-red-400 {
+  color:#B4231B !important;
+}
+.theme-light .text-red-500 {
+  color:#B4231B !important;
+}
+.theme-light .text-red-600 {
+  color:#B4231B !important;
+}
+.theme-light .text-slate-100 {
+  color:#22140F !important;
+}
+.theme-light .text-slate-200 {
+  color:#22140F !important;
+}
+.theme-light .text-slate-300 {
+  color:#22140F !important;
+}
+.theme-light .text-slate-400 {
+  color:#7A665C !important;
+}
+.theme-light .text-slate-500 {
+  color:#8B776C !important;
+}
+.theme-light .text-slate-600 {
+  color:#A08D82 !important;
+}
+.theme-light .text-white {
+  color:#22140F !important;
 }
 
-/* Card hover and shadows in light theme */
-.theme-light .shadow-lg,
-.theme-light .shadow-2xl,
-.theme-light .shadow-md {
-  box-shadow: 0 4px 20px -2px rgba(34, 20, 15, 0.06), 0 2px 6px -1px rgba(34, 20, 15, 0.04) !important;
-}
-
-.theme-light .group:hover {
-  border-color: #C43B15 !important;
-  box-shadow: 0 10px 25px -5px rgba(196, 59, 21, 0.12), 0 4px 6px -2px rgba(34, 20, 15, 0.04) !important;
-}
-
-/* Inputs & Form controls in light theme */
+/* Формы */
 .theme-light input,
+.theme-light textarea,
 .theme-light select {
   background-color: #FFFFFF !important;
   color: #22140F !important;
   border-color: #E8D8CD !important;
 }
+.theme-light input::placeholder { color: #9C897E !important; }
+.theme-light input:focus, .theme-light select:focus { border-color: #C43B15 !important; outline: none !important; }
 
-.theme-light input::placeholder {
-  color: #9C897E !important;
+/* Тени и свечение: синее glow -> терракотовое */
+.theme-light .shadow-lg, .theme-light .shadow-xl, .theme-light .shadow-2xl { box-shadow: 0 4px 20px -2px rgba(34,20,15,.06), 0 2px 6px -1px rgba(34,20,15,.04) !important; }
+
+/* Исключение: там, где фон остаётся насыщенным (кнопки, статусы, затемнения фото),
+   светлый текст обязан остаться светлым - иначе он ляжет чёрным на тёмную плашку */
+/* Белый текст на насыщенной плашке: #FFFFFF */
+.theme-light .bg-\[\#068eff\] .text-white,
+.theme-light .bg-\[\#068eff\].text-white,
+.theme-light .bg-cyan-500 .text-white,
+.theme-light .bg-cyan-500.text-white,
+.theme-light .bg-red-600 .text-white,
+.theme-light .bg-red-600.text-white {
+  color: #FFFFFF !important;
 }
-
-.theme-light input:focus,
-.theme-light select:focus {
-  border-color: #C43B15 !important;
-  outline: none;
+.theme-light .bg-emerald-600 .text-white,
+.theme-light .bg-emerald-600.text-white,
+.theme-light .bg-blue-600 .text-white,
+.theme-light .bg-blue-600.text-white,
+.theme-light .bg-blue-500 .text-white,
+.theme-light .bg-blue-500.text-white {
+  color: #FFFFFF !important;
 }
-
-/* Car card badges in light theme */
-.theme-light .bg-slate-800\/90,
-.theme-light .bg-slate-800\/80,
-.theme-light .bg-slate-800\/60,
-.theme-light .bg-slate-800 {
-  background-color: #F5EBE4 !important;
-  color: #4A382F !important;
+.theme-light .bg-\[\#D94625\] .text-white,
+.theme-light .bg-\[\#D94625\].text-white,
+.theme-light .bg-blue-400 .text-white,
+.theme-light .bg-blue-400.text-white,
+.theme-light .bg-amber-600 .text-white,
+.theme-light .bg-amber-600.text-white {
+  color: #FFFFFF !important;
 }
-
-.theme-light .bg-red-950\/40,
-.theme-light .bg-red-950\/50 {
-  background-color: #FDF1EC !important;
-  color: #C43B15 !important;
-  border-color: #F0D3C3 !important;
+.theme-light .bg-emerald-500 .text-white,
+.theme-light .bg-emerald-500.text-white,
+.theme-light .bg-red-400 .text-white,
+.theme-light .bg-red-400.text-white,
+.theme-light .bg-red-500 .text-white,
+.theme-light .bg-red-500.text-white {
+  color: #FFFFFF !important;
 }
-
-.theme-light .bg-blue-950\/40 {
-  background-color: #EFF6FF !important;
-  color: #1D4ED8 !important;
-  border-color: #DBEAFE !important;
+.theme-light .bg-\[\#068eff\]\/60 .text-white,
+.theme-light .bg-\[\#068eff\]\/60.text-white,
+.theme-light .bg-emerald-500\/80 .text-white,
+.theme-light .bg-emerald-500\/80.text-white,
+.theme-light .bg-\[\#D94625\]\/60 .text-white,
+.theme-light .bg-\[\#D94625\]\/60.text-white {
+  color: #FFFFFF !important;
 }
-
-.theme-light .bg-emerald-950\/40 {
-  background-color: #EBF8F2 !important;
-  color: #0A6A3F !important;
-  border-color: #C6EEDC !important;
-}
-
-.theme-light .bg-amber-950\/85 {
-  background-color: #FEF7E6 !important;
+/* Белый текст на насыщенной плашке: #965800 */
+.theme-light .bg-amber-500 .text-white,
+.theme-light .bg-amber-500.text-white {
   color: #965800 !important;
-  border-color: #FDE6B4 !important;
+}
+
+/* Наследование светлого текста для очень тёмных плашек: акцентные кнопки, затемнения фото */
+/* Наследуемый светлый текст: #FFFFFF */
+.theme-light .bg-\[\#068eff\],
+.theme-light .bg-red-600,
+.theme-light .bg-emerald-600,
+.theme-light .bg-blue-600,
+.theme-light .bg-blue-500,
+.theme-light .bg-\[\#D94625\] {
+  color: #FFFFFF !important;
+}
+.theme-light .bg-amber-600,
+.theme-light .bg-red-400,
+.theme-light .bg-red-500,
+.theme-light .bg-\[\#068eff\]\/60,
+.theme-light .bg-\[\#D94625\]\/60 {
+  color: #FFFFFF !important;
+}
+
+/* Приглушённые светлые тексты внутри таких же насыщенных плашек */
+.theme-light .bg-\[\#068eff\] .text-slate-100,
+.theme-light .bg-\[\#068eff\]text-slate-100,
+.theme-light .bg-cyan-500 .text-slate-100,
+.theme-light .bg-cyan-500text-slate-100,
+.theme-light .bg-amber-500 .text-slate-100,
+.theme-light .bg-amber-500text-slate-100 {
+  color: #F1F5F9 !important;
+}
+.theme-light .bg-red-600 .text-slate-100,
+.theme-light .bg-red-600text-slate-100,
+.theme-light .bg-emerald-600 .text-slate-100,
+.theme-light .bg-emerald-600text-slate-100,
+.theme-light .bg-blue-600 .text-slate-100,
+.theme-light .bg-blue-600text-slate-100 {
+  color: #F1F5F9 !important;
+}
+.theme-light .bg-blue-500 .text-slate-100,
+.theme-light .bg-blue-500text-slate-100,
+.theme-light .bg-\[\#D94625\] .text-slate-100,
+.theme-light .bg-\[\#D94625\]text-slate-100,
+.theme-light .bg-blue-400 .text-slate-100,
+.theme-light .bg-blue-400text-slate-100 {
+  color: #F1F5F9 !important;
+}
+.theme-light .bg-amber-600 .text-slate-100,
+.theme-light .bg-amber-600text-slate-100,
+.theme-light .bg-emerald-500 .text-slate-100,
+.theme-light .bg-emerald-500text-slate-100,
+.theme-light .bg-red-400 .text-slate-100,
+.theme-light .bg-red-400text-slate-100 {
+  color: #F1F5F9 !important;
+}
+.theme-light .bg-red-500 .text-slate-100,
+.theme-light .bg-red-500text-slate-100,
+.theme-light .bg-\[\#068eff\]\/60 .text-slate-100,
+.theme-light .bg-\[\#068eff\]\/60text-slate-100,
+.theme-light .bg-emerald-500\/80 .text-slate-100,
+.theme-light .bg-emerald-500\/80text-slate-100 {
+  color: #F1F5F9 !important;
+}
+.theme-light .bg-\[\#D94625\]\/60 .text-slate-100,
+.theme-light .bg-\[\#D94625\]\/60text-slate-100 {
+  color: #F1F5F9 !important;
+}
+.theme-light .bg-\[\#068eff\] .text-slate-200,
+.theme-light .bg-\[\#068eff\]text-slate-200,
+.theme-light .bg-cyan-500 .text-slate-200,
+.theme-light .bg-cyan-500text-slate-200,
+.theme-light .bg-amber-500 .text-slate-200,
+.theme-light .bg-amber-500text-slate-200 {
+  color: #E2E8F0 !important;
+}
+.theme-light .bg-red-600 .text-slate-200,
+.theme-light .bg-red-600text-slate-200,
+.theme-light .bg-emerald-600 .text-slate-200,
+.theme-light .bg-emerald-600text-slate-200,
+.theme-light .bg-blue-600 .text-slate-200,
+.theme-light .bg-blue-600text-slate-200 {
+  color: #E2E8F0 !important;
+}
+.theme-light .bg-blue-500 .text-slate-200,
+.theme-light .bg-blue-500text-slate-200,
+.theme-light .bg-\[\#D94625\] .text-slate-200,
+.theme-light .bg-\[\#D94625\]text-slate-200,
+.theme-light .bg-blue-400 .text-slate-200,
+.theme-light .bg-blue-400text-slate-200 {
+  color: #E2E8F0 !important;
+}
+.theme-light .bg-amber-600 .text-slate-200,
+.theme-light .bg-amber-600text-slate-200,
+.theme-light .bg-emerald-500 .text-slate-200,
+.theme-light .bg-emerald-500text-slate-200,
+.theme-light .bg-red-400 .text-slate-200,
+.theme-light .bg-red-400text-slate-200 {
+  color: #E2E8F0 !important;
+}
+.theme-light .bg-red-500 .text-slate-200,
+.theme-light .bg-red-500text-slate-200,
+.theme-light .bg-\[\#068eff\]\/60 .text-slate-200,
+.theme-light .bg-\[\#068eff\]\/60text-slate-200,
+.theme-light .bg-emerald-500\/80 .text-slate-200,
+.theme-light .bg-emerald-500\/80text-slate-200 {
+  color: #E2E8F0 !important;
+}
+.theme-light .bg-\[\#D94625\]\/60 .text-slate-200,
+.theme-light .bg-\[\#D94625\]\/60text-slate-200 {
+  color: #E2E8F0 !important;
+}
+.theme-light .bg-\[\#068eff\] .text-slate-300,
+.theme-light .bg-\[\#068eff\]text-slate-300,
+.theme-light .bg-cyan-500 .text-slate-300,
+.theme-light .bg-cyan-500text-slate-300,
+.theme-light .bg-amber-500 .text-slate-300,
+.theme-light .bg-amber-500text-slate-300 {
+  color: #CBD5E1 !important;
+}
+.theme-light .bg-red-600 .text-slate-300,
+.theme-light .bg-red-600text-slate-300,
+.theme-light .bg-emerald-600 .text-slate-300,
+.theme-light .bg-emerald-600text-slate-300,
+.theme-light .bg-blue-600 .text-slate-300,
+.theme-light .bg-blue-600text-slate-300 {
+  color: #CBD5E1 !important;
+}
+.theme-light .bg-blue-500 .text-slate-300,
+.theme-light .bg-blue-500text-slate-300,
+.theme-light .bg-\[\#D94625\] .text-slate-300,
+.theme-light .bg-\[\#D94625\]text-slate-300,
+.theme-light .bg-blue-400 .text-slate-300,
+.theme-light .bg-blue-400text-slate-300 {
+  color: #CBD5E1 !important;
+}
+.theme-light .bg-amber-600 .text-slate-300,
+.theme-light .bg-amber-600text-slate-300,
+.theme-light .bg-emerald-500 .text-slate-300,
+.theme-light .bg-emerald-500text-slate-300,
+.theme-light .bg-red-400 .text-slate-300,
+.theme-light .bg-red-400text-slate-300 {
+  color: #CBD5E1 !important;
+}
+.theme-light .bg-red-500 .text-slate-300,
+.theme-light .bg-red-500text-slate-300,
+.theme-light .bg-\[\#068eff\]\/60 .text-slate-300,
+.theme-light .bg-\[\#068eff\]\/60text-slate-300,
+.theme-light .bg-emerald-500\/80 .text-slate-300,
+.theme-light .bg-emerald-500\/80text-slate-300 {
+  color: #CBD5E1 !important;
+}
+.theme-light .bg-\[\#D94625\]\/60 .text-slate-300,
+.theme-light .bg-\[\#D94625\]\/60text-slate-300 {
+  color: #CBD5E1 !important;
+}
+.theme-light .bg-\[\#068eff\] .text-slate-400,
+.theme-light .bg-\[\#068eff\]text-slate-400,
+.theme-light .bg-cyan-500 .text-slate-400,
+.theme-light .bg-cyan-500text-slate-400,
+.theme-light .bg-amber-500 .text-slate-400,
+.theme-light .bg-amber-500text-slate-400 {
+  color: #CBD5E1 !important;
+}
+.theme-light .bg-red-600 .text-slate-400,
+.theme-light .bg-red-600text-slate-400,
+.theme-light .bg-emerald-600 .text-slate-400,
+.theme-light .bg-emerald-600text-slate-400,
+.theme-light .bg-blue-600 .text-slate-400,
+.theme-light .bg-blue-600text-slate-400 {
+  color: #CBD5E1 !important;
+}
+.theme-light .bg-blue-500 .text-slate-400,
+.theme-light .bg-blue-500text-slate-400,
+.theme-light .bg-\[\#D94625\] .text-slate-400,
+.theme-light .bg-\[\#D94625\]text-slate-400,
+.theme-light .bg-blue-400 .text-slate-400,
+.theme-light .bg-blue-400text-slate-400 {
+  color: #CBD5E1 !important;
+}
+.theme-light .bg-amber-600 .text-slate-400,
+.theme-light .bg-amber-600text-slate-400,
+.theme-light .bg-emerald-500 .text-slate-400,
+.theme-light .bg-emerald-500text-slate-400,
+.theme-light .bg-red-400 .text-slate-400,
+.theme-light .bg-red-400text-slate-400 {
+  color: #CBD5E1 !important;
+}
+.theme-light .bg-red-500 .text-slate-400,
+.theme-light .bg-red-500text-slate-400,
+.theme-light .bg-\[\#068eff\]\/60 .text-slate-400,
+.theme-light .bg-\[\#068eff\]\/60text-slate-400,
+.theme-light .bg-emerald-500\/80 .text-slate-400,
+.theme-light .bg-emerald-500\/80text-slate-400 {
+  color: #CBD5E1 !important;
+}
+.theme-light .bg-\[\#D94625\]\/60 .text-slate-400,
+.theme-light .bg-\[\#D94625\]\/60text-slate-400 {
+  color: #CBD5E1 !important;
+}
+.theme-light .bg-\[\#068eff\] .text-slate-500,
+.theme-light .bg-\[\#068eff\]text-slate-500,
+.theme-light .bg-cyan-500 .text-slate-500,
+.theme-light .bg-cyan-500text-slate-500,
+.theme-light .bg-amber-500 .text-slate-500,
+.theme-light .bg-amber-500text-slate-500 {
+  color: #CBD5E1 !important;
+}
+.theme-light .bg-red-600 .text-slate-500,
+.theme-light .bg-red-600text-slate-500,
+.theme-light .bg-emerald-600 .text-slate-500,
+.theme-light .bg-emerald-600text-slate-500,
+.theme-light .bg-blue-600 .text-slate-500,
+.theme-light .bg-blue-600text-slate-500 {
+  color: #CBD5E1 !important;
+}
+.theme-light .bg-blue-500 .text-slate-500,
+.theme-light .bg-blue-500text-slate-500,
+.theme-light .bg-\[\#D94625\] .text-slate-500,
+.theme-light .bg-\[\#D94625\]text-slate-500,
+.theme-light .bg-blue-400 .text-slate-500,
+.theme-light .bg-blue-400text-slate-500 {
+  color: #CBD5E1 !important;
+}
+.theme-light .bg-amber-600 .text-slate-500,
+.theme-light .bg-amber-600text-slate-500,
+.theme-light .bg-emerald-500 .text-slate-500,
+.theme-light .bg-emerald-500text-slate-500,
+.theme-light .bg-red-400 .text-slate-500,
+.theme-light .bg-red-400text-slate-500 {
+  color: #CBD5E1 !important;
+}
+.theme-light .bg-red-500 .text-slate-500,
+.theme-light .bg-red-500text-slate-500,
+.theme-light .bg-\[\#068eff\]\/60 .text-slate-500,
+.theme-light .bg-\[\#068eff\]\/60text-slate-500,
+.theme-light .bg-emerald-500\/80 .text-slate-500,
+.theme-light .bg-emerald-500\/80text-slate-500 {
+  color: #CBD5E1 !important;
+}
+.theme-light .bg-\[\#D94625\]\/60 .text-slate-500,
+.theme-light .bg-\[\#D94625\]\/60text-slate-500 {
+  color: #CBD5E1 !important;
+}
+.theme-light .bg-\[\#068eff\] .text-slate-600,
+.theme-light .bg-\[\#068eff\]text-slate-600,
+.theme-light .bg-cyan-500 .text-slate-600,
+.theme-light .bg-cyan-500text-slate-600,
+.theme-light .bg-amber-500 .text-slate-600,
+.theme-light .bg-amber-500text-slate-600 {
+  color: #E2E8F0 !important;
+}
+.theme-light .bg-red-600 .text-slate-600,
+.theme-light .bg-red-600text-slate-600,
+.theme-light .bg-emerald-600 .text-slate-600,
+.theme-light .bg-emerald-600text-slate-600,
+.theme-light .bg-blue-600 .text-slate-600,
+.theme-light .bg-blue-600text-slate-600 {
+  color: #E2E8F0 !important;
+}
+.theme-light .bg-blue-500 .text-slate-600,
+.theme-light .bg-blue-500text-slate-600,
+.theme-light .bg-\[\#D94625\] .text-slate-600,
+.theme-light .bg-\[\#D94625\]text-slate-600,
+.theme-light .bg-blue-400 .text-slate-600,
+.theme-light .bg-blue-400text-slate-600 {
+  color: #E2E8F0 !important;
+}
+.theme-light .bg-amber-600 .text-slate-600,
+.theme-light .bg-amber-600text-slate-600,
+.theme-light .bg-emerald-500 .text-slate-600,
+.theme-light .bg-emerald-500text-slate-600,
+.theme-light .bg-red-400 .text-slate-600,
+.theme-light .bg-red-400text-slate-600 {
+  color: #E2E8F0 !important;
+}
+.theme-light .bg-red-500 .text-slate-600,
+.theme-light .bg-red-500text-slate-600,
+.theme-light .bg-\[\#068eff\]\/60 .text-slate-600,
+.theme-light .bg-\[\#068eff\]\/60text-slate-600,
+.theme-light .bg-emerald-500\/80 .text-slate-600,
+.theme-light .bg-emerald-500\/80text-slate-600 {
+  color: #E2E8F0 !important;
+}
+.theme-light .bg-\[\#D94625\]\/60 .text-slate-600,
+.theme-light .bg-\[\#D94625\]\/60text-slate-600 {
+  color: #E2E8F0 !important;
+}
+.theme-light .bg-\[\#068eff\] .text-slate-700,
+.theme-light .bg-\[\#068eff\]text-slate-700,
+.theme-light .bg-cyan-500 .text-slate-700,
+.theme-light .bg-cyan-500text-slate-700,
+.theme-light .bg-amber-500 .text-slate-700,
+.theme-light .bg-amber-500text-slate-700 {
+  color: #E2E8F0 !important;
+}
+.theme-light .bg-red-600 .text-slate-700,
+.theme-light .bg-red-600text-slate-700,
+.theme-light .bg-emerald-600 .text-slate-700,
+.theme-light .bg-emerald-600text-slate-700,
+.theme-light .bg-blue-600 .text-slate-700,
+.theme-light .bg-blue-600text-slate-700 {
+  color: #E2E8F0 !important;
+}
+.theme-light .bg-blue-500 .text-slate-700,
+.theme-light .bg-blue-500text-slate-700,
+.theme-light .bg-\[\#D94625\] .text-slate-700,
+.theme-light .bg-\[\#D94625\]text-slate-700,
+.theme-light .bg-blue-400 .text-slate-700,
+.theme-light .bg-blue-400text-slate-700 {
+  color: #E2E8F0 !important;
+}
+.theme-light .bg-amber-600 .text-slate-700,
+.theme-light .bg-amber-600text-slate-700,
+.theme-light .bg-emerald-500 .text-slate-700,
+.theme-light .bg-emerald-500text-slate-700,
+.theme-light .bg-red-400 .text-slate-700,
+.theme-light .bg-red-400text-slate-700 {
+  color: #E2E8F0 !important;
+}
+.theme-light .bg-red-500 .text-slate-700,
+.theme-light .bg-red-500text-slate-700,
+.theme-light .bg-\[\#068eff\]\/60 .text-slate-700,
+.theme-light .bg-\[\#068eff\]\/60text-slate-700,
+.theme-light .bg-emerald-500\/80 .text-slate-700,
+.theme-light .bg-emerald-500\/80text-slate-700 {
+  color: #E2E8F0 !important;
+}
+.theme-light .bg-\[\#D94625\]\/60 .text-slate-700,
+.theme-light .bg-\[\#D94625\]\/60text-slate-700 {
+  color: #E2E8F0 !important;
 }
