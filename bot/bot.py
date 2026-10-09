@@ -25,6 +25,7 @@ import secrets
 import sys
 import time
 import json
+import sqlite3
 import logging
 import asyncio
 from datetime import datetime, timezone
@@ -116,6 +117,8 @@ USER_PREFERENCES: Dict[int, Dict[str, Any]] = {}
 
 # Подписки на автосборщик (1 раз в день): { user_id: { "make": "BMW", "model": "X5" } }
 SUBSCRIBERS_FILE = os.path.join(os.path.dirname(__file__), "subscribers.json")
+# Лёгкая локальная база бота: один SQLite-файл, без серверной СУБД.
+DB_PATH = os.getenv("PRIME_DB_PATH", "/opt/primebot/primebot.db")
 DAILY_SUBSCRIBERS: Dict[int, Dict[str, str]] = {}
 
 
@@ -133,26 +136,57 @@ def normalize_make(raw_make: str) -> str:
     return m
 
 
+def _db_conn():
+    """Подключение к primebot.db с созданием таблицы при первом запуске."""
+    conn = sqlite3.connect(DB_PATH)
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS subscribers ("
+        "user_id INTEGER PRIMARY KEY, cfg TEXT NOT NULL, updated_at TEXT)"
+    )
+    return conn
+
+
 def load_subscribers():
-    """Загрузка подписок из файла subscribers.json при старте бота."""
+    """Загрузка подписок из primebot.db; пустая база одноразово берёт subscribers.json."""
     global DAILY_SUBSCRIBERS
     try:
+        conn = _db_conn()
+        rows = conn.execute("SELECT user_id, cfg FROM subscribers").fetchall()
+        conn.close()
+        if rows:
+            DAILY_SUBSCRIBERS = {int(uid): json.loads(cfg) for uid, cfg in rows}
+            logger.info(f"Загружено {len(DAILY_SUBSCRIBERS)} подписок из {DB_PATH}")
+            return
         if os.path.exists(SUBSCRIBERS_FILE):
             with open(SUBSCRIBERS_FILE, "r", encoding="utf-8") as f:
-                raw_data = json.load(f)
-                DAILY_SUBSCRIBERS = {int(k): v for k, v in raw_data.items()}
-                logger.info(f"Загружено {len(DAILY_SUBSCRIBERS)} сохраненных подписок из {SUBSCRIBERS_FILE}")
+                DAILY_SUBSCRIBERS = {int(k): v for k, v in json.load(f).items()}
+            logger.info(f"Перенос {len(DAILY_SUBSCRIBERS)} подписок из {SUBSCRIBERS_FILE} в {DB_PATH}")
+            save_subscribers()
     except Exception as e:
-        logger.error(f"Ошибка чтения {SUBSCRIBERS_FILE}: {e}")
+        logger.error(f"Ошибка чтения {DB_PATH}: {e}")
 
 
 def save_subscribers():
-    """Сохранение подписок в файл subscribers.json на диск."""
+    """Сохранение подписок в primebot.db; строки отписавшихся удаляются."""
     try:
-        with open(SUBSCRIBERS_FILE, "w", encoding="utf-8") as f:
-            json.dump(DAILY_SUBSCRIBERS, f, ensure_ascii=False, indent=2)
+        conn = _db_conn()
+        conn.executemany(
+            "INSERT OR REPLACE INTO subscribers (user_id, cfg, updated_at) VALUES (?, ?, ?)",
+            [
+                (uid, json.dumps(cfg, ensure_ascii=False), str(cfg.get("updated_at", "")))
+                for uid, cfg in DAILY_SUBSCRIBERS.items()
+            ],
+        )
+        ids = list(DAILY_SUBSCRIBERS.keys())
+        if ids:
+            marks = ",".join("?" for _ in ids)
+            conn.execute(f"DELETE FROM subscribers WHERE user_id NOT IN ({marks})", ids)
+        else:
+            conn.execute("DELETE FROM subscribers")
+        conn.commit()
+        conn.close()
     except Exception as e:
-        logger.error(f"Ошибка сохранения {SUBSCRIBERS_FILE}: {e}")
+        logger.error(f"Ошибка сохранения {DB_PATH}: {e}")
 
 
 async def server_subscribers() -> Optional[Dict[int, Dict[str, Any]]]:

@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   X,
   Sliders,
   Moon,
   Sun,
   Check,
+  Lock,
   ExternalLink,
   ShieldCheck,
   DollarSign,
@@ -39,9 +40,23 @@ export const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
   onClearBookmarks,
   bookmarksCount
 }) => {
+  const [darkPrompt, setDarkPrompt] = useState<'closed' | 'open' | 'wrong'>('closed');
+  const [darkInput, setDarkInput] = useState('');
+
   if (!isOpen) return null;
 
   const isLight = theme === 'light';
+
+  // Тёмная тема открывается только по служебному паролю: витрина по умолчанию светлая.
+  const submitDarkUnlock = () => {
+    if (darkInput === 'adminadmin') {
+      setDarkPrompt('closed');
+      setDarkInput('');
+      onChangeTheme('dark');
+    } else {
+      setDarkPrompt('wrong');
+    }
+  };
 
   const currencies: { id: Currency; symbol: string; label: string }[] = [
     { id: 'USD', symbol: '$', label: 'USD ($)' },
@@ -144,7 +159,11 @@ export const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
               {/* 1. ТЁМНАЯ ТЕМА */}
               <button
                 type="button"
-                onClick={() => onChangeTheme('dark')}
+                onClick={() => {
+                  if (!isLight) return;
+                  setDarkInput('');
+                  setDarkPrompt('open');
+                }}
                 className={`p-3 rounded-2xl border text-left transition-all duration-200 relative flex flex-col justify-between ${
                   !isLight
                     ? 'bg-[#141826] border-[#068eff] ring-2 ring-[#068eff]/30 shadow-lg'
@@ -183,7 +202,10 @@ export const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
                     </div>
                   )}
                 </div>
-                <span className="text-[10px] text-slate-400 mt-0.5">Carbon & Neon Blue</span>
+                <span className="text-[10px] text-slate-400 mt-0.5 flex items-center gap-1">
+                  <Lock className="w-2.5 h-2.5 shrink-0" />
+                  Carbon &amp; Neon Blue - по паролю
+                </span>
               </button>
 
               {/* 2. СВЕТЛАЯ ТЕМА (CARCHECKBOT STYLE) */}
@@ -233,6 +255,72 @@ export const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
                 </span>
               </button>
             </div>
+
+            {darkPrompt !== 'closed' && (
+              <div
+                className={`mt-2.5 rounded-2xl border p-3 ${
+                  isLight ? 'bg-[#FFF8F6] border-[#FFDDD6]' : 'bg-[#141826] border-slate-700'
+                }`}
+              >
+                <label
+                  className={`flex items-center gap-1.5 text-[11px] font-bold mb-2 ${
+                    isLight ? 'text-slate-800' : 'text-slate-100'
+                  }`}
+                >
+                  <Lock className="w-3.5 h-3.5 text-[#068eff]" />
+                  Служебный доступ
+                </label>
+                <input
+                  type="password"
+                  autoFocus
+                  value={darkInput}
+                  onChange={(e) => {
+                    setDarkInput(e.target.value);
+                    if (darkPrompt === 'wrong') setDarkPrompt('open');
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      submitDarkUnlock();
+                    }
+                  }}
+                  placeholder="Пароль"
+                  className={`w-full rounded-xl border px-3 py-2 text-sm outline-none ${
+                    isLight
+                      ? 'bg-white border-slate-200 text-slate-900'
+                      : 'bg-[#090c12] border-slate-700 text-white'
+                  }`}
+                />
+                {darkPrompt === 'wrong' && (
+                  <p className="text-[11px] text-[#D94625] font-semibold mt-1.5">
+                    Пароль не подошёл. Попробуйте ещё раз.
+                  </p>
+                )}
+                <div className="flex gap-2 mt-2.5">
+                  <button
+                    type="button"
+                    onClick={submitDarkUnlock}
+                    className="flex-1 h-9 rounded-xl bg-[#068eff] text-white text-xs font-bold"
+                  >
+                    Подтвердить
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDarkPrompt('closed');
+                      setDarkInput('');
+                    }}
+                    className={`px-4 h-9 rounded-xl text-xs font-bold border ${
+                      isLight
+                        ? 'border-slate-200 text-slate-600'
+                        : 'border-slate-700 text-slate-300'
+                    }`}
+                  >
+                    Отменить
+                  </button>
+                </div>
+              </div>
+            )}
 
             <p
               className={`text-[11px] leading-relaxed px-1 ${
