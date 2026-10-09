@@ -15,7 +15,7 @@ import {
   Calculator,
   MessageSquare
 } from 'lucide-react';
-import { CarLot, Currency } from '../types/car';
+import { CarLot, Currency, AppTheme } from '../types/car';
 import { formatPrice } from '../utils/currency';
 import { TimedCountdownBadge } from './TimedCountdownBadge';
 import { CAR_PLACEHOLDER_SVG } from '../services/carsApiService';
@@ -25,14 +25,17 @@ interface TimedCarCardProps {
   currency: Currency;
   isBookmarked: boolean;
   onToggleBookmark: (lot: CarLot) => void;
+  theme?: AppTheme;
 }
 
 export const TimedCarCard: React.FC<TimedCarCardProps> = ({
   lot,
   currency,
   isBookmarked,
-  onToggleBookmark
+  onToggleBookmark,
+  theme = 'dark'
 }) => {
+  const isLight = theme === 'light';
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const touchStartXRef = useRef<number | null>(null);
 

@@ -21,8 +21,9 @@ import { TimedCarCard } from './components/TimedCarCard';
 import { MobileBottomNav } from './components/MobileBottomNav';
 import { ClockDialAnimation } from './components/ClockDialAnimation';
 import { SaveToFolderModal } from './components/SaveToFolderModal';
+import { UserSettingsModal } from './components/UserSettingsModal';
 import { AUCTION_LOTS } from './data/auctionLots';
-import { CarLot, PrimeFilterState, BotConfig, Currency, ClientFolder, DEFAULT_CLIENT_FOLDERS } from './types/car';
+import { CarLot, PrimeFilterState, BotConfig, Currency, ClientFolder, DEFAULT_CLIENT_FOLDERS, AppTheme } from './types/car';
 import { carsApiService } from './services/carsApiService';
 
 // Площадки ведут торги по своему времени, и на лентах оно нью-йоркское:
@@ -165,6 +166,32 @@ export default function App() {
     timedMode: 'only'
   });
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // App theme state: 'dark' (Carbon Dark) vs 'light' (CarCheckBot Light)
+  const [theme, setTheme] = useState<AppTheme>(() => {
+    try {
+      const saved = localStorage.getItem('prime_app_theme') as AppTheme;
+      return saved === 'light' || saved === 'dark' ? saved : 'dark';
+    } catch {
+      return 'dark';
+    }
+  });
+
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
+  // Sync theme with HTML root and body
+  useEffect(() => {
+    try {
+      localStorage.setItem('prime_app_theme', theme);
+    } catch {}
+    if (theme === 'light') {
+      document.documentElement.classList.add('theme-light');
+      document.body.classList.add('theme-light');
+    } else {
+      document.documentElement.classList.remove('theme-light');
+      document.body.classList.remove('theme-light');
+    }
+  }, [theme]);
 
   // Initial load via cars-proxy.php / apicar API
   useEffect(() => {
@@ -516,6 +543,7 @@ export default function App() {
                 currency={currency}
                 isBookmarked={bookmarkedIds.includes(lot.id)}
                 onToggleBookmark={handleToggleBookmark}
+                theme={theme}
               />
             ))}
           </div>
@@ -584,13 +612,15 @@ export default function App() {
         </div>
       )}
 
-      {/* 2. Mobile Bottom Navigation: [Фильтры], [Автоподбор], [Закладки] */}
+      {/* 2. Mobile Bottom Navigation: [Фильтры], [Автоподбор], [Закладки], [Настройки] */}
       <MobileBottomNav
         onOpenFilter={() => setIsFilterOpen(true)}
         onOpenBot={() => setIsBotOpen(true)}
         onOpenBookmarks={() => setIsBookmarksOpen(true)}
+        onOpenSettings={() => setIsSettingsOpen(true)}
         activeFilterCount={activeFiltersCount}
         bookmarksCount={bookmarkedIds.length}
+        theme={theme}
       />
 
       {/* 3. Mobile Filter Drawer (Timed inside Auction field, Documents hidden by default) */}
@@ -643,6 +673,22 @@ export default function App() {
           setSaveToFolderLot(null);
           setIsBookmarksOpen(true);
         }}
+      />
+
+      {/* 7. User Settings Modal (Тема в стиле CarCheckBot, Валюта, Сброс) */}
+      <UserSettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        theme={theme}
+        onChangeTheme={setTheme}
+        currency={currency}
+        onChangeCurrency={setCurrency}
+        onResetFilters={handleResetFilters}
+        onClearBookmarks={() => {
+          setBookmarkedIds([]);
+          setFolders((prev) => prev.map((f) => ({ ...f, lotIds: [] })));
+        }}
+        bookmarksCount={bookmarkedIds.length}
       />
 
     </div>

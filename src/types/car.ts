@@ -1,4 +1,5 @@
 export type AuctionSite = 'copart' | 'iaai';
+export type AppTheme = 'dark' | 'light';
 
 export interface CarLot {
   id: string;

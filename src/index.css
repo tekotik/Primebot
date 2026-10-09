@@ -119,3 +119,196 @@
   scrollbar-width: none !important;
   -webkit-overflow-scrolling: touch;
 }
+
+/* ==========================================================================
+   CARCHECKBOT LIGHT THEME (Светлая тема в стиле https://carcheckbot.com/ru)
+   ========================================================================== */
+
+body.theme-light,
+.theme-light {
+  background-color: #FFF9F5 !important;
+  color: #22140F !important;
+}
+
+body.theme-light ::-webkit-scrollbar-track,
+.theme-light ::-webkit-scrollbar-track {
+  background: #F5EBE4 !important;
+}
+
+body.theme-light ::-webkit-scrollbar-thumb,
+.theme-light ::-webkit-scrollbar-thumb {
+  background: #D8CCC5 !important;
+}
+
+/* Background overrides in light theme */
+.theme-light .bg-\[\#090c12\],
+.theme-light .bg-\[\#0a0d14\],
+.theme-light .bg-\[\#0b0e14\],
+.theme-light .bg-\[\#05070d\] {
+  background-color: #FFF9F5 !important;
+}
+
+.theme-light .bg-\[\#0c1018\]\/95,
+.theme-light .bg-\[\#0c1018\] {
+  background-color: rgba(255, 255, 255, 0.98) !important;
+}
+
+.theme-light .bg-\[\#111520\],
+.theme-light .bg-\[\#0f131c\],
+.theme-light .bg-\[\#0f131c\]\/95,
+.theme-light .bg-\[\#131724\],
+.theme-light .bg-\[\#141824\],
+.theme-light .bg-\[\#121624\],
+.theme-light .bg-\[\#121622\],
+.theme-light .bg-\[\#0d1017\],
+.theme-light .bg-\[\#101522\],
+.theme-light .bg-\[\#151a28\] {
+  background-color: #FFFFFF !important;
+}
+
+.theme-light .bg-\[\#131929\] {
+  background-color: #FFF2EB !important;
+}
+
+.theme-light .bg-\[\#0e121d\] {
+  background-color: #FAF6F3 !important;
+}
+
+/* Borders */
+.theme-light .border-slate-800,
+.theme-light .border-slate-800\/90,
+.theme-light .border-slate-800\/80,
+.theme-light .border-slate-800\/60,
+.theme-light .border-slate-800\/40,
+.theme-light .border-slate-700 {
+  border-color: #E8D8CD !important;
+}
+
+.theme-light .border-blue-900\/40,
+.theme-light .border-blue-900\/30 {
+  border-color: #F0D3C3 !important;
+}
+
+/* Text overrides in light theme */
+.theme-light .text-white {
+  color: #22140F !important;
+}
+
+.theme-light .text-slate-100 {
+  color: #22140F !important;
+}
+
+.theme-light .text-slate-200 {
+  color: #38241C !important;
+}
+
+.theme-light .text-slate-300 {
+  color: #553E34 !important;
+}
+
+.theme-light .text-slate-400 {
+  color: #7A665C !important;
+}
+
+.theme-light .text-slate-500 {
+  color: #9C897E !important;
+}
+
+.theme-light .text-slate-600 {
+  color: #B5A49A !important;
+}
+
+/* Primary accent buttons & text - CarCheckBot signature Terracotta #C43B15 */
+.theme-light .bg-\[\#068eff\] {
+  background-color: #C43B15 !important;
+}
+
+.theme-light .hover\:bg-\[\#007be5\]:hover {
+  background-color: #A9300F !important;
+}
+
+.theme-light .text-\[\#068eff\],
+.theme-light .text-\[\#008fff\] {
+  color: #C43B15 !important;
+}
+
+.theme-light .border-\[\#068eff\] {
+  border-color: #C43B15 !important;
+}
+
+.theme-light .border-\[\#068eff\]\/30,
+.theme-light .border-\[\#068eff\]\/40,
+.theme-light .border-\[\#068eff\]\/60 {
+  border-color: #F0D3C3 !important;
+}
+
+.theme-light .bg-\[\#068eff\]\/10,
+.theme-light .bg-\[\#068eff\]\/15,
+.theme-light .bg-\[\#068eff\]\/20,
+.theme-light .bg-\[\#068eff\]\/25 {
+  background-color: #FDF1EC !important;
+}
+
+/* Card hover and shadows in light theme */
+.theme-light .shadow-lg,
+.theme-light .shadow-2xl,
+.theme-light .shadow-md {
+  box-shadow: 0 4px 20px -2px rgba(34, 20, 15, 0.06), 0 2px 6px -1px rgba(34, 20, 15, 0.04) !important;
+}
+
+.theme-light .group:hover {
+  border-color: #C43B15 !important;
+  box-shadow: 0 10px 25px -5px rgba(196, 59, 21, 0.12), 0 4px 6px -2px rgba(34, 20, 15, 0.04) !important;
+}
+
+/* Inputs & Form controls in light theme */
+.theme-light input,
+.theme-light select {
+  background-color: #FFFFFF !important;
+  color: #22140F !important;
+  border-color: #E8D8CD !important;
+}
+
+.theme-light input::placeholder {
+  color: #9C897E !important;
+}
+
+.theme-light input:focus,
+.theme-light select:focus {
+  border-color: #C43B15 !important;
+  outline: none;
+}
+
+/* Car card badges in light theme */
+.theme-light .bg-slate-800\/90,
+.theme-light .bg-slate-800\/80,
+.theme-light .bg-slate-800\/60,
+.theme-light .bg-slate-800 {
+  background-color: #F5EBE4 !important;
+  color: #4A382F !important;
+}
+
+.theme-light .bg-red-950\/40,
+.theme-light .bg-red-950\/50 {
+  background-color: #FDF1EC !important;
+  color: #C43B15 !important;
+  border-color: #F0D3C3 !important;
+}
+
+.theme-light .bg-blue-950\/40 {
+  background-color: #EFF6FF !important;
+  color: #1D4ED8 !important;
+  border-color: #DBEAFE !important;
+}
+
+.theme-light .bg-emerald-950\/40 {
+  background-color: #EBF8F2 !important;
+  color: #0A6A3F !important;
+  border-color: #C6EEDC !important;
+}
+
+.theme-light .bg-amber-950\/85 {
+  background-color: #FEF7E6 !important;
+  color: #965800 !important;
+  border-color: #FDE6B4 !important;
+}
