@@ -109,6 +109,9 @@ logging.basicConfig(
 )
 logger = logging.getLogger("PrimeBot")
 
+# httpx печатает полный URL запроса, а в нём токен бота. Глушим до предупреждений.
+logging.getLogger("httpx").setLevel(logging.WARNING)
+
 # 5-минутный кэш: { cache_key: (timestamp, data) }
 QUERY_CACHE: Dict[str, tuple[float, Dict[str, Any]]] = {}
 CACHE_TTL = 300  # 5 минут
@@ -121,7 +124,7 @@ SUBSCRIBERS_FILE = os.path.join(os.path.dirname(__file__), "subscribers.json")
 # Лёгкая локальная база бота: один SQLite-файл, без серверной СУБД.
 DB_PATH = os.getenv("PRIME_DB_PATH", "/opt/primebot/primebot.db")
 
-# Кто имеет право на служебные команды (/send). Пусто - команда запрещена для всех,
+# Кто имеет право на секретную команду /send. Пусто - команда запрещена для всех,
 # а id обратившегося попадает в журнал, чтобы владелец добавил себя в PRIME_ADMIN_IDS.
 ADMIN_IDS = {
     int(x) for x in re.split(r"[,;\s]+", os.getenv("PRIME_ADMIN_IDS", "")) if x.isdigit()
@@ -1064,17 +1067,17 @@ async def web_app_data_handler(update: Update, context: ContextTypes.DEFAULT_TYP
 
 
 async def send_broadcast_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Служебная рассылка: /send <текст> - сообщение всем, кто писал боту."""
+    """Секретная рассылка: /send <текст> - сообщение всем, кто писал боту.
+    Посторонний не получает никакого ответа, чтобы сам факт команды не светился."""
     user = update.effective_user
     if not user or user.id not in ADMIN_IDS:
         if user:
-            logger.info(f"Рассылку запросил не служебный id: {user.id}")
-        await update.message.reply_text("Команда доступна владельцу бота.")
+            logger.info(f"Рассылку запросил посторонний id: {user.id}")
         return
 
     text = " ".join(context.args or []).strip()
     if not text:
-        await update.message.reply_text("Формат: /send <текст сообщения>")
+        await update.message.reply_text("Укажите текст после команды.")
         return
 
     recipients = known_chats()

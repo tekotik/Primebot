@@ -56,7 +56,7 @@ export const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
   // Карточка тёмной темы видна только после разблокировки (или когда она уже включена).
   const showDarkCard = darkUnlocked || !isLight;
 
-  // Тёмная тема открывается только по служебному паролю: витрина по умолчанию светлая.
+  // Тёмная тема открывается только по секретному паролю: витрина по умолчанию светлая.
   const submitDarkUnlock = () => {
     if (darkInput === 'adminadmin') {
       try {
@@ -167,7 +167,7 @@ export const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
               </span>
             </div>
 
-            {/* Карточки тем: тёмная показывается только после служебного пароля */}
+            {/* Карточки тем: тёмная показывается только после секретного пароля */}
             <div className={`grid gap-2.5 ${showDarkCard ? 'grid-cols-2' : 'grid-cols-1'}`}>
               {/* 1. ТЁМНАЯ ТЕМА */}
               {showDarkCard && (
@@ -284,7 +284,7 @@ export const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
                 }`}
               >
                 <Lock className="w-3 h-3" />
-                Служебный доступ
+                Секретный доступ
               </button>
             )}
 
@@ -300,7 +300,7 @@ export const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
                   }`}
                 >
                   <Lock className="w-3.5 h-3.5 text-[#068eff]" />
-                  Служебный доступ
+                  Секретный доступ
                 </label>
                 <input
                   type="password"
