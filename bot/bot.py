@@ -517,7 +517,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await issue_session_key(update.effective_user.id)
     url = app_url(update.effective_user.id)
     text = (
-        "👋 <b>Добро пожаловать в бота PrimeAvtoExport!</b>\n\n"
+        "👋 <b>Добро пожаловать в бота CarCheckBot!</b>\n\n"
         "Я ищу актуальные автомобили на аукционах <b>Copart</b> и <b>IAAI (Timed)</b> "
         "и считаю время до закрытия торгов.\n\n"
         "🤖 Кнопка «Открыть автоподбор» ведёт в мини-приложение: там лента лотов, "

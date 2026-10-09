@@ -1,18 +1,34 @@
 import React from 'react';
+import { AppTheme } from '../types/car';
 
 interface PrimeLogoProps {
   className?: string;
   size?: number;
   showText?: boolean;
+  theme?: AppTheme;
 }
 
 export const PrimeLogo: React.FC<PrimeLogoProps> = ({
   className = '',
   size = 32,
-  showText = true
+  showText = true,
+  theme = 'dark'
 }) => {
+  const isLight = theme === 'light';
+
   return (
     <div className={`flex items-center gap-2.5 ${className}`}>
+      {isLight ? (
+        <img
+          src="/carcheckbot-logo.svg"
+          alt="CarCheckBot"
+          width={size}
+          height={size}
+          draggable={false}
+          className="shrink-0 select-none"
+        />
+      ) : (
+      <>
       {/* Official PrimeAvtoExport Vector Logo Emblem */}
       <svg
         width={size}
@@ -39,9 +55,18 @@ export const PrimeLogo: React.FC<PrimeLogoProps> = ({
           <polygon fill="#005bdb" points="70.26 39.68 70.26 44.51 76.92 42.89 76.92 38.06 70.26 39.68" />
         </g>
       </svg>
+      </>
+      )}
 
       {/* Serious, high-contrast typography without rainbow accents */}
-      {showText && (
+      {showText && isLight && (
+        <div className="flex items-center">
+          <span className="font-['Exo_2',sans-serif] font-extrabold tracking-tight text-lg leading-none text-[#111111]">
+            CarCheck<span className="text-[#C43B15]">Bot</span>
+          </span>
+        </div>
+      )}
+      {showText && !isLight && (
         <div className="flex items-center">
           <span className="font-['Exo_2',sans-serif] font-extrabold tracking-wider text-base uppercase text-white leading-none">
             PRIME<span className="text-[#008fff] ml-0.5">AVTO</span>

@@ -167,13 +167,13 @@ export default function App() {
   });
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // App theme state: 'dark' (Carbon Dark) vs 'light' (CarCheckBot Light)
+  // App theme state: 'light' (CarCheckBot Light, по умолчанию) vs 'dark' (Carbon Dark)
   const [theme, setTheme] = useState<AppTheme>(() => {
     try {
       const saved = localStorage.getItem('prime_app_theme') as AppTheme;
-      return saved === 'light' || saved === 'dark' ? saved : 'dark';
+      return saved === 'light' || saved === 'dark' ? saved : 'light';
     } catch {
-      return 'dark';
+      return 'light';
     }
   });
 
@@ -375,7 +375,7 @@ export default function App() {
     <div className="min-h-screen bg-[#090c12] text-slate-100 flex flex-col font-sans pb-24 selection:bg-[#068eff] selection:text-white">
       {/* 1. Mobile Top Header with PrimeAvtoExport Logo and Serious Typography */}
       <header className="sticky top-0 z-30 w-full bg-[#0c1018]/95 backdrop-blur-md border-b border-slate-800/90 px-4 py-3 flex items-center justify-between">
-        <PrimeLogo size={28} showText={true} />
+        <PrimeLogo size={28} showText={true} theme={theme} />
 
         <div className="flex items-center gap-2 shrink-0">
           <HeaderNyTime />
