@@ -742,7 +742,7 @@ export const MobileBookmarksDrawer: React.FC<MobileBookmarksDrawerProps> = ({
                 type="text"
                 value={newFolderName}
                 onChange={(e) => setNewFolderName(e.target.value)}
-                placeholder="Имя клиента (например, Сергей)"
+                placeholder="Название папки"
                 className="flex-1 px-3 py-2 bg-[#121622] border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#068eff]"
               />
               <button
@@ -782,7 +782,7 @@ export const MobileBookmarksDrawer: React.FC<MobileBookmarksDrawerProps> = ({
                   autoFocus
                   value={newFolderName}
                   onChange={(e) => setNewFolderName(e.target.value)}
-                  placeholder="Имя клиента (например, Сергей)"
+                  placeholder="Название папки"
                   className="w-full px-3 py-2.5 bg-[#0b0e14] border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#068eff]"
                 />
 
