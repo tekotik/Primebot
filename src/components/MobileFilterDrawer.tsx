@@ -316,6 +316,7 @@ export const MobileFilterDrawer: React.FC<MobileFilterDrawerProps> = ({
               <option value="Gasoline">Бензин</option>
               <option value="Diesel">Дизель</option>
               <option value="Electric">Электро</option>
+              <option value="Hybrid">Гибрид</option>
               <option value="Flexible Fuel">Flex Fuel</option>
             </select>
           </div>

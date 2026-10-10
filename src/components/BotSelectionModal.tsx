@@ -868,6 +868,7 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
                   <option value="Gasoline" className="bg-[#0d1017] text-white">Бензин</option>
                   <option value="Diesel" className="bg-[#0d1017] text-white">Дизель</option>
                   <option value="Electric" className="bg-[#0d1017] text-white">Электро</option>
+                  <option value="Hybrid" className="bg-[#0d1017] text-white">Гибрид</option>
                   <option value="Flexible Fuel" className="bg-[#0d1017] text-white">Flex Fuel</option>
                 </select>
               </div>
