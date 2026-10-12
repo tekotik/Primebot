@@ -17,7 +17,8 @@ PrimeAvtoExport Telegram Bot (Primebot)
 4. Кэширование:
    - 5 минут на идентичные запросы (не перегружать сервер).
 5. Ссылки:
-   - Одна кнопка "🔎 Проверка по VIN" -> carcheckbot.com с подставленными VIN и номером лота
+   - Кнопка "🔎 Проверка по VIN" -> carcheckbot.com с подставленными VIN и номером лота
+   - Кнопка "🏛 Лот на Copart/IAAI" -> адрес лота из поля link ответа ленты
 """
 
 import os
@@ -544,6 +545,11 @@ def format_lot_message(lot: Dict[str, Any]) -> tuple[str, InlineKeyboardMarkup]:
     # строкой в карточке, и кнопкой.
     check_link = f"https://carcheckbot.com/ru/car/{vin}?lot={lot_id}" if vin and lot_id else ""
 
+    # Адрес лота берём из ленты (поле link): собранный вручную URL Copart или
+    # IAAI может не открыться у человека.
+    lot_link = (lot.get("link") or "").strip()
+    lot_site = (platform or "").strip()
+
     if check_link:
         text_parts.append(f'🔎 <a href="{check_link}">Кто продавец? Резерв продавца</a>')
 
@@ -553,6 +559,9 @@ def format_lot_message(lot: Dict[str, Any]) -> tuple[str, InlineKeyboardMarkup]:
 
     if check_link:
         keyboard.append([InlineKeyboardButton("🔎 Проверка по VIN", url=check_link)])
+
+    if lot_link.startswith("http"):
+        keyboard.append([InlineKeyboardButton(f"🏛 Лот на {lot_site or 'аукционе'}", url=lot_link)])
 
     return caption, InlineKeyboardMarkup(keyboard)
 
