@@ -266,6 +266,9 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
   // Активный запрос списка подписок: по кнопке «Отменить» он обрывается.
   const abortRef = useRef<AbortController | null>(null);
 
+  // Блок статуса с перебором лент: к нему подматываем экран при запуске поиска.
+  const scanAnchorRef = useRef<HTMLDivElement | null>(null);
+
   const [serverSub, setServerSub] = useState<{
     state: 'idle' | 'loading' | 'ok' | 'error'; text: string; signature: string; total: number; savedAt: string; why: string;
   }>({ state: 'idle', text: '', signature: '', total: 0, savedAt: '', why: '' });
@@ -424,6 +427,9 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
         setToastText('В фильтре не заполнено: ' + missing.join(', '));
         return;
       }
+
+      // Кнопка запуска живёт внизу, а перебор лент показан сверху: подматываем к нему.
+      scanAnchorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
     if (!starting) {
@@ -604,7 +610,7 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
 
           {/* 3. ЕДИНЫЙ КОМПАКТНЫЙ СТАТУС-БЛОК ПОДПИСКИ */}
           {autoCollector.isActive || (serverSub.state === 'ok' && serverSub.text) ? (
-            <div className="p-3.5 bg-gradient-to-br from-[#0c1626] to-[#0c121e] border border-emerald-500/40 rounded-2xl shadow-lg shadow-emerald-950/20 space-y-3">
+            <div ref={scanAnchorRef} className="p-3.5 bg-gradient-to-br from-[#0c1626] to-[#0c121e] border border-emerald-500/40 rounded-2xl shadow-lg shadow-emerald-950/20 space-y-3">
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2.5 min-w-0">
                   <div className="w-8 h-8 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center shrink-0">
@@ -694,7 +700,7 @@ export const BotSelectionModal: React.FC<BotSelectionModalProps> = ({
               )}
             </div>
           ) : (
-            <div className="p-3.5 bg-gradient-to-br from-[#0e1422] to-[#090d16] border border-slate-800 rounded-2xl shadow-lg space-y-2">
+            <div ref={scanAnchorRef} className="p-3.5 bg-gradient-to-br from-[#0e1422] to-[#090d16] border border-slate-800 rounded-2xl shadow-lg space-y-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-xl bg-[#068eff]/15 border border-[#068eff]/30 text-[#068eff] flex items-center justify-center shrink-0">
