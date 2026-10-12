@@ -36,9 +36,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    // Тестируемся на staging: в корне прода bot-subscribe.php ещё не лежит.
-    const base = process.env.PRIME_SUBSCRIBE_URL
-      || 'https://primeavtoexport.com/staging/api/bot-subscribe.php';
+    // Прод-точка живёт на VPS с 10.10; staging остаётся только когда явно
+    // выставлен PRIME_ENV=staging или задан PRIME_SUBSCRIBE_URL.
+    const isStaging = process.env.PRIME_ENV === 'staging';
+    const defaultBase = isStaging
+      ? 'https://primeavtoexport.com/staging/api/bot-subscribe.php'
+      : 'https://primeavtoexport.com/api/bot-subscribe.php';
+
+    const base = process.env.PRIME_SUBSCRIBE_URL || defaultBase;
 
     const apiRes = await fetch(base, {
       method: 'POST',
