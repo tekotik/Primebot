@@ -20,6 +20,21 @@ import { formatPrice } from '../utils/currency';
 import { TimedCountdownBadge } from './TimedCountdownBadge';
 import { CAR_PLACEHOLDER_SVG } from '../services/carsApiService';
 
+// Copart отдаёт location как «NJ - Trenton», IAAI - как «Clearwater (FL)».
+// Приводим оба к виду «Trenton, NJ»; код штата берём из отдельного поля,
+// потому что у IAAI он в скобках иногда в нижнем регистре.
+function lotPlace(location: string, state: string): string {
+  const st = String(state || '').trim().toUpperCase();
+  let raw = String(location || '').trim();
+  if (!raw) return st || 'США';
+  raw = raw.replace(/\s*\(([A-Za-z]{2})\)\s*$/, '').trim();
+  const m = raw.match(/^([A-Z]{2})\s+-\s+(.+)$/);
+  if (m) raw = m[2].trim();
+  raw = raw.replace(/\s+/g, ' ').trim();
+  if (!st) return raw || 'США';
+  return raw ? `${raw}, ${st}` : st;
+}
+
 interface TimedCarCardProps {
   lot: CarLot;
   currency: Currency;
@@ -38,6 +53,7 @@ export const TimedCarCard: React.FC<TimedCarCardProps> = ({
   const isLight = theme === 'light';
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const touchStartXRef = useRef<number | null>(null);
+  const place = lotPlace(lot.location, lot.state);
 
   const images = lot.images && lot.images.length > 0 ? lot.images : [CAR_PLACEHOLDER_SVG];
   const totalImages = images.length;
@@ -182,9 +198,9 @@ export const TimedCarCard: React.FC<TimedCarCardProps> = ({
           {/* Header Lot & Location */}
           <div className="flex items-center justify-between text-[11px] text-slate-400 mb-1">
             <span className="font-mono text-slate-400">Лот #{lot.lotId}</span>
-            <span className="flex items-center gap-1 text-slate-400">
-              <MapPin className="w-3 h-3 text-slate-500" />
-              {lot.state}
+            <span className="flex items-center gap-1 text-slate-400 min-w-0">
+              <MapPin className="w-3 h-3 text-slate-500 shrink-0" />
+              <span className="truncate" title={place}>{place}</span>
             </span>
           </div>
 
