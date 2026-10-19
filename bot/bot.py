@@ -457,13 +457,33 @@ SELLER_TYPES = {
 }
 
 
+def lot_place(location: str, state: str) -> str:
+    """
+    Copart отдаёт location как «NJ - Trenton», IAAI - как «Clearwater (FL)».
+    Приводим оба к виду «Trenton, NJ»; код штата берём из отдельного поля,
+    потому что у IAAI он в скобках иногда в нижнем регистре.
+    """
+    st = str(state or "").strip().upper()
+    raw = str(location or "").strip()
+    if not raw:
+        return st or "США"
+    raw = re.sub(r"\s*\(([A-Za-z]{2})\)\s*$", "", raw).strip()
+    m = re.match(r"^([A-Z]{2})\s+-\s+(.+)$", raw)
+    if m:
+        raw = m.group(2).strip()
+    raw = re.sub(r"\s+", " ", raw).strip()
+    if not st:
+        return raw or "США"
+    return f"{raw}, {st}" if raw else st
+
+
 def format_lot_message(lot: Dict[str, Any]) -> tuple[str, InlineKeyboardMarkup]:
     """
     Форматирует карточку лота согласно техническому заданию:
     - Фото: sendPhoto
     - Год + Марка + Модель + Серия
     - Ставка, резерв продавца и «купить сейчас»
-    - Площадка + номер лота + штат
+    - Площадка + номер лота + город и штат
     - До закрытия (часы для timed)
     - Продавец
     """
@@ -487,8 +507,8 @@ def format_lot_message(lot: Dict[str, Any]) -> tuple[str, InlineKeyboardMarkup]:
 
     platform = lot.get("platform", "IAAI")
     lot_id = lot.get("lot_id", "")
-    state = lot.get("state", "US")
-    site_info = f"🏛 <b>Площадка:</b> {platform} (лот <code>#{lot_id}</code>, {state})"
+    place = lot_place(lot.get("location", ""), lot.get("state", ""))
+    site_info = f"🏛 <b>Площадка:</b> {platform} (лот <code>#{lot_id}</code>, {place})"
 
     # --- ПРАВИЛА ПО ВРЕМЕНИ (ТЕХНИЧЕСКОЕ ЗАДАНИЕ ПУНКТ 5 И ЗАМЕЧАНИЕ 1) ---
     # Не кэшируем text_hours, а пересчитываем динамически от close_utc в момент отправки
